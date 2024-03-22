@@ -44,7 +44,7 @@ end_No_LiqlelL = []
 start_No_LiqlelM = []
 end_No_LiqlelM = []
 
-NO_日期时间 = []
+NO_DateTime = []
 One_DateTime = []
 
 No_HGHpre = []
@@ -53,19 +53,19 @@ No_HGHpre_SumCount = []
 
 q=[]
 df = []
-df_列表 = []
+df_list = []
 
 
-b1 = '2024_1月+++三联燃料消耗数据' # 保存EXCEL表格的文件名称202
+b1 = '2024_1月+++三联待机燃料消耗数据'  # 储存 EXCEL表格 的文件名称202
 # adress2 = 'C:/Users/FCK/Desktop/12/test/%s.xlsx' % b1
-adress3 = f"E:/远程下载数据/处理完成数据/{b1}.xlsx" # 保存EXCEL表格文件的路径
-# EXCEL格式为“某某年，某某月，某某日”，例如：“2023.10.1”这种格式.。“年.月.日”
-Year = 2024 # 年，表格的年
-Month = 1 # 月，表格的月
+adress3 = f"E:/远程下载数据/处理完数据/{b1}.xlsx"  # 储存 EXCEL表格文件 的路径
+#  EXCEL格式为“某某 年，某某 月，某某 日” ，例如：”2023.10.1“这种格式.。"  年 . 月  . 日  "
+year = 2024  # 年，表格的年
+month = 1  # 月，表格的月
 
-for i in range(1, 33): # 遍历所有数据 i=8 range=31. 取值范围：8<= i <31
+for i in range(1, 33):  # 遍历所有数据  i=8  range=31.   取值范围：8<= i <31
     # a1 = '2023.9.%s' % i
-    # b1 = '2023_11_%s_测试数据' %i
+    # b1 = '2023_11_%s_test数据' %i
     a1 = '%d.%d.%d' % (year, month, i)  # 这个指令将会使用 year、month 和 i 的值来创建一个类似于 "XXXX.XX.XX" 格式的字符串，并将其存储在变量 a1 中。
     a1 = a1.strip()  # 这个指令会将变量 a1 中的字符串去掉开头和结尾的空白字符
     # 读取Excel文件中的数据
@@ -93,6 +93,7 @@ for i in range(1, 33): # 遍历所有数据 i=8 range=31. 取值范围：8<= i <
             New_MSW = df['MSw'].tolist()
             max_index = df.index.max()
 
+            print(f'索引最大值：{max_index}')
             # prev_row = None
 
             LiqlelL = 'LiqlelL'  # 外置液位（mm）
@@ -146,17 +147,15 @@ for i in range(1, 33): # 遍历所有数据 i=8 range=31. 取值范围：8<= i <
                         differences = No_HGHpre[i] - No_HGHpre[i + 1]
                         if differences < -1.5 and No_HGHpre[i + 1] > 22.5:
                             No_HGHpre_Count.append(No_HGHpre[i + 1])
-                            if differences < -1.5 and No_HGHpre[i + 1] > 22.5:
-                                No_HGHpre_Count.append(No_HGHpre[i + 1])
-                                if max_index > 15000:
-                                    i += 3000
-                                elif max_index > 10000:
-                                    i += 1000
-                                elif max_index > 5000:
-                                    i += 500
-                                else:
-                                    # 如果条件满足，跳过接下来的200个元素
-                                    i += 150  # 增加i的值，确保跳过200个元素
+                            if max_index > 15000:
+                                i += 3000
+                            elif max_index > 10000:
+                                i += 1000
+                            elif max_index > 5000:
+                                i += 500
+                            else:
+                                # 如果条件满足，跳过接下来的200个元素
+                                i += 150  # 增加i的值，确保跳过200个元素
                         else:
                             # 如果条件不满足，正常递增i
                             i += 1  # 正常递增i
@@ -288,31 +287,31 @@ for i in range(1, 33): # 遍历所有数据 i=8 range=31. 取值范围：8<= i <
                 print(
                     f'\n++++++++++++++   {One_DateTime[-1]}    当天没有数据，下载数据为空 ！！！    ++++++++++++++++++++++++\n')
 
-        除了文件未找到错误：
+        except FileNotFoundError:
             print(f"文件 {adress1} 不存在，已跳过")
-    别的：
+    else:
         print(f"文件 {adress1} 不存在，已跳过")
 
-A_all_Sum_S_RemFuelIn = 总和(all_Sum_S_RemFuelIn)
+A_all_Sum_S_RemFuelIn = sum(all_Sum_S_RemFuelIn)
 
 print(f"总燃料消耗(L)：{A_all_Sum_S_RemFuelIn}\n")
 
 # print(f"时间：{Timer_RemFuelIn}\n")
 
-# 在控制台上打印，显示每列的长度(元素个数)，如果长度(元素个数)不一样，会报错“输出的列长不一样”
-print(f"时间长度：{len(One_DateTime)}")
-# print(f"时间长度：{len(Timer_RemFuelIn)}")
-print(f"消耗燃料长度：{len(all_Sum_S_RemFuelIn)}")
+# 在控制台上打印，显示每列的长度(元素个数) ，如果长度(元素个数)不一样，会报错“输出的列长不一样”
+print(f"时间 长度：{len(One_DateTime)}")
+# print(f"时间 长度：{len(Timer_RemFuelIn)}")
+print(f"消耗燃料 长度：{len(all_Sum_S_RemFuelIn)}")
 
-print(f"内置-开始时液位(L)长度：{len(start_S_RemFuelIn)}")
-print(f"内置-结束时液位(L)长度：{len(end_S_RemFuelIn)}")
-print(f"外置-开始时液位(L）长度：{len(start_S_RemFuelOut)}")
-print(f"外置-结束时液位(L)长度：{len(end_S_RemFuelOut)}")
-print(f"外置-结束时液位(MM)长度：{len(start_No_LiqlelL)}")
-print(f"外置-结束时液位(MM)长度：{len(end_No_LiqlelL)}")
-print(f"内置-结束时液位(MM)长度：{len(start_No_LiqlelM)}")
-print(f"内置-结束时液位(MM)长度：{len(end_No_LiqlelM)}")
-print(f"产氢次数长度：{len(No_HGHpre_SumCount)}")
+print(f"内置-开始时液位(L) 长度：{len(start_S_RemFuelIn)}")
+print(f"内置-结束时液位(L) 长度：{len(end_S_RemFuelIn)}")
+print(f"外置-开始时液位(L） 长度：{len(start_S_RemFuelOut)}")
+print(f"外置-结束时液位(L) 长度：{len(end_S_RemFuelOut)}")
+print(f"外置-结束时液位(MM) 长度：{len(start_No_LiqlelL)}")
+print(f"外置-结束时液位(MM) 长度：{len(end_No_LiqlelL)}")
+print(f"内置-结束时液位(MM) 长度：{len(start_No_LiqlelM)}")
+print(f"内置-结束时液位(MM) 长度：{len(end_No_LiqlelM)}")
+print(f"产氢次数 长度：{len(No_HGHpre_SumCount)}")
 # 将新的DataFrame保存到新的Excel文件中
 new_df = pd.DataFrame(
     {
@@ -321,35 +320,35 @@ new_df = pd.DataFrame(
         '开始外置水箱剩余燃料(mm)': start_No_LiqlelL,
         '结束外置水箱剩余燃料(mm)': end_No_LiqlelL,
         '开始内置水箱剩余燃料(mm)': start_No_LiqlelM,
-        '结束内置水燃料箱剩余(mm)': end_No_LiqlelM,
+        '结束内置水箱剩余燃料(mm)': end_No_LiqlelM,
         '开始外置水箱剩余燃料(L)': start_S_RemFuelOut,
         '结束外置水箱剩余燃料(L)': end_S_RemFuelOut,
         '开始内置水箱剩余燃料(L)': start_S_RemFuelIn,
         '结束内置水箱剩余燃料(L)': end_S_RemFuelIn,
 
-        '消耗消耗燃料(L)': all_Sum_S_RemFuelIn,
+        '待机消耗燃料(L)': all_Sum_S_RemFuelIn,
         '产氢计数（次）': No_HGHpre_SumCount,
     })
-文件路径=地址3
-new_df.to_excel(文件路径，索引=False)
-#打开现有的Excel文件
-工作簿 = openpyxl.load_workbook(file_path)
+file_path = adress3
+new_df.to_excel(file_path, index=False)
+# 打开现有的Excel文件
+workbook = openpyxl.load_workbook(file_path)
 # 选择第一个工作表
-工作表 = 工作簿.活动
+sheet = workbook.active
 # 设置第一行的行高
 sheet.row_dimensions[1].height = 50
-# 设置第一列和第二列的宽度为25
-sheet.column_dimensions['A'].width = 21 # 第一列
-#sheet.column_dimensions['B'].width = 21 #第二列
-#设置其余列的宽度为10
-对于sheet.columns中的col：
-    如果 col[0].column_letter 不在 ['A'] 中：
+# 设置第一列和第二列的宽度为 25
+sheet.column_dimensions['A'].width = 21  # 第一列
+# sheet.column_dimensions['B'].width = 21  # 第二列
+# 设置其余列的宽度为 10
+for col in sheet.columns:
+    if col[0].column_letter not in ['A']:
         sheet.column_dimensions[col[0].column_letter].width = 15
 # 遍历第一行的所有单元格，并为每个单元格对象同时设置自动换行、水平居中和垂直居中。
-对于工作表[1]中的单元格：
-    单元格_obj = 单元格
-    cell_obj.alignment = openpyxl.styles.Alignment(wrap_text=True, 水平='中心', 垂直='中心')
+for cell in sheet[1]:
+    cell_obj = cell
+    cell_obj.alignment = openpyxl.styles.Alignment(wrap_text=True, horizontal='center', vertical='center')
 
-工作簿.保存（文件路径）
-print(f"\n文件保存成功！！！")
-print(f"文件保存路径：{file_path}")
+workbook.save(file_path)
+print(f"\n文件保存成功 ！! ! ")
+print(f"文件保存路径 ：{file_path}")
