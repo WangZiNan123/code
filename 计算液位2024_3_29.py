@@ -14,6 +14,7 @@ import os
 #  2024_3_29 版本更新：   更新时间 2024.3.29
 # 1.新增‘待机条件’判断：如果电堆电压‘StaV’全部为0，或者电堆功率‘Stapow’全部为0，则为待机待机状态，没有发电。（原本条件：整机开关’MSw‘全部都是False，则为待机状态）
 # 2.新增备注条件：如果数据量（总行数）小于3500，则给备注加上注释。数据量（总行数）小于多少。因为数据太少，算出来的值不准确
+# 3. 新增管委会里面制氢机（B制氢机）产氢计数，平均产氢间隔时间
 # ================================================= #
 
 # 打印行号和列的数据
@@ -73,20 +74,26 @@ remark = []  # 备注
 New_StaV = []  # 电堆电压列表
 New_Stapow = []  # 电堆功率列表
 
-b1 = '2024_1月白石待机燃料消耗数据，备注小于3500'  # 储存 EXCEL表格 的文件名称202
+No_HgB_Hpre = []  # 管委会里面制氢机，氢气压力
+No_HgB_Hpre_Count = []
+No_HgB_Hpre_SumCount = []
+No_HgB_Hpre_time_list = []
+No_HgB_Hpre_time_average = []  # 平均产氢时间
+
+b1 = '2024_1月管委会待机燃料消耗数据，备注小于3500'  # 储存 EXCEL表格 的文件名称202
 # adress2 = 'C:/Users/FCK/Desktop/12/test/%s.xlsx' % b1
 adress3 = f"C:/Users/FCK/Desktop/12/数据处理/{b1}.xlsx"  # 储存 EXCEL表格文件 的路径
 #  EXCEL格式为“某某 年，某某 月，某某 日” ，例如：”2023.10.1“这种格式.。"  年 . 月  . 日  "
 year = 2024  # 年，表格的年
 month = 1  # 月，表格的月
 
-for i in range(1, 33):  # 遍历所有数据  i=8  range=31.   取值范围：8<= i <31
+for i in range(1, 8):  # 遍历所有数据  i=8  range=31.   取值范围：8<= i <31
     # a1 = '2023.9.%s' % i
     # b1 = '2023_11_%s_test数据' %i
     a1 = '%d.%d.%d' % (year, month, i)  # 这个指令将会使用 year、month 和 i 的值来创建一个类似于 "XXXX.XX.XX" 格式的字符串，并将其存储在变量 a1 中。
     a1 = a1.strip()  # 这个指令会将变量 a1 中的字符串去掉开头和结尾的空白字符
     # 读取Excel文件中的数据
-    adress1 = f'C:/Users/FCK/Desktop/12/白石10/1月/{a1}.xlsx'  # 读取 EXCEL表格文件 的路径
+    adress1 = f'C:/Users/FCK/Desktop/12/管委会/{a1}.xlsx'  # 读取 EXCEL表格文件 的路径
 
     if os.path.exists(adress1):  # 检查文件（文件名，文件路径是对得上）是否存在，不存在则结束程序
         try:
@@ -105,7 +112,9 @@ for i in range(1, 33):  # 遍历所有数据  i=8  range=31.   取值范围：8<
             DateTime = 'DateTime'  # 时间
             S_RemFuelIn = 'S_RemFuelIn'  # 内置水箱液位
             S_RemFuelOut = 'S_RemFuelOut'  # 外置水箱液位
+
             HGHpre = 'HGHpre'  # 氢气压力
+            HgB_Hpre = 'HgB_Hpre'  # 管委会里面制氢机氢气压力
 
             New_MSW = df['MSw'].tolist()
             max_index = df.index.max()
@@ -127,6 +136,8 @@ for i in range(1, 33):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                 NO_DateTime = df['DateTime'].tolist()
                 # 分割时间为{年-月-日  ， 时-分-秒}
                 date_only = NO_DateTime[1].split(" ")
+
+                B_NO_DateTime = df['DateTime'].tolist()
                 # 日期 ：年-月-日
 
                 print(f'\n ————————————————  {date_only[0]}   一天计算开始    ————————————————    \n')
@@ -156,7 +167,13 @@ for i in range(1, 33):  # 遍历所有数据  i=8  range=31.   取值范围：8<
 
                         No_LiqlelL.append(round(row[LiqlelL], 1))
                         No_LiqlelM.append(round(row[LiqlelM], 1))
+
                         No_HGHpre.append(round(row[HGHpre], 1))
+
+                        if np.isnan(row[HgB_Hpre]):
+                            No_HgB_Hpre.append(0)
+                        else:
+                            No_HgB_Hpre.append(round(row[HgB_Hpre], 1))
 
                     One_DateTime.append(date_only[0])
                     # print(f'时间：{NO_DateTime}')
@@ -196,12 +213,12 @@ for i in range(1, 33):  # 遍历所有数据  i=8  range=31.   取值范围：8<
 
                             if current_HGHpre_time and last_HGHpre_time:
                                 HGHpre_time = round((current_HGHpre_time - last_HGHpre_time).total_seconds() / 60, 2)
-                                print(f'当前时间点：{current_HGHpre_time}  ====  上个时间点：{last_HGHpre_time}')
+                                print(f'A制氢机 当前时间点：{current_HGHpre_time}  ====  A制氢机 上个时间点：{last_HGHpre_time}')
                             last_HGHpre_time = current_HGHpre_time
                             if HGHpre_time:
                                 # 储存平均产氢时间差的值到列表No_HGHpre_time_list
                                 No_HGHpre_time_list.append(HGHpre_time)
-                                print(f"时间差：{HGHpre_time} 分钟")
+                                print(f"A制氢机 时间差：{HGHpre_time} 分钟")
                             if max_index > 15000:
                                 i += 3000
                             elif max_index > 10000:
@@ -220,20 +237,78 @@ for i in range(1, 33):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                             # 如果条件不满足，正常递增i
                             i += 1  # 正常递增i
 
-                    #     q.append(i)
                     # print(f"循环列表：======{q}")
-                    if len(No_HGHpre_time_list) > 2:
+                    if len(No_HGHpre_time_list) >= 1:
                         average = round(sum(No_HGHpre_time_list) / len(No_HGHpre_time_list), 2)
                     else:
                         average = 0
                     No_HGHpre_time_average.append(average)
                     # print(f'平均')
-                    print(f'平均产氢时间：{average}')
-                    print(f"计算产气次数 ：{len(No_HGHpre_Count)}")
+                    print(f'A制氢机平均产氢时间：{average}')
+                    print(f"A制氢机计算产气次数 ：{len(No_HGHpre_Count)}")
 
                     No_HGHpre_SumCount.append(len(No_HGHpre_Count))
                     # print(f'时间  列表：{One_DateTime}')
                     No_HGHpre_Count.clear()
+
+                    #  管委会里面制氢机
+                    HgB_Hpre_HGHpre_time = 0
+                    last_HgB_Hpre_time = 0
+                    current_HgB_Hpre_time = 0
+                    s = 0
+                    print(f'No_HgB_Hpre[0]=========:{No_HgB_Hpre[0]}')
+                    if No_HgB_Hpre[0] > 1:
+                        while s < len(No_HgB_Hpre) - 1:
+                            differences = No_HgB_Hpre[s] - No_HgB_Hpre[s + 1]
+                            if differences < -1.5 and No_HgB_Hpre[s + 1] > 22.5:
+                                No_HgB_Hpre_Count.append(No_HgB_Hpre[s + 1])
+                                B_index_time = s + 1
+                                # 计算产氢时间
+                                current_HgB_Hpre_time = datetime.strptime(B_NO_DateTime[B_index_time], '%Y-%m-%d %H:%M:%S')
+
+                                if current_HgB_Hpre_time and last_HgB_Hpre_time:
+                                    HgB_Hpre_HGHpre_time = round(
+                                        (current_HgB_Hpre_time - last_HgB_Hpre_time).total_seconds() / 60,
+                                        2)
+                                    print(f'B制氢机 当前时间点：{current_HgB_Hpre_time}  ====  B制氢机 上个时间点：{last_HgB_Hpre_time}')
+                                last_HgB_Hpre_time = current_HgB_Hpre_time
+                                if HgB_Hpre_HGHpre_time:
+                                    # 储存平均产氢时间差的值到列表No_HGHpre_time_list
+                                    No_HgB_Hpre_time_list.append(HgB_Hpre_HGHpre_time)
+                                    print(f"B制氢机 时间差：{HgB_Hpre_HGHpre_time} 分钟")
+                                if max_index > 15000:
+                                    s += 3000
+                                elif max_index > 10000:
+                                    s += 1250
+                                elif max_index > 7500:
+                                    s += 850
+                                elif max_index > 5000:
+                                    s += 500
+                                elif max_index > 3000:
+                                    s += 280
+                                else:
+                                    # 如果条件满足，跳过接下来的200个元素
+                                    s += 100  # 增加i的值，确保跳过200个元素
+
+                            else:
+                                # 如果条件不满足，正常递增i
+                                s += 1  # 正常递增i
+
+
+
+                    # 管委会里面制氢机
+                    if len(No_HgB_Hpre_time_list) >= 1:
+                        B_average = round(sum(No_HgB_Hpre_time_list) / len(No_HgB_Hpre_time_list), 2)
+                    else:
+                        B_average = 0
+                    No_HgB_Hpre_time_average.append(B_average)
+                    # print(f'平均')
+                    print(f'B制氢机平均产氢时间：{B_average}')
+                    print(f"B制氢机计算产气次数 ：{len(No_HgB_Hpre_Count)}")
+
+                    No_HgB_Hpre_SumCount.append(len(No_HgB_Hpre_Count))
+                    # print(f'时间  列表：{One_DateTime}')
+                    No_HgB_Hpre_Count.clear()
 
                     print(f"时间 ：{date_only[0]}")
                     print(f'开始时内置液位(mm)：{start_No_LiqlelL[-1]}')
@@ -356,6 +431,9 @@ for i in range(1, 33):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                     One_DateTime.append(date_only[0])
                     No_HGHpre_time_average.append(o1)
                     remark.append(b1)
+
+                    No_HgB_Hpre_SumCount.append(o1)
+                    No_HgB_Hpre_time_average.append(o1)
                     print(f'\n===========   {date_only[0]} 当天有发电，不计算燃料消耗   ==========\n')
 
                 # print(f"总燃料消耗(L)：{Sum_S_RemFuelIn}")
@@ -370,6 +448,9 @@ for i in range(1, 33):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                 q.clear()
                 df_list.clear()
                 No_HGHpre_time_list.clear()
+
+                No_HgB_Hpre.clear()
+                No_HgB_Hpre_time_list.clear()
                 # 在控制台上打印，显示每列的长度(元素个数) ，如果长度(元素个数)不一样，会报错“输出的列长不一样”
 
                 print(f"\n时间 长度：{len(One_DateTime)}")
@@ -386,6 +467,9 @@ for i in range(1, 33):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                 print(f"产氢次数 长度：{len(No_HGHpre_SumCount)}")
                 print(f"平均产氢时间 长度：{len(No_HGHpre_time_average)}")
                 print(f"备注 长度：{len(remark)}")
+
+                print(f"B制氢机产氢次数 长度：{len(No_HgB_Hpre_SumCount)}")
+                print(f"B制氢机平均产氢时间 长度：{len(No_HgB_Hpre_time_average)}")
 
                 print(f'\n++++++++++++++  {date_only[0]} 一天的计算结束   ++++++++++++++++++++++++\n')
 
@@ -408,6 +492,9 @@ for i in range(1, 33):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                 all_Sum_S_RemFuelIn.append(o1)
                 No_HGHpre_SumCount.append(o1)
                 No_HGHpre_time_average.append(o1)
+
+                No_HgB_Hpre_SumCount.append(o1)
+                No_HgB_Hpre_time_average.append(o1)
 
                 remark.append(b1)
                 print(
@@ -443,7 +530,11 @@ print(f"备注 长度：{len(remark)}")
 
 print(f'燃料的值…………………………： {all_Sum_S_RemFuelIn}')
 
-if start_S_RemFuelOut[1] > 0 and end_S_RemFuelOut[1] > 0:
+print(f"B制氢机产氢次数 长度：{len(No_HgB_Hpre_SumCount)}")
+print(f"B制氢机平均产氢时间 长度：{len(No_HgB_Hpre_time_average)}")
+
+print(f'No_HgB_Hpre_SumCount[0]$$$$$$$$$$$$$$---->>>>{No_HgB_Hpre_SumCount[0]}')
+if start_S_RemFuelOut[0] > 0 and end_S_RemFuelOut[0] > 0:
     # 将新的DataFrame保存到新的Excel文件中
     new_df = pd.DataFrame(
         {
@@ -461,6 +552,29 @@ if start_S_RemFuelOut[1] > 0 and end_S_RemFuelOut[1] > 0:
             '待机消耗燃料(L)': all_Sum_S_RemFuelIn,
             '产氢计数（次）': No_HGHpre_SumCount,
             '平均产氢时间（min）': No_HGHpre_time_average,
+            '备注': remark,
+
+        })
+
+elif No_HgB_Hpre_SumCount[0] > 0:
+    new_df = pd.DataFrame(
+        {
+            '时间': One_DateTime,
+            # '时间': Timer_RemFuelIn,
+            '开始外置水箱剩余燃料(mm)': start_No_LiqlelL,
+            '结束外置水箱剩余燃料(mm)': end_No_LiqlelL,
+            '开始内置水箱剩余燃料(mm)': start_No_LiqlelM,
+            '结束内置水箱剩余燃料(mm)': end_No_LiqlelM,
+            '开始外置水箱剩余燃料(L)': start_S_RemFuelOut,
+            '结束外置水箱剩余燃料(L)': end_S_RemFuelOut,
+            '开始内置水箱剩余燃料(L)': start_S_RemFuelIn,
+            '结束内置水箱剩余燃料(L)': end_S_RemFuelIn,
+
+            '待机消耗燃料(L)': all_Sum_S_RemFuelIn,
+            'A制氢机产氢计数（次）': No_HGHpre_SumCount,
+            'A制氢机平均产氢时间（min）': No_HGHpre_time_average,
+            'B制氢机产氢计数（次）': No_HgB_Hpre_SumCount,
+            'B制氢机平均产氢时间（min）': No_HgB_Hpre_time_average,
             '备注': remark,
 
         })
