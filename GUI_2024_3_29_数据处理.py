@@ -142,8 +142,11 @@ class DataProcessingApp:
                                         '\n\n版本更新 6.5 V 2024.3.22 ：\n'
                                         '新增警告：如果读取文件格式不是".xlsx“会弹出警告框，或者文件有上锁/加密，都会弹出警告框，中止程序运行\n'
                                         '\n\n版本更新 7.0 V 2024.3.29 ：\n'
-                                        '1.发电数据统计：新增外置/内置燃料的毫米（mm）值计算。如果没有升(L)，改用毫米（mm）计算燃料消耗。如：白石，楼下机房。燃料消耗率(L.kWh -1)不参与计算，值为0. \n'
-                                        '2.待机燃料计算：新增平均产氢时间，值为每次产氢的间隔时间平均值'
+                                        '发电数据统计：新增外置/内置燃料的毫米（mm）值计算。如果没有升(L)，改用毫米（mm）计算燃料消耗。如：白石，楼下机房。燃料消耗率(L.kWh -1)不参与计算，值为0. \n'
+                                        '待机燃料计算：'
+                                        '\n 1.新增平均产氢时间，值为每次产氢的间隔时间平均值'
+                                        '\n 2.新增‘待机条件’判断：如果电堆电压‘StaV’全部为0，或者电堆功率‘Stapow’全部为0，则为待机待机状态，没有发电。（原本条件：整机开关’MSw‘全部都是False，则为待机状态）'
+                                        '\n 3.新增备注条件：如果数据量（总行数）小于3500，则给备注加上注释。数据量（总行数）小于多少。因为数据太少，算出来的值不准确'
 
                                 )
         instruction_text.config(state=tk.DISABLED)
@@ -180,6 +183,7 @@ class DataProcessingApp:
         threa = Thread(target=self.excel_process_data)
         threa.start()
 
+    # 当按下“合并数据”时，禁用“发电数据处理”按钮
     def excel_process_data(self):
 
         self.progress.start()
@@ -1792,6 +1796,10 @@ class DataProcessingApp:
         No_HGHpre_time_list = []
         No_HGHpre_time_average = []  # 平均产氢时间
         remark = []  # 备注
+        New_StaV = []  # 电堆电压列表
+
+        New_Stapow = []  # 电堆功率列表
+
         ###################   计算待机燃料消耗    #############
 
         adress1 = self.file_path  # 读取文件路径。将选择的文件路径赋值给adress1变量
@@ -1846,6 +1854,9 @@ class DataProcessingApp:
                     # New_MSW=df.dropna(subset=['MSw'],how='any',inplace=True)
                     # print(New_MSW)
 
+                    New_StaV = df['StaV'].tolist()
+                    New_Stapow = df['Stapow'].tolist()
+
                     LiqlelL = 'LiqlelL'  # 外置液位（mm）
                     LiqlelM = 'LiqlelM'  # 内置液位（mm）
 
@@ -1869,7 +1880,11 @@ class DataProcessingApp:
                         # 创建了一个新的迭代器，它只包含New_MSW中不是None的元素。然后，all()
                         # 函数检查这些经过过滤的元素是否都是False。
 
-                        if all(value == False for value in New_MSW):  # 如果MSW=FALSE，不发电时，储存发电时间段内某列的数据
+                        # 使用 all() 函数检查 'MSw' 列中的所有值是否都为 False
+                        # 如果MSW=FALSE，不发电时，储存发电时间段内某列的数据，或者 电堆电压StaV全部等于0时，
+                        if (all(value == False for value in New_MSW)
+                                or all(value == 0 for value in New_StaV)
+                                or all(value == 0 for value in New_Stapow)):  # 如果MSW=FALSE，不发电时，储存发电时间段内某列的数据
                             for index, row in df.iterrows():  # 这段代码会遍历 DataFrame df 中的每一行数据。
                                 No_S_RemFuelIn_value.append(
                                     round(row[S_RemFuelIn], 1))  # 不发电时，储存 内置水箱剩余燃料 的值到列表 S_RemFuelIn_value
@@ -1923,11 +1938,13 @@ class DataProcessingApp:
                                     if max_index > 15000:
                                         i += 3000
                                     elif max_index > 10000:
-                                        i += 1000
+                                        i += 1250
+                                    elif max_index > 7500:
+                                        i += 850
                                     elif max_index > 5000:
                                         i += 500
                                     elif max_index > 3000:
-                                        i += 250
+                                        i += 280
                                     else:
                                         # 如果条件满足，跳过接下来的200个元素
                                         i += 100  # 增加i的值，确保跳过200个元素
