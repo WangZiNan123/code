@@ -205,11 +205,13 @@ for i in range(1, 33):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                             if max_index > 15000:
                                 i += 3000
                             elif max_index > 10000:
-                                i += 1000
+                                i += 1250
+                            elif max_index > 7500:
+                                i += 850
                             elif max_index > 5000:
                                 i += 500
                             elif max_index > 3000:
-                                i += 250
+                                i += 280
                             else:
                                 # 如果条件满足，跳过接下来的200个元素
                                 i += 100  # 增加i的值，确保跳过200个元素
