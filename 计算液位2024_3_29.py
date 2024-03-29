@@ -12,7 +12,7 @@ import os
 # 3.修改液位选择，如果以"升"为单位的液位为空，则赋于默认值0.计算以“毫米”为单位的液位，“白石”“楼下机房”内置液位S_RemFuelIn，S_RemFuelOut等为空
 
 #  2024_3_29 版本更新：   更新时间 2024.3.29
-# 1.新增‘待机条件’判断：如果电堆电压‘StaV’全部为0，则为待机待机状态，没有发电。（原本条件：整机开关’MSw‘全部都是False，则为待机状态）
+# 1.新增‘待机条件’判断：如果电堆电压‘StaV’全部为0，或者电堆功率‘Stapow’全部为0，则为待机待机状态，没有发电。（原本条件：整机开关’MSw‘全部都是False，则为待机状态）
 # 2.新增备注条件：如果数据量（总行数）小于3500，则给备注加上注释。数据量（总行数）小于多少。因为数据太少，算出来的值不准确
 # ================================================= #
 
@@ -70,8 +70,8 @@ No_HGHpre_time_list = []
 No_HGHpre_time_average = []  # 平均产氢时间
 
 remark = []  # 备注
-New_StaV=[]     #电堆电压列表
-
+New_StaV = []  # 电堆电压列表
+New_Stapow = []  # 电堆功率列表
 
 b1 = '2024_1月白石待机燃料消耗数据，备注小于3500'  # 储存 EXCEL表格 的文件名称202
 # adress2 = 'C:/Users/FCK/Desktop/12/test/%s.xlsx' % b1
@@ -111,6 +111,7 @@ for i in range(1, 33):  # 遍历所有数据  i=8  range=31.   取值范围：8<
             max_index = df.index.max()
 
             New_StaV = df['StaV'].tolist()
+            New_Stapow = df['Stapow'].tolist()
 
             print(f'索引最大值：{max_index}')
             # prev_row = None
@@ -130,11 +131,11 @@ for i in range(1, 33):  # 遍历所有数据  i=8  range=31.   取值范围：8<
 
                 print(f'\n ————————————————  {date_only[0]}   一天计算开始    ————————————————    \n')
 
-                # 获取 'MSw' 列的所有数据，并存储到列表 New_MSW 中
-
-                # 使用 all() 函数检查 'MSw' 列中的所有值是否都为 False
+                # 使用 all() 函数检查 'MSw' ‘StaV’‘Stapow’列中的所有值是否都为 False
                 # 如果MSW=FALSE，不发电时，储存发电时间段内某列的数据，或者 电堆电压StaV全部等于0时，
-                if all(value == False for value in New_MSW) or all(value == 0 for value in New_StaV):
+                if (all(value == False for value in New_MSW)
+                        or all(value == 0 for value in New_StaV)
+                        or all(value == 0 for value in New_Stapow)):
                     for index, row in df.iterrows():  # 这段代码会遍历 DataFrame df 中的每一行数据。
 
                         # print("row[S_RemFuelIn] 值类型:", type(row[S_RemFuelIn]), f' 值 = {row[S_RemFuelIn]}')
