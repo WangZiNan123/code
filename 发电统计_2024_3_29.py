@@ -9,10 +9,14 @@ import os
 # 2024_3_29 版本更新：2024.3.29
 # 更新内容：
 # 1.读取excel表格里面所有页数据，如白石，楼下机房
+
 # 2024_3_29_A 版本更新：2024.3.29
 # 1.增加外置液位，内置液位毫米（mm）的计算 ，当 外置液位，内置液位以升（L）为单位的值为空时，改用毫米（mm）计算液位消耗，如白石，楼下机房
 # 此时 燃料消耗率(L.kWh -1) 不参与计算，值等于0。因为单位是升（L），毫米不参与计算
 
+# 2024_3_30_A 版本更新：2024.3.30
+# 1.对最后文件保存做出判断，如果检测到没有发电数据，不保存文件。'总发电功率(W)': everytime_power列表,如果全部都等于0，则没有发电
+# 2.修复发电量为负数的情况，如果小于0，则‘发电量(kw/h)’=0。
 # ================================================= #
 
 new_df = []
@@ -337,6 +341,8 @@ for i in range(1, 32):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                             end_LiqlelM.append(round(prev_row[LiqlelM], 1))
 
                             Once_Topgen = round(Topgen_value[-1] - Topgen_value[-2], 3)
+                            if Once_Topgen < 0:
+                                Once_Topgen = 0
                             print(f"每次发电量(kw/h)：{Once_Topgen}")
                             Once_Topgen_value.append(Once_Topgen)
 
@@ -695,6 +701,8 @@ for i in range(1, 32):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                                 end_S_RemFuelOut.append(round(row[S_RemFuelOut], 1))
 
                                 Once_Topgen = round(Topgen_value[-1] - Topgen_value[-2], 3)
+                                if Once_Topgen < 0:
+                                    Once_Topgen = 0
                                 print(f"每次发电量(kw/h)：{Once_Topgen}")
                                 Once_Topgen_value.append(Once_Topgen)
 
@@ -908,6 +916,8 @@ for i in range(1, 32):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                                 end_S_RemFuelOut.append(round(last_row[S_RemFuelOut], 1))
 
                                 Once_Topgen = round(Topgen_value[-1] - Topgen_value[-2], 3)
+                                if Once_Topgen < 0:
+                                    Once_Topgen = 0
                                 print(f"每次发电量(kw/h)：{Once_Topgen}")
                                 Once_Topgen_value.append(Once_Topgen)
 
@@ -1214,7 +1224,9 @@ print(f"结束外置水箱剩余燃料(mm) 长度：{len(end_LiqlelL)}")
 print(f"开始内置水箱剩余燃料(mm) 长度：{len(start_LiqlelM)}")
 print(f"结束内置水箱剩余燃料(mm) 长度：{len(end_LiqlelM)}")
 
+count = 0
 if any(value > 0 for value in start_S_RemFuelIn) and any(value > 0 for value in end_S_RemFuelIn):
+    count = 1
     # 将新的DataFrame保存到新的Excel文件中
     new_df = pd.DataFrame(
         {
@@ -1252,6 +1264,7 @@ if any(value > 0 for value in start_S_RemFuelIn) and any(value > 0 for value in 
         })
 
 else:
+    count = 2
     # 将新的DataFrame保存到新的Excel文件中
     new_df = pd.DataFrame(
         {
@@ -1308,6 +1321,10 @@ for cell in sheet[1]:
     cell_obj = cell
     cell_obj.alignment = openpyxl.styles.Alignment(wrap_text=True, horizontal='center', vertical='center')
 
-workbook.save(file_path)
-print(f"\n文件保存成功 ！! ! ")
-print(f"文件保存路径 ：{file_path}")
+if any(value > 0 for value in everytime_power):
+    workbook.save(file_path)
+    print(f"\n文件保存成功 ！! ! ")
+    print(f"文件保存路径 ：{file_path}")
+else:
+    print(f"\n文件保存不成功 ！! ! ")
+    print(f"\n所读取的文件里面没有发电数据  ！! ! ")
