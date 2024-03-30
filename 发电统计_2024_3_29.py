@@ -107,12 +107,12 @@ end_LiqlelL = []
 start_LiqlelM = []
 end_LiqlelM = []
 
-b1 = '2024_1月白石08发电数据==AAA='  # 储存 EXCEL表格 的文件名称
+b1 = '2024_2月5G汇聚机房02号发电数据'  # 储存 EXCEL表格 的文件名称
 # adress2 = 'C:/Users/FCK/Desktop/12/test/%s.xlsx' % b1
-adress3 = f"E:/远程下载数据/处理完数据/{b1}.xlsx"  # 储存 EXCEL表格文件 的路径
+adress3 = f"E:/远程下载数据/5G汇聚机房02/{b1}.xlsx"  # 储存 EXCEL表格文件 的路径
 #  EXCEL格式为“某某 年，某某 月，某某 日” ，例如：”2023.10.1“这种格式.。"  年 . 月  . 日  "
 year = 2024  # 年，表格的年
-month = 1  # 月，表格的月
+month = 2  # 月，表格的月
 
 for i in range(1, 32):  # 遍历所有数据  i=8  range=31.   取值范围：8<= i <31
     # a1 = '2023.9.%s' % i
@@ -120,7 +120,7 @@ for i in range(1, 32):  # 遍历所有数据  i=8  range=31.   取值范围：8<
     a1 = '%d.%d.%d' % (year, month, i)  # 这个指令将会使用 year、month 和 i 的值来创建一个类似于 "XXXX.XX.XX" 格式的字符串，并将其存储在变量 a1 中。
     a1 = a1.strip()  # 这个指令会将变量 a1 中的字符串去掉开头和结尾的空白字符
     # 读取Excel文件中的数据
-    adress1 = f'E:/远程下载数据/白石08/1月/{a1}.xlsx'  # 读取 EXCEL表格文件 的路径
+    adress1 = f'E:/远程下载数据/5G汇聚机房02/202402/{a1}.xlsx'  # 读取 EXCEL表格文件 的路径
 
     if os.path.exists(adress1):  # 检查文件（文件名，文件路径是对得上）是否存在，不存在则结束程序
         try:
@@ -1214,7 +1214,7 @@ print(f"结束外置水箱剩余燃料(mm) 长度：{len(end_LiqlelL)}")
 print(f"开始内置水箱剩余燃料(mm) 长度：{len(start_LiqlelM)}")
 print(f"结束内置水箱剩余燃料(mm) 长度：{len(end_LiqlelM)}")
 
-if start_S_RemFuelIn[0] > 0 and end_S_RemFuelIn[0] > 0:
+if any(value > 0 for value in start_S_RemFuelIn) and any(value > 0 for value in end_S_RemFuelIn):
     # 将新的DataFrame保存到新的Excel文件中
     new_df = pd.DataFrame(
         {
