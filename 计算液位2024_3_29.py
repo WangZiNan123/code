@@ -15,6 +15,9 @@ import os
 # 1.新增‘待机条件’判断：如果电堆电压‘StaV’全部为0，或者电堆功率‘Stapow’全部为0，则为待机待机状态，没有发电。（原本条件：整机开关’MSw‘全部都是False，则为待机状态）
 # 2.新增备注条件：如果数据量（总行数）小于3500，则给备注加上注释。数据量（总行数）小于多少。因为数据太少，算出来的值不准确
 # 3. 新增管委会里面制氢机（B制氢机）产氢计数，平均产氢间隔时间
+
+#  2024_3_30 版本更新：   更新时间 2024.3.30
+# 新增对管委会里面’B制氢机‘的待机燃料消耗使用：外置液位为里面‘B制氢机’的液位
 # ================================================= #
 
 # 打印行号和列的数据
@@ -80,20 +83,22 @@ No_HgB_Hpre_SumCount = []
 No_HgB_Hpre_time_list = []
 No_HgB_Hpre_time_average = []  # 平均产氢时间
 
-b1 = '2024_1月管委会待机燃料消耗数据，备注小于3500'  # 储存 EXCEL表格 的文件名称202
+out_NO_Once_S_RemFuelIn = []  # 外置液位以毫米为单位（mm）
+out_all_Sum_S_RemFuelIn = []
+b1 = '2024_1月管委会待机燃料消耗数据'  # 储存 EXCEL表格 的文件名称202
 # adress2 = 'C:/Users/FCK/Desktop/12/test/%s.xlsx' % b1
-adress3 = f"C:/Users/FCK/Desktop/12/数据处理/{b1}.xlsx"  # 储存 EXCEL表格文件 的路径
+adress3 = f"E:/远程下载数据/管委会/{b1}.xlsx"  # 储存 EXCEL表格文件 的路径
 #  EXCEL格式为“某某 年，某某 月，某某 日” ，例如：”2023.10.1“这种格式.。"  年 . 月  . 日  "
 year = 2024  # 年，表格的年
 month = 1  # 月，表格的月
 
-for i in range(1, 8):  # 遍历所有数据  i=8  range=31.   取值范围：8<= i <31
+for i in range(1, 32):  # 遍历所有数据  i=8  range=31.   取值范围：8<= i <31
     # a1 = '2023.9.%s' % i
     # b1 = '2023_11_%s_test数据' %i
     a1 = '%d.%d.%d' % (year, month, i)  # 这个指令将会使用 year、month 和 i 的值来创建一个类似于 "XXXX.XX.XX" 格式的字符串，并将其存储在变量 a1 中。
     a1 = a1.strip()  # 这个指令会将变量 a1 中的字符串去掉开头和结尾的空白字符
     # 读取Excel文件中的数据
-    adress1 = f'C:/Users/FCK/Desktop/12/管委会/{a1}.xlsx'  # 读取 EXCEL表格文件 的路径
+    adress1 = f'E:/远程下载数据/管委会/202401/{a1}.xlsx'  # 读取 EXCEL表格文件 的路径
 
     if os.path.exists(adress1):  # 检查文件（文件名，文件路径是对得上）是否存在，不存在则结束程序
         try:
@@ -182,17 +187,17 @@ for i in range(1, 8):  # 遍历所有数据  i=8  range=31.   取值范围：8<=
                     print("内置液位 值类型:", type(No_S_RemFuelIn_value[0]))
 
                     # 内置液位(L)
-                    start_S_RemFuelIn.append(No_S_RemFuelIn_value[1])
+                    start_S_RemFuelIn.append(No_S_RemFuelIn_value[0])
                     end_S_RemFuelIn.append(No_S_RemFuelIn_value[-1])
                     # 外置液位(L)
-                    start_S_RemFuelOut.append(No_S_RemFuelOut_value[1])
+                    start_S_RemFuelOut.append(No_S_RemFuelOut_value[0])
                     end_S_RemFuelOut.append(No_S_RemFuelOut_value[-1])
 
                     # 外置液位(mm)
-                    start_No_LiqlelL.append(No_LiqlelL[1])
+                    start_No_LiqlelL.append(No_LiqlelL[0])
                     end_No_LiqlelL.append(No_LiqlelL[-1])
                     # 内置液位(mm)
-                    start_No_LiqlelM.append(No_LiqlelM[1])
+                    start_No_LiqlelM.append(No_LiqlelM[0])
                     end_No_LiqlelM.append(No_LiqlelM[-1])
 
                     HGHpre_time = 0
@@ -213,7 +218,8 @@ for i in range(1, 8):  # 遍历所有数据  i=8  range=31.   取值范围：8<=
 
                             if current_HGHpre_time and last_HGHpre_time:
                                 HGHpre_time = round((current_HGHpre_time - last_HGHpre_time).total_seconds() / 60, 2)
-                                print(f'A制氢机 当前时间点：{current_HGHpre_time}  ====  A制氢机 上个时间点：{last_HGHpre_time}')
+                                print(
+                                    f'A制氢机 当前时间点：{current_HGHpre_time}  ====  A制氢机 上个时间点：{last_HGHpre_time}')
                             last_HGHpre_time = current_HGHpre_time
                             if HGHpre_time:
                                 # 储存平均产氢时间差的值到列表No_HGHpre_time_list
@@ -251,12 +257,12 @@ for i in range(1, 8):  # 遍历所有数据  i=8  range=31.   取值范围：8<=
                     # print(f'时间  列表：{One_DateTime}')
                     No_HGHpre_Count.clear()
 
-                    #  管委会里面制氢机
+                    #  管委会里面制氢机产氢次数计算，
                     HgB_Hpre_HGHpre_time = 0
                     last_HgB_Hpre_time = 0
                     current_HgB_Hpre_time = 0
                     s = 0
-                    print(f'No_HgB_Hpre[0]=========:{No_HgB_Hpre[0]}')
+                    print(f'管委会B制氢机氢气压力 索引：1 =========:{No_HgB_Hpre[0]}')
                     if No_HgB_Hpre[0] > 1:
                         while s < len(No_HgB_Hpre) - 1:
                             differences = No_HgB_Hpre[s] - No_HgB_Hpre[s + 1]
@@ -264,13 +270,15 @@ for i in range(1, 8):  # 遍历所有数据  i=8  range=31.   取值范围：8<=
                                 No_HgB_Hpre_Count.append(No_HgB_Hpre[s + 1])
                                 B_index_time = s + 1
                                 # 计算产氢时间
-                                current_HgB_Hpre_time = datetime.strptime(B_NO_DateTime[B_index_time], '%Y-%m-%d %H:%M:%S')
+                                current_HgB_Hpre_time = datetime.strptime(B_NO_DateTime[B_index_time],
+                                                                          '%Y-%m-%d %H:%M:%S')
 
                                 if current_HgB_Hpre_time and last_HgB_Hpre_time:
                                     HgB_Hpre_HGHpre_time = round(
                                         (current_HgB_Hpre_time - last_HgB_Hpre_time).total_seconds() / 60,
                                         2)
-                                    print(f'B制氢机 当前时间点：{current_HgB_Hpre_time}  ====  B制氢机 上个时间点：{last_HgB_Hpre_time}')
+                                    print(
+                                        f'B制氢机 当前时间点：{current_HgB_Hpre_time}  ====  B制氢机 上个时间点：{last_HgB_Hpre_time}')
                                 last_HgB_Hpre_time = current_HgB_Hpre_time
                                 if HgB_Hpre_HGHpre_time:
                                     # 储存平均产氢时间差的值到列表No_HGHpre_time_list
@@ -294,9 +302,7 @@ for i in range(1, 8):  # 遍历所有数据  i=8  range=31.   取值范围：8<=
                                 # 如果条件不满足，正常递增i
                                 s += 1  # 正常递增i
 
-
-
-                    # 管委会里面制氢机
+                    # 管委会里面制氢机产氢时间
                     if len(No_HgB_Hpre_time_list) >= 1:
                         B_average = round(sum(No_HgB_Hpre_time_list) / len(No_HgB_Hpre_time_list), 2)
                     else:
@@ -324,10 +330,10 @@ for i in range(1, 8):  # 遍历所有数据  i=8  range=31.   取值范围：8<=
                     Max_Msw = max(No_S_RemFuelIn_value)
                     print(f"最大值*（L）:{Max_Msw}")
 
-                    Max_Msw_mm = max(No_LiqlelM)
+                    Max_Msw_mm = max(No_LiqlelL)
                     print(f"最大值*（mm）:{Max_Msw_mm}")
 
-                    Min_Msw_mm = min(No_LiqlelM)
+                    Min_Msw_mm = min(No_LiqlelL)
                     print(f"最小值*（mm）:{Min_Msw_mm}")
 
                     # print(f'燃料值（L）:{No_S_RemFuelIn_value}')
@@ -335,13 +341,71 @@ for i in range(1, 8):  # 遍历所有数据  i=8  range=31.   取值范围：8<=
                     print(f"------液位（MM）的列表:{start_No_LiqlelL}")
 
                     NO_differences = 0
-                    print('@@@@@@@@@@@@', No_S_RemFuelIn_value[1], No_S_RemFuelOut_value[1])
-                    # 如果列表不为空。说明有数据，执行下面计算
-                    if No_S_RemFuelIn_value[1] > 0 and No_S_RemFuelOut_value[1] > 0:
+                    print('No_S_RemFuelIn_value----》》》', No_S_RemFuelIn_value[0],
+                          '      No_S_RemFuelOut_value[0]----->>>>>>', No_S_RemFuelOut_value[0])
+
+                    # 如果列表为空。说明没有数据，执行下面计算
+                    if (No_S_RemFuelIn_value[0] > 0
+                            and No_S_RemFuelOut_value[0] == 0
+                            and No_LiqlelL[0] > 0
+                            and No_HgB_Hpre[0] > 1):
+
+                        # 计算以升为单位 （L）
+                        # 如果一天中有加液，找出最大值去减第一项，大于1。说明当天有加液
+                        if (Max_Msw - No_S_RemFuelIn_value[0]) > 1:
+                            first_RemFuelIn = No_S_RemFuelIn_value[0] - 15
+                            second_RemFuelIn = Max_Msw - No_S_RemFuelIn_value[-1]
+                            NO_differences = round(first_RemFuelIn + second_RemFuelIn, 2)
+                            # print(f'燃料值的差====（L）:{NO_differences}')
+                            # print(f"最大值-第一个:{Max_Msw - No_S_RemFuelIn_value[1]}")
+                            # 如果计算出来的NO_differences液位消耗值小于0，则等于0
+                            if NO_differences <= 0:
+                                NO_differences = 0
+                            # NO_Once_RemFuelIn = round(sum(NO_differences), 2)
+                            NO_Once_S_RemFuelIn.append(NO_differences)
+                            print(f'当天有加液 + 不发电消耗燃料（L）+管委会内置燃料:{NO_differences} 内部')
+
+                        else:
+
+                            NO_differences = round(No_S_RemFuelIn_value[0] - No_S_RemFuelIn_value[-1], 2)
+                            # 如果计算出来的NO_differences液位消耗值小于0，则等于0
+                            if NO_differences <= 0:
+                                NO_differences = 0
+                            NO_Once_S_RemFuelIn.append(NO_differences)
+                            # print('当天没有加液  ， 计算 L')
+                            print(f'当天没有加液 + 不发电消耗燃料（L）+管委会内置燃料:{NO_differences}  ')
+
+                        # 计算以毫米为单位 （mm） ,外置燃料。
+                        # 如果一天中有加液，找出最大值去减第一项，大于1。说明当天有加液
+                        if (Max_Msw_mm - No_LiqlelL[0]) > 30:
+                            first_RemFuelout = No_LiqlelL[0] - Min_Msw_mm
+                            second_RemFuelout = Max_Msw_mm - No_LiqlelL[-1]
+                            print(f'1---> {first_RemFuelout}  . 2--->{second_RemFuelout}')
+                            out_NO_differences = round(first_RemFuelout + second_RemFuelout, 2)
+                            # print(f'燃料值的差====（L）:{NO_differences}')
+                            # print(f"最大值-第一个:{Max_Msw - No_S_RemFuelIn_value[1]}")
+                            # 如果计算出来的NO_differences液位消耗值小于0，则等于0
+                            if out_NO_differences <= 0:
+                                out_NO_differences = 0
+                            # NO_Once_RemFuelIn = round(sum(NO_differences), 2)
+                            out_NO_Once_S_RemFuelIn.append(out_NO_differences)
+                            print(f' 当天有加液 + 不发电消耗燃料（mm）+管委会外置燃料:{out_NO_differences} 内部')
+                        else:
+                            print(f'外置燃料（mm） B制氢机液位', No_LiqlelL)
+                            out_NO_differences = round(No_LiqlelL[0] - No_LiqlelL[-1], 2)
+                            # 如果计算出来的NO_differences液位消耗值小于0，则等于0
+                            if out_NO_differences <= 0:
+                                out_NO_differences = 0
+                            out_NO_Once_S_RemFuelIn.append(out_NO_differences)
+                            # print('当天没有加液  ， 计算 mm')
+                            print(f'当天没有加液 + 不发电消耗燃料（mm）+管委会外置燃料:{out_NO_differences}  ')
+
+                    # 如果列表不为空。说明有数据，执行下面计算,外置燃料或者内置燃料（L）不为空
+                    elif No_S_RemFuelIn_value[0] > 0:
                         # print('@@@@@@@@@@@@@@@@@@@@')
                         # 如果一天中有加液，找出最大值去减第一项，大于1。说明当天有加液
-                        if (Max_Msw - No_S_RemFuelIn_value[1]) > 1:
-                            first_RemFuelIn = No_S_RemFuelIn_value[1] - 15
+                        if (Max_Msw - No_S_RemFuelIn_value[0]) > 1:
+                            first_RemFuelIn = No_S_RemFuelIn_value[0] - 15
                             second_RemFuelIn = Max_Msw - No_S_RemFuelIn_value[-1]
                             NO_differences = round(first_RemFuelIn + second_RemFuelIn, 2)
                             # print(f'燃料值的差====（L）:{NO_differences}')
@@ -355,18 +419,20 @@ for i in range(1, 8):  # 遍历所有数据  i=8  range=31.   取值范围：8<=
 
                         else:
 
-                            NO_differences = round(No_S_RemFuelIn_value[1] - No_S_RemFuelIn_value[-1], 2)
+                            NO_differences = round(No_S_RemFuelIn_value[0] - No_S_RemFuelIn_value[-1], 2)
                             # 如果计算出来的NO_differences液位消耗值小于0，则等于0
                             if NO_differences <= 0:
                                 NO_differences = 0
                             NO_Once_S_RemFuelIn.append(NO_differences)
                             # print('当天没有加液  ， 计算 L')
                             print(f'当天没有加液 + 不发电消耗燃料（L）:{NO_differences}  ')
-                    # 如果列表为空。说明没有数据，执行下面计算
+
+                    # 计算没有内置液位（L）时，燃料消耗
                     else:
+                        # 内置水箱液位 ，以毫米（mm）为单位
                         # 如果一天中有加液，找出最大值去减第一项，大于1。说明当天有加液
-                        if (Max_Msw_mm - No_LiqlelM[1]) > 50:
-                            first_RemFuelIn = No_LiqlelM[1] - Min_Msw_mm
+                        if (Max_Msw_mm - No_LiqlelM[0]) > 50:
+                            first_RemFuelIn = No_LiqlelM[0] - Min_Msw_mm
                             second_RemFuelIn = Max_Msw - No_LiqlelM[-1]
                             NO_differences = round(first_RemFuelIn + second_RemFuelIn, 2)
                             # print(f'燃料值的差====（L）:{NO_differences}')
@@ -380,7 +446,7 @@ for i in range(1, 8):  # 遍历所有数据  i=8  range=31.   取值范围：8<=
 
                         else:
 
-                            NO_differences = round(No_LiqlelM[1] - No_LiqlelM[-1], 2)
+                            NO_differences = round(No_LiqlelM[0] - No_LiqlelM[-1], 2)
                             # 如果计算出来的NO_differences液位消耗值小于0，则等于0
                             if NO_differences <= 0:
                                 NO_differences = 0
@@ -393,6 +459,11 @@ for i in range(1, 8):  # 遍历所有数据  i=8  range=31.   取值范围：8<=
                     # 将待机时的 NO_Once_S_RemFuelIn 液位消耗 求出总和
                     Sum_S_RemFuelIn = sum(NO_Once_S_RemFuelIn)
                     all_Sum_S_RemFuelIn.append(Sum_S_RemFuelIn)
+
+                    # 计算管委会里面制氢机(B制氢机)的外置液位消耗（mm）
+                    # out_all_Sum_S_RemFuelIn.append(out_NO_Once_S_RemFuelIn)
+                    # out_Sum_S_RemFuelout = sum(out_NO_Once_S_RemFuelIn)
+
 
                     # 如果没有故障，’备注‘里面写0 ,如果数据量小于3500，开始做备注
                     if 3500 >= max_index > 3000:
@@ -434,6 +505,8 @@ for i in range(1, 8):  # 遍历所有数据  i=8  range=31.   取值范围：8<=
 
                     No_HgB_Hpre_SumCount.append(o1)
                     No_HgB_Hpre_time_average.append(o1)
+
+                    out_NO_Once_S_RemFuelIn.append(o1)
                     print(f'\n===========   {date_only[0]} 当天有发电，不计算燃料消耗   ==========\n')
 
                 # print(f"总燃料消耗(L)：{Sum_S_RemFuelIn}")
@@ -471,6 +544,8 @@ for i in range(1, 8):  # 遍历所有数据  i=8  range=31.   取值范围：8<=
                 print(f"B制氢机产氢次数 长度：{len(No_HgB_Hpre_SumCount)}")
                 print(f"B制氢机平均产氢时间 长度：{len(No_HgB_Hpre_time_average)}")
 
+                print(f"管委会外置液位 长度：{len(out_NO_Once_S_RemFuelIn)}")
+
                 print(f'\n++++++++++++++  {date_only[0]} 一天的计算结束   ++++++++++++++++++++++++\n')
 
                 # 储存 a1时间点 到 Timer_RemFuelIn列表 里面，用于在excel表格打印
@@ -496,6 +571,8 @@ for i in range(1, 8):  # 遍历所有数据  i=8  range=31.   取值范围：8<=
                 No_HgB_Hpre_SumCount.append(o1)
                 No_HgB_Hpre_time_average.append(o1)
 
+                out_NO_Once_S_RemFuelIn.append(o1)
+
                 remark.append(b1)
                 print(
                     f'\n++++++++++++++   {One_DateTime[-1]}    当天没有数据，下载数据为空 ！！！    ++++++++++++++++++++++++\n')
@@ -506,8 +583,11 @@ for i in range(1, 8):  # 遍历所有数据  i=8  range=31.   取值范围：8<=
         print(f"文件 {adress1} 不存在，已跳过")
 
 A_all_Sum_S_RemFuelIn = sum(all_Sum_S_RemFuelIn)
-
 print(f"总燃料消耗(L)：{A_all_Sum_S_RemFuelIn}\n")
+
+print(f'管委会外置（B制氢机）--------',out_NO_Once_S_RemFuelIn)
+B_all_Sum_S_RemFuelIn = sum(out_NO_Once_S_RemFuelIn)
+print(f"管委会外置（B制氢机）总燃料消耗(mm)：{B_all_Sum_S_RemFuelIn}\n")
 
 # print(f"时间：{Timer_RemFuelIn}\n")
 
@@ -534,7 +614,40 @@ print(f"B制氢机产氢次数 长度：{len(No_HgB_Hpre_SumCount)}")
 print(f"B制氢机平均产氢时间 长度：{len(No_HgB_Hpre_time_average)}")
 
 print(f'No_HgB_Hpre_SumCount[0]$$$$$$$$$$$$$$---->>>>{No_HgB_Hpre_SumCount[0]}')
-if start_S_RemFuelOut[0] > 0 and end_S_RemFuelOut[0] > 0:
+
+
+print(f"管委会B制氢机燃料（外置液位） 长度：{len(out_NO_Once_S_RemFuelIn)}")
+
+conut=0     # 标记位conut，用于记录程序进入哪个文件保存条件
+
+# 如果产氢次数大于0，执行下面程序
+if No_HgB_Hpre_SumCount[0] > 0:
+    conut = 1
+    new_df = pd.DataFrame(
+        {
+            '时间': One_DateTime,
+            # '时间': Timer_RemFuelIn,
+            '开始外置水箱剩余燃料(mm)': start_No_LiqlelL,
+            '结束外置水箱剩余燃料(mm)': end_No_LiqlelL,
+            '开始内置水箱剩余燃料(mm)': start_No_LiqlelM,
+            '结束内置水箱剩余燃料(mm)': end_No_LiqlelM,
+            '开始外置水箱剩余燃料(L)': start_S_RemFuelOut,
+            '结束外置水箱剩余燃料(L)': end_S_RemFuelOut,
+            '开始内置水箱剩余燃料(L)': start_S_RemFuelIn,
+            '结束内置水箱剩余燃料(L)': end_S_RemFuelIn,
+
+            'A制氢机待机消耗燃料(L)': all_Sum_S_RemFuelIn,
+            'A制氢机产氢计数（次）': No_HGHpre_SumCount,
+            'A制氢机平均产氢时间（min）': No_HGHpre_time_average,
+            'B制氢机待机消耗燃料(mm)': out_NO_Once_S_RemFuelIn,
+            'B制氢机产氢计数（次）': No_HgB_Hpre_SumCount,
+            'B制氢机平均产氢时间（min）': No_HgB_Hpre_time_average,
+            '备注': remark,
+
+        })
+
+elif start_S_RemFuelIn[0] > 0 and end_S_RemFuelIn[0] > 0:
+    conut = 2
     # 将新的DataFrame保存到新的Excel文件中
     new_df = pd.DataFrame(
         {
@@ -556,31 +669,10 @@ if start_S_RemFuelOut[0] > 0 and end_S_RemFuelOut[0] > 0:
 
         })
 
-elif No_HgB_Hpre_SumCount[0] > 0:
-    new_df = pd.DataFrame(
-        {
-            '时间': One_DateTime,
-            # '时间': Timer_RemFuelIn,
-            '开始外置水箱剩余燃料(mm)': start_No_LiqlelL,
-            '结束外置水箱剩余燃料(mm)': end_No_LiqlelL,
-            '开始内置水箱剩余燃料(mm)': start_No_LiqlelM,
-            '结束内置水箱剩余燃料(mm)': end_No_LiqlelM,
-            '开始外置水箱剩余燃料(L)': start_S_RemFuelOut,
-            '结束外置水箱剩余燃料(L)': end_S_RemFuelOut,
-            '开始内置水箱剩余燃料(L)': start_S_RemFuelIn,
-            '结束内置水箱剩余燃料(L)': end_S_RemFuelIn,
 
-            '待机消耗燃料(L)': all_Sum_S_RemFuelIn,
-            'A制氢机产氢计数（次）': No_HGHpre_SumCount,
-            'A制氢机平均产氢时间（min）': No_HGHpre_time_average,
-            'B制氢机产氢计数（次）': No_HgB_Hpre_SumCount,
-            'B制氢机平均产氢时间（min）': No_HgB_Hpre_time_average,
-            '备注': remark,
-
-        })
-
+# 如果内置液位以升为单位（L），为0，执行以下程序。如白石，楼下机房
 else:
-
+    conut = 3
     # 将新的DataFrame保存到新的Excel文件中
     new_df = pd.DataFrame(
         {
@@ -625,3 +717,11 @@ for cell in sheet[1]:
 workbook.save(file_path)
 print(f"\n文件保存成功 ！! ! ")
 print(f"文件保存路径 ：{file_path}")
+if conut == 1:
+    print(f"文件保存格式是管委会的格式，液位单位：(mm) + 液位单位：(L)")
+elif conut == 2:
+    print(f'文件保存格式是正常的格式，液位单位：(L)')
+elif conut == 3:
+    print(f'文件保存格式是白石，楼下机房的格式，液位单位：(mm)')
+else:
+    print(f'文件保存失败 ！！！')
