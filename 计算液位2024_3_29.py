@@ -18,6 +18,8 @@ import os
 
 #  2024_3_30 版本更新：   更新时间 2024.3.30
 # 新增对管委会里面’B制氢机‘的待机燃料消耗使用：外置液位为里面‘B制氢机’的液位
+#  2024_3_30_A 版本更新：   更新时间 2024.3.30
+# 修复管委会文档格式
 # ================================================= #
 
 # 打印行号和列的数据
@@ -85,12 +87,12 @@ No_HgB_Hpre_time_average = []  # 平均产氢时间
 
 out_NO_Once_S_RemFuelIn = []  # 外置液位以毫米为单位（mm）
 out_all_Sum_S_RemFuelIn = []
-b1 = '2024_1月管委会待机燃料消耗数据'  # 储存 EXCEL表格 的文件名称202
+b1 = '2024_2月管委会待机燃料消耗数据A'  # 储存 EXCEL表格 的文件名称202
 # adress2 = 'C:/Users/FCK/Desktop/12/test/%s.xlsx' % b1
 adress3 = f"E:/远程下载数据/管委会/{b1}.xlsx"  # 储存 EXCEL表格文件 的路径
 #  EXCEL格式为“某某 年，某某 月，某某 日” ，例如：”2023.10.1“这种格式.。"  年 . 月  . 日  "
 year = 2024  # 年，表格的年
-month = 1  # 月，表格的月
+month = 2  # 月，表格的月
 
 for i in range(1, 32):  # 遍历所有数据  i=8  range=31.   取值范围：8<= i <31
     # a1 = '2023.9.%s' % i
@@ -98,7 +100,7 @@ for i in range(1, 32):  # 遍历所有数据  i=8  range=31.   取值范围：8<
     a1 = '%d.%d.%d' % (year, month, i)  # 这个指令将会使用 year、month 和 i 的值来创建一个类似于 "XXXX.XX.XX" 格式的字符串，并将其存储在变量 a1 中。
     a1 = a1.strip()  # 这个指令会将变量 a1 中的字符串去掉开头和结尾的空白字符
     # 读取Excel文件中的数据
-    adress1 = f'E:/远程下载数据/管委会/202401/{a1}.xlsx'  # 读取 EXCEL表格文件 的路径
+    adress1 = f'E:/远程下载数据/管委会/202402/{a1}.xlsx'  # 读取 EXCEL表格文件 的路径
 
     if os.path.exists(adress1):  # 检查文件（文件名，文件路径是对得上）是否存在，不存在则结束程序
         try:
@@ -464,7 +466,6 @@ for i in range(1, 32):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                     # out_all_Sum_S_RemFuelIn.append(out_NO_Once_S_RemFuelIn)
                     # out_Sum_S_RemFuelout = sum(out_NO_Once_S_RemFuelIn)
 
-
                     # 如果没有故障，’备注‘里面写0 ,如果数据量小于3500，开始做备注
                     if 3500 >= max_index > 3000:
                         remark.append('当天数据缺失，数据总量小于3500行')
@@ -585,7 +586,7 @@ for i in range(1, 32):  # 遍历所有数据  i=8  range=31.   取值范围：8<
 A_all_Sum_S_RemFuelIn = sum(all_Sum_S_RemFuelIn)
 print(f"总燃料消耗(L)：{A_all_Sum_S_RemFuelIn}\n")
 
-print(f'管委会外置（B制氢机）--------',out_NO_Once_S_RemFuelIn)
+print(f'管委会外置（B制氢机）--------', out_NO_Once_S_RemFuelIn)
 B_all_Sum_S_RemFuelIn = sum(out_NO_Once_S_RemFuelIn)
 print(f"管委会外置（B制氢机）总燃料消耗(mm)：{B_all_Sum_S_RemFuelIn}\n")
 
@@ -615,13 +616,12 @@ print(f"B制氢机平均产氢时间 长度：{len(No_HgB_Hpre_time_average)}")
 
 print(f'No_HgB_Hpre_SumCount[0]$$$$$$$$$$$$$$---->>>>{No_HgB_Hpre_SumCount[0]}')
 
-
 print(f"管委会B制氢机燃料（外置液位） 长度：{len(out_NO_Once_S_RemFuelIn)}")
 
-conut=0     # 标记位conut，用于记录程序进入哪个文件保存条件
+conut = 0  # 标记位conut，用于记录程序进入哪个文件保存条件
 
 # 如果产氢次数大于0，执行下面程序
-if No_HgB_Hpre_SumCount[0] > 0:
+if any(value > 0 for value in No_HgB_Hpre_SumCount):
     conut = 1
     new_df = pd.DataFrame(
         {
