@@ -17,6 +17,10 @@ import os
 # 2024_3_30_A 版本更新：2024.3.30
 # 1.对最后文件保存做出判断，如果检测到没有发电数据，不保存文件。'总发电功率(W)': everytime_power列表,如果全部都等于0，则没有发电
 # 2.修复发电量为负数的情况，如果小于0，则‘发电量(kw/h)’=0。
+
+# 2024_5_31_A 版本更新：2024.5.31
+# 增加发电时 电堆A1平均温度（Statem1）, 电堆A2平均温度（Statem2）, 电堆B平均温度（FcB_StackT）
+
 # ================================================= #
 
 new_df = []
@@ -111,20 +115,27 @@ end_LiqlelL = []
 start_LiqlelM = []
 end_LiqlelM = []
 
-b1 = '2024_2月5G汇聚机房02号发电数据'  # 储存 EXCEL表格 的文件名称
+A1_Stack_Temp_Value = []  # 电堆A1温度
+A2_Stack_Temp_Value  = []  # 电堆A2温度
+B_Stack_Temp_Value  = []  # 电堆B温度
+everytime_A1_Stack_Temp = []       # 储存电堆A1温度的列表
+everytime_A2_Stack_Temp = []      # 储存电堆A2温度的列表
+everytime_B_Stack_Temp = []      # 储存电堆B温度的列表
+
+b1 = '2024_4月管委会发电数据 test2'  # 储存 EXCEL表格 的文件名称
 # adress2 = 'C:/Users/FCK/Desktop/12/test/%s.xlsx' % b1
-adress3 = f"E:/远程下载数据/5G汇聚机房02/{b1}.xlsx"  # 储存 EXCEL表格文件 的路径
+adress3 = f"E:/远程下载数据/管委会/{b1}.xlsx"  # 储存 EXCEL表格文件 的路径
 #  EXCEL格式为“某某 年，某某 月，某某 日” ，例如：”2023.10.1“这种格式.。"  年 . 月  . 日  "
 year = 2024  # 年，表格的年
-month = 2  # 月，表格的月
+month = 4  # 月，表格的月
 
-for i in range(1, 32):  # 遍历所有数据  i=8  range=31.   取值范围：8<= i <31
+for i in range(12, 15):  # 遍历所有数据  i=8  range=31.   取值范围：8<= i <31
     # a1 = '2023.9.%s' % i
     # b1 = '2023_11_%s_test数据' %i
     a1 = '%d.%d.%d' % (year, month, i)  # 这个指令将会使用 year、month 和 i 的值来创建一个类似于 "XXXX.XX.XX" 格式的字符串，并将其存储在变量 a1 中。
     a1 = a1.strip()  # 这个指令会将变量 a1 中的字符串去掉开头和结尾的空白字符
     # 读取Excel文件中的数据
-    adress1 = f'E:/远程下载数据/5G汇聚机房02/202402/{a1}.xlsx'  # 读取 EXCEL表格文件 的路径
+    adress1 = f'E:/远程下载数据/管委会/4月/{a1}.xlsx'  # 读取 EXCEL表格文件 的路径
 
     if os.path.exists(adress1):  # 检查文件（文件名，文件路径是对得上）是否存在，不存在则结束程序
         try:
@@ -184,6 +195,10 @@ for i in range(1, 32):  # 遍历所有数据  i=8  range=31.   取值范围：8<
 
             LiqlelL = 'LiqlelL'  # 外置液位（mm）
             LiqlelM = 'LiqlelM'  # 内置液位（mm）
+
+            A1_Stack_Temp = 'Statem1'  # 电堆A1温度
+            A2_Stack_Temp = 'Statem2'   # 电堆A2温度
+            B_Stack_Temp = 'FcB_StackT'    # 电堆B温度
 
             #   打印有多少行
             # print('==========电堆电压', df['StaV'])
@@ -246,6 +261,12 @@ for i in range(1, 32):  # 遍历所有数据  i=8  range=31.   取值范围：8<
 
                             true_LiqlelM.append(round(row[LiqlelM], 2))  # 发电时，储存 内置水箱剩余燃料(mm) 的值到列表 true_LiqlelM
                             true_LiqlelL.append(round(row[LiqlelL], 2))  # 发电时，储存 外置水箱剩余燃料(mm) 的值到列表 true_LiqlelL
+
+                            A1_Stack_Temp_Value.append(round(row[A1_Stack_Temp], 1))  # 储存电堆A1的温度
+                            A2_Stack_Temp_Value.append(round(row[A2_Stack_Temp], 1))  # 储存电堆A2的温度
+                            B_Stack_Temp_Value.append(round(row[B_Stack_Temp], 1))  # 储存电堆B的温度
+
+
                         if prev_row[MSw] == False and row[MSw] == True:  # 开始发电时间 。 如果MSW的上一个值=false,并且当前的值=true
                             print(f"\n第一有开始 ###############\n")
                             print(  # 在控制台上打印，显示
@@ -358,6 +379,18 @@ for i in range(1, 32):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                             mean_IC = round(sum(IC_value) / len(IC_value), 2)
                             everytime_IC.append(mean_IC)
                             print(f'芯片平均温度(℃):{mean_IC}')
+
+                            mean_A1_Stack_Temp = round(sum(A1_Stack_Temp_Value) / len(A1_Stack_Temp_Value), 2)
+                            everytime_A1_Stack_Temp.append(mean_A1_Stack_Temp)
+                            print(f'电堆A1平均温度(℃):{mean_A1_Stack_Temp}')
+
+                            mean_A2_Stack_Temp = round(sum(A2_Stack_Temp_Value) / len(A2_Stack_Temp_Value), 2)
+                            everytime_A2_Stack_Temp.append(mean_A2_Stack_Temp)
+                            print(f'电堆A2平均温度(℃):{mean_A2_Stack_Temp}')
+
+                            mean_B_Stack_Temp = round(sum(B_Stack_Temp_Value) / len(B_Stack_Temp_Value), 2)
+                            everytime_B_Stack_Temp.append(mean_B_Stack_Temp)
+                            print(f'电堆B平均温度(℃):{mean_B_Stack_Temp}')
 
                             Once_RemFuelIn = 0
 
@@ -720,6 +753,18 @@ for i in range(1, 32):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                                 everytime_IC.append(mean_IC)
                                 print(f'芯片平均温度(℃):{mean_IC}')
 
+                                mean_A1_Stack_Temp = round(sum(A1_Stack_Temp_Value) / len(A1_Stack_Temp_Value), 2)
+                                everytime_A1_Stack_Temp.append(mean_A1_Stack_Temp)
+                                print(f'电堆A1平均温度(℃):{mean_A1_Stack_Temp}')
+
+                                mean_A2_Stack_Temp = round(sum(A2_Stack_Temp_Value) / len(A2_Stack_Temp_Value), 2)
+                                everytime_A2_Stack_Temp.append(mean_A2_Stack_Temp)
+                                print(f'电堆A2平均温度(℃):{mean_A2_Stack_Temp}')
+
+                                mean_B_Stack_Temp = round(sum(B_Stack_Temp_Value) / len(B_Stack_Temp_Value), 2)
+                                everytime_B_Stack_Temp.append(mean_B_Stack_Temp)
+                                print(f'电堆B平均温度(℃):{mean_B_Stack_Temp}')
+
                                 # 计算液位。 last_fuel_levels 多出来的部分元素。
                                 fuel_List_value = S_RemFuelIn_value[len(last_fuel_levels):]
                                 # print(f'最后一次液位 >>>>>>>>>>>>：{fuel_List_value} \n')
@@ -935,6 +980,18 @@ for i in range(1, 32):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                                 everytime_IC.append(mean_IC)
                                 print(f'芯片平均温度(℃):{mean_IC}')
 
+                                mean_A1_Stack_Temp = round(sum(A1_Stack_Temp_Value) / len(A1_Stack_Temp_Value), 2)
+                                everytime_A1_Stack_Temp.append(mean_A1_Stack_Temp)
+                                print(f'电堆A1平均温度(℃):{mean_A1_Stack_Temp}')
+
+                                mean_A2_Stack_Temp = round(sum(A2_Stack_Temp_Value) / len(A2_Stack_Temp_Value), 2)
+                                everytime_A2_Stack_Temp.append(mean_A2_Stack_Temp)
+                                print(f'电堆A2平均温度(℃):{mean_A2_Stack_Temp}')
+
+                                mean_B_Stack_Temp = round(sum(B_Stack_Temp_Value) / len(B_Stack_Temp_Value), 2)
+                                everytime_B_Stack_Temp.append(mean_B_Stack_Temp)
+                                print(f'电堆B平均温度(℃):{mean_B_Stack_Temp}')
+
                                 # 计算液位。 last_fuel_levels 多出来的部分元素。
                                 fuel_List_value = S_RemFuelIn_value[len(last_fuel_levels):]
                                 # print(f'最后一次液位 >>>>>>>>>>>>：{fuel_List_value} \n')
@@ -1149,6 +1206,11 @@ for i in range(1, 32):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                 first_start_datatime = 0
                 second_end_datatime = 0
 
+                A1_Stack_Temp_Value.clear()
+                A2_Stack_Temp_Value.clear()
+                B_Stack_Temp_Value.clear()
+                IC_value.clear()
+
                 print(f"\n开始发电时间 长度：{len(start_datatime)}")
                 print(f"结束发电时间 长度：{len(end_datatime)}")
                 print(f"开始外置水箱剩余燃料 长度：{len(start_S_RemFuelOut)}")
@@ -1176,6 +1238,10 @@ for i in range(1, 32):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                 print(f"结束外置水箱剩余燃料(mm) 长度：{len(end_LiqlelL)}")
                 print(f"开始内置水箱剩余燃料(mm) 长度：{len(start_LiqlelM)}")
                 print(f"结束内置水箱剩余燃料(mm) 长度：{len(end_LiqlelM)}")
+
+                print(f"电堆A1温度 长度：{len(everytime_A1_Stack_Temp)}")
+                print(f"电堆A2温度 长度：{len(everytime_A2_Stack_Temp)}")
+                print(f"电堆B温度 长度：{len(everytime_B_Stack_Temp)}")
 
                 print(f'\n++++++++++++++   一天的计算结束   ++++++++++++++++++++++++\n')
 
@@ -1224,9 +1290,14 @@ print(f"结束外置水箱剩余燃料(mm) 长度：{len(end_LiqlelL)}")
 print(f"开始内置水箱剩余燃料(mm) 长度：{len(start_LiqlelM)}")
 print(f"结束内置水箱剩余燃料(mm) 长度：{len(end_LiqlelM)}")
 
+print(f"电堆A1温度 长度：{len(everytime_A1_Stack_Temp)}")
+print(f"电堆A2温度 长度：{len(everytime_A2_Stack_Temp)}")
+print(f"电堆B温度 长度：{len(everytime_B_Stack_Temp)}")
+
 count = 0
 if any(value > 0 for value in start_S_RemFuelIn) and any(value > 0 for value in end_S_RemFuelIn):
     count = 1
+    # 以下'消耗燃料'保存格式为 L
     # 将新的DataFrame保存到新的Excel文件中
     new_df = pd.DataFrame(
         {
@@ -1249,6 +1320,11 @@ if any(value > 0 for value in start_S_RemFuelIn) and any(value > 0 for value in 
             'A电堆功率(W)': everytime_A_power,
             'B电堆功率(W)': everytime_B_power,
             '芯片温度(℃)': everytime_IC,
+
+            '电堆A1温度(℃)': everytime_A1_Stack_Temp,
+            '电堆A2温度(℃)': everytime_A2_Stack_Temp,
+            '电堆B温度(℃)': everytime_B_Stack_Temp,
+
             'A电堆电压(V)': modified_A_StackV,
             'B电堆电压(V)': modified_B_StackV,
             '重整室最高温度(℃)': everytime_max_HGretem,
@@ -1265,6 +1341,7 @@ if any(value > 0 for value in start_S_RemFuelIn) and any(value > 0 for value in 
 
 else:
     count = 2
+    # 以下'消耗燃料'保存格式为 mm
     # 将新的DataFrame保存到新的Excel文件中
     new_df = pd.DataFrame(
         {
@@ -1287,6 +1364,11 @@ else:
             'A电堆功率(W)': everytime_A_power,
             'B电堆功率(W)': everytime_B_power,
             '芯片温度(℃)': everytime_IC,
+
+            '电堆A1温度(℃)': everytime_A1_Stack_Temp,
+            '电堆A2温度(℃)': everytime_A2_Stack_Temp,
+            '电堆B温度(℃)': everytime_B_Stack_Temp,
+
             'A电堆电压(V)': modified_A_StackV,
             'B电堆电压(V)': modified_B_StackV,
             '重整室最高温度(℃)': everytime_max_HGretem,
