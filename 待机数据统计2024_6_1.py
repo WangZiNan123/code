@@ -23,6 +23,9 @@ import os
 
 # 2024_5_31 版本更新：2024.5.31
 # 增加待机时 电堆A1平均温度（Statem1）, 电堆A2平均温度（Statem2）, 电堆B平均温度（FcB_StackT）
+
+# 2024_6_1 版本更新：2024.6.1
+# 增加待机时 重整室最高温度（HGretem）, 重整室最低温度（HGretem）, 提纯器最高温度（Hfetem）,提纯器最低温度（Hfetem）
 # ================================================= #
 
 # 打印行号和列的数据
@@ -98,11 +101,19 @@ everytime_A1_Stack_Temp = []       # 储存电堆A1温度的列表
 everytime_A2_Stack_Temp = []      # 储存电堆A2温度的列表
 everytime_B_Stack_Temp = []      # 储存电堆B温度的列表
 
+HGretem_value = []  # 发电时，储存 重整室温度的值到列表 HGretem_value
+Hfetem_value = []  # 发电时，储存 重整室温度的值到列表 Hfetem_value
+HGretem_list = []
+Hfetem_list = []
+everytime_max_HGretem = []
+everytime_min_HGretem = []
+everytime_max_Hfetem = []
+everytime_min_Hfetem = []
 
 
-b1 = '2024_4月川岛待机燃料消耗数据  test2'  # 储存 EXCEL表格 的文件名称202
+b1 = '2024_4月三联待机燃料消耗数据  test3'  # 储存 EXCEL表格 的文件名称202
 # adress2 = 'C:/Users/FCK/Desktop/12/test/%s.xlsx' % b1
-adress3 = f"E:/远程下载数据/川岛/{b1}.xlsx"  # 储存 EXCEL表格文件 的路径
+adress3 = f"E:/远程下载数据/三联/{b1}.xlsx"  # 储存 EXCEL表格文件 的路径
 #  EXCEL格式为“某某 年，某某 月，某某 日” ，例如：”2023.10.1“这种格式.。"  年 . 月  . 日  "
 year = 2024  # 年，表格的年
 month = 4  # 月，表格的月
@@ -113,7 +124,7 @@ for i in range(1, 32):  # 遍历所有数据  i=8  range=31.   取值范围：8<
     a1 = '%d.%d.%d' % (year, month, i)  # 这个指令将会使用 year、month 和 i 的值来创建一个类似于 "XXXX.XX.XX" 格式的字符串，并将其存储在变量 a1 中。
     a1 = a1.strip()  # 这个指令会将变量 a1 中的字符串去掉开头和结尾的空白字符
     # 读取Excel文件中的数据
-    adress1 = f'E:/远程下载数据/川岛/4月/{a1}.xlsx'  # 读取 EXCEL表格文件 的路径
+    adress1 = f'E:/远程下载数据/三联/4月/{a1}.xlsx'  # 读取 EXCEL表格文件 的路径
 
     if os.path.exists(adress1):  # 检查文件（文件名，文件路径是对得上）是否存在，不存在则结束程序
         try:
@@ -140,6 +151,8 @@ for i in range(1, 32):  # 遍历所有数据  i=8  range=31.   取值范围：8<
             A2_Stack_Temp = 'Statem2'  # 电堆A2温度
             B_Stack_Temp = 'FcB_StackT'  # 电堆B温度
 
+            HGretem = 'HGretem'  # 重整室温度
+            Hfetem = 'Hfetem'  # 提纯器温度
 
             New_MSW = df['MSw'].tolist()
             max_index = df.index.max()
@@ -221,9 +234,73 @@ for i in range(1, 32):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                             # No_S_RemFuelOut_value.append(round(row[S_RemFuelOut], 1))
                             B_Stack_Temp_Value.append(round(row[B_Stack_Temp], 1))  # 储存电堆B的温度
 
+                        # 检查 row[HGretem] 是否为 NaN 的数据类型为float
+                        if np.isnan(row[HGretem]):
+                            HGretem_value.append(0)
+                        else:
+                            # No_S_RemFuelOut_value.append(round(row[S_RemFuelOut], 1))
+                            HGretem_value.append(round(row[HGretem], 1))  # 储存 重整室温度的值到列表 HGretem_value
+
+                        # 检查 row[Hfetem] 是否为 NaN 的数据类型为float
+                        if np.isnan(row[Hfetem]):
+                            Hfetem_value.append(0)
+                        else:
+                            # No_S_RemFuelOut_value.append(round(row[S_RemFuelOut], 1))
+                            Hfetem_value.append(round(row[Hfetem], 1))  # 储存 提纯室温度的值到列表 Hfetem_value
 
                     One_DateTime.append(date_only[0])
                     # print(f'时间：{NO_DateTime}')
+
+                    if all(item == 0 for item in HGretem_value) and all(item == 0 for item in Hfetem_value):
+
+                        max_HGretem = 0
+                        everytime_max_HGretem.append(max_HGretem)
+                        print(f'重整室最大温度(℃)：{max_HGretem}', end="      ")
+
+                        min_HGretem = 0
+                        everytime_min_HGretem.append(min_HGretem)
+                        print(f'重整室最小温度(℃)：{min_HGretem}')
+
+                        # print(f'重整室最列表温度^^^^^^^^^^^^5(℃)：{HGretem_value}')
+                        HGretem_value = []  # 用完HGretem_value列表后，要把列表清空，不然会叠加列表
+
+                        max_Hfetem = 0
+                        everytime_max_Hfetem.append(max_Hfetem)
+                        print(f'提纯器最大温度(℃)：{max_Hfetem}', end="      ")
+
+                        min_Hfetem = 0
+                        everytime_min_Hfetem.append(min_Hfetem)
+                        print(f'提纯器最小温度(℃)：{min_Hfetem}')
+
+                        # print(f'提纯器温度列表^^^^^^^^^^^^^^^6(℃)：{Hfetem_value}')
+                        Hfetem_value = []
+
+                    else:
+                        #   使用列表推导式过滤了列表 HGretem_value 中值为 0 的元素，并将结果重新赋值给 HGretem_value
+                        HGretem_value = [x for x in HGretem_value if x != 0]
+                        max_HGretem = round(max(HGretem_value), 1)
+                        everytime_max_HGretem.append(max_HGretem)
+                        print(f'重整室最大温度(℃)：{max_HGretem}', end="      ")
+
+                        min_HGretem = round(min(HGretem_value), 1)
+                        everytime_min_HGretem.append(min_HGretem)
+                        print(f'重整室最小温度(℃)：{min_HGretem}')
+
+                        # print(f'重整室最列表温度^^^^^^^^^^^^5(℃)：{HGretem_value}')
+                        HGretem_value = []  # 用完HGretem_value列表后，要把列表清空，不然会叠加列表
+
+                        #   使用列表推导式过滤了列表 Hfetem_value 中值为 0 的元素，并将结果重新赋值给 Hfetem_value
+                        Hfetem_value = [x for x in Hfetem_value if x != 0]
+                        max_Hfetem = round(max(Hfetem_value), 1)
+                        everytime_max_Hfetem.append(max_Hfetem)
+                        print(f'提纯器最大温度(℃)：{max_Hfetem}', end="      ")
+
+                        min_Hfetem = round(min(Hfetem_value), 1)
+                        everytime_min_Hfetem.append(min_Hfetem)
+                        print(f'提纯器最小温度(℃)：{min_Hfetem}')
+
+                        # print(f'提纯器温度列表^^^^^^^^^^^^^^^6(℃)：{Hfetem_value}')
+                        Hfetem_value = []  # 用完Hfetem_value列表后，要把列表清空，不然会叠加列表
 
                     mean_A1_Stack_Temp = round(sum(A1_Stack_Temp_Value) / len(A1_Stack_Temp_Value), 2)
                     everytime_A1_Stack_Temp.append(mean_A1_Stack_Temp)
@@ -390,13 +467,18 @@ for i in range(1, 32):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                     Min_Msw_mm = min(No_LiqlelL)
                     print(f"最小值*（mm）:{Min_Msw_mm}")
 
+                    print(f"重整室最高温度 长度：{len(everytime_max_HGretem)}")
+                    print(f"重整室最低温度 长度：{len(everytime_min_HGretem)}")
+                    print(f"提纯器最高温度 长度：{len(everytime_max_Hfetem)}")
+                    print(f"提纯器最低温度 长度：{len(everytime_min_Hfetem)}")
+
                     # print(f'燃料值（L）:{No_S_RemFuelIn_value}')
-                    print(f"++++++液位（L）的列表:{start_S_RemFuelIn}")
-                    print(f"------液位（MM）的列表:{start_No_LiqlelL}")
+                    # print(f"++++++液位（L）的列表:{start_S_RemFuelIn}")
+                    # print(f"------液位（MM）的列表:{start_No_LiqlelL}")
 
                     NO_differences = 0
-                    print('No_S_RemFuelIn_value----》》》', No_S_RemFuelIn_value[0],
-                          '      No_S_RemFuelOut_value[0]----->>>>>>', No_S_RemFuelOut_value[0])
+                    # print('No_S_RemFuelIn_value----》》》', No_S_RemFuelIn_value[0],
+                    #       '      No_S_RemFuelOut_value[0]----->>>>>>', No_S_RemFuelOut_value[0])
 
                     # 如果列表为空。说明没有数据，执行下面计算
                     if (No_S_RemFuelIn_value[0] > 0
@@ -565,6 +647,12 @@ for i in range(1, 32):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                     everytime_A1_Stack_Temp.append(o1)
                     everytime_A2_Stack_Temp.append(o1)
 
+                    everytime_max_HGretem.append(o1)
+                    everytime_min_HGretem.append(o1)
+                    everytime_max_Hfetem.append(o1)
+                    everytime_min_Hfetem.append(o1)
+
+
                     print(f'\n===========   {date_only[0]} 当天有发电，不计算燃料消耗   ==========\n')
 
                 # print(f"总燃料消耗(L)：{Sum_S_RemFuelIn}")
@@ -613,6 +701,11 @@ for i in range(1, 32):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                 print(f"电堆A2温度 长度：{len(everytime_A2_Stack_Temp)}")
                 print(f"电堆B温度 长度：{len(everytime_B_Stack_Temp)}")
 
+                print(f"重整室最高温度 长度：{len(everytime_max_HGretem)}")
+                print(f"重整室最低温度 长度：{len(everytime_min_HGretem)}")
+                print(f"提纯器最高温度 长度：{len(everytime_max_Hfetem)}")
+                print(f"提纯器最低温度 长度：{len(everytime_min_Hfetem)}")
+
 
                 print(f'\n++++++++++++++  {date_only[0]} 一天的计算结束   ++++++++++++++++++++++++\n')
 
@@ -646,6 +739,11 @@ for i in range(1, 32):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                 everytime_B_Stack_Temp.append(o1)
                 everytime_A1_Stack_Temp.append(o1)
                 everytime_A2_Stack_Temp.append(o1)
+
+                everytime_max_HGretem.append(o1)
+                everytime_min_HGretem.append(o1)
+                everytime_max_Hfetem.append(o1)
+                everytime_min_Hfetem.append(o1)
 
                 print(
                     f'\n++++++++++++++   {One_DateTime[-1]}    当天没有数据，下载数据为空 ！！！    ++++++++++++++++++++++++\n')
@@ -694,6 +792,12 @@ print(f"电堆A1温度 长度：{len(everytime_A1_Stack_Temp)}")
 print(f"电堆A2温度 长度：{len(everytime_A2_Stack_Temp)}")
 print(f"电堆B温度 长度：{len(everytime_B_Stack_Temp)}")
 
+print(f"重整室最高温度 长度：{len(everytime_max_HGretem)}")
+print(f"重整室最低温度 长度：{len(everytime_min_HGretem)}")
+print(f"提纯器最高温度 长度：{len(everytime_max_Hfetem)}")
+print(f"提纯器最低温度 长度：{len(everytime_min_Hfetem)}")
+
+
 conut = 0  # 标记位conut，用于记录程序进入哪个文件保存条件
 
 # 如果产氢次数大于0，执行下面程序
@@ -718,6 +822,11 @@ if any(value > 0 for value in No_HgB_Hpre_SumCount):
             'B制氢机待机消耗燃料(mm)': out_NO_Once_S_RemFuelIn,
             'B制氢机产氢计数（次）': No_HgB_Hpre_SumCount,
             'B制氢机平均产氢时间（min）': No_HgB_Hpre_time_average,
+
+            '重整室最高温度(℃)': everytime_max_HGretem,
+            '重整室最低温度(℃)': everytime_min_HGretem,
+            '提纯器最高温度(℃)': everytime_max_Hfetem,
+            '提纯器最低温度(℃)': everytime_min_Hfetem,
 
             '电堆A1温度(℃)': everytime_A1_Stack_Temp,
             '电堆A2温度(℃)': everytime_A2_Stack_Temp,
@@ -746,6 +855,11 @@ elif start_S_RemFuelIn[0] > 0 and end_S_RemFuelIn[0] > 0:
             '待机消耗燃料(L)': all_Sum_S_RemFuelIn,
             '产氢计数（次）': No_HGHpre_SumCount,
             '平均产氢时间（min）': No_HGHpre_time_average,
+
+            '重整室最高温度(℃)': everytime_max_HGretem,
+            '重整室最低温度(℃)': everytime_min_HGretem,
+            '提纯器最高温度(℃)': everytime_max_Hfetem,
+            '提纯器最低温度(℃)': everytime_min_Hfetem,
 
             '电堆A1温度(℃)': everytime_A1_Stack_Temp,
             '电堆A2温度(℃)': everytime_A2_Stack_Temp,
@@ -778,6 +892,11 @@ else:
             '待机消耗燃料(mm)': all_Sum_S_RemFuelIn,
             '产氢计数（次）': No_HGHpre_SumCount,
             '平均产氢时间（min）': No_HGHpre_time_average,
+
+            '重整室最高温度(℃)': everytime_max_HGretem,
+            '重整室最低温度(℃)': everytime_min_HGretem,
+            '提纯器最高温度(℃)': everytime_max_Hfetem,
+            '提纯器最低温度(℃)': everytime_min_Hfetem,
 
             '电堆A1温度(℃)': everytime_A1_Stack_Temp,
             '电堆A2温度(℃)': everytime_A2_Stack_Temp,
