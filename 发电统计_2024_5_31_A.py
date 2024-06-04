@@ -21,6 +21,8 @@ import os
 # 2024_5_31_A 版本更新：2024.5.31
 # 增加发电时 电堆A1平均温度（Statem1）, 电堆A2平均温度（Statem2）, 电堆B平均温度（FcB_StackT）
 
+# 2024_6_4 版本更新：2024.6.4
+# 修改发电时 ，楼下机房，白石机房，这些以mm计算液位高度的“燃料消耗” ，以折线图的最高值-最低值求出变化液位
 # ================================================= #
 
 new_df = []
@@ -116,26 +118,34 @@ start_LiqlelM = []
 end_LiqlelM = []
 
 A1_Stack_Temp_Value = []  # 电堆A1温度
-A2_Stack_Temp_Value  = []  # 电堆A2温度
-B_Stack_Temp_Value  = []  # 电堆B温度
-everytime_A1_Stack_Temp = []       # 储存电堆A1温度的列表
-everytime_A2_Stack_Temp = []      # 储存电堆A2温度的列表
-everytime_B_Stack_Temp = []      # 储存电堆B温度的列表
+A2_Stack_Temp_Value = []  # 电堆A2温度
+B_Stack_Temp_Value = []  # 电堆B温度
+everytime_A1_Stack_Temp = []  # 储存电堆A1温度的列表
+everytime_A2_Stack_Temp = []  # 储存电堆A2温度的列表
+everytime_B_Stack_Temp = []  # 储存电堆B温度的列表
 
-b1 = '2024_4月管委会发电数据 test2'  # 储存 EXCEL表格 的文件名称
+fuel_mm = []  # 液位
+last_fuel_mm = []  # 上一个液位mm
+fuel_List_mm = []  # 储存每次发电时液位的数值mm
+remove_duplicates_LiqlelM = []
+
+min_fuel_mm = []
+max_fuel_mm = []
+
+b1 = '2024_6月2日5G汇聚机房01发电数据 test'  # 储存 EXCEL表格 的文件名称
 # adress2 = 'C:/Users/FCK/Desktop/12/test/%s.xlsx' % b1
-adress3 = f"E:/远程下载数据/管委会/{b1}.xlsx"  # 储存 EXCEL表格文件 的路径
+adress3 = f"E:/远程下载数据/5G汇聚机房01/{b1}.xlsx"  # 储存 EXCEL表格文件 的路径
 #  EXCEL格式为“某某 年，某某 月，某某 日” ，例如：”2023.10.1“这种格式.。"  年 . 月  . 日  "
 year = 2024  # 年，表格的年
-month = 4  # 月，表格的月
+month = 6  # 月，表格的月
 
-for i in range(12, 15):  # 遍历所有数据  i=8  range=31.   取值范围：8<= i <31
+for i in range(1, 33):  # 遍历所有数据  i=8  range=31.   取值范围：8<= i <31
     # a1 = '2023.9.%s' % i
     # b1 = '2023_11_%s_test数据' %i
     a1 = '%d.%d.%d' % (year, month, i)  # 这个指令将会使用 year、month 和 i 的值来创建一个类似于 "XXXX.XX.XX" 格式的字符串，并将其存储在变量 a1 中。
     a1 = a1.strip()  # 这个指令会将变量 a1 中的字符串去掉开头和结尾的空白字符
     # 读取Excel文件中的数据
-    adress1 = f'E:/远程下载数据/管委会/4月/{a1}.xlsx'  # 读取 EXCEL表格文件 的路径
+    adress1 = f'E:/远程下载数据/5G汇聚机房01/202406/{a1}.xlsx'  # 读取 EXCEL表格文件 的路径
 
     if os.path.exists(adress1):  # 检查文件（文件名，文件路径是对得上）是否存在，不存在则结束程序
         try:
@@ -197,8 +207,8 @@ for i in range(12, 15):  # 遍历所有数据  i=8  range=31.   取值范围：8
             LiqlelM = 'LiqlelM'  # 内置液位（mm）
 
             A1_Stack_Temp = 'Statem1'  # 电堆A1温度
-            A2_Stack_Temp = 'Statem2'   # 电堆A2温度
-            B_Stack_Temp = 'FcB_StackT'    # 电堆B温度
+            A2_Stack_Temp = 'Statem2'  # 电堆A2温度
+            B_Stack_Temp = 'FcB_StackT'  # 电堆B温度
 
             #   打印有多少行
             # print('==========电堆电压', df['StaV'])
@@ -223,18 +233,36 @@ for i in range(12, 15):  # 遍历所有数据  i=8  range=31.   取值范围：8
                     # 去掉小于100的元素并重新生成列表
                     new_list = [x for x in input_list if x >= 100]
 
-                    if len(new_list) > 10:  # 如果新列表元素个数大于10
-                        top_values = sorted(new_list, reverse=True)[:10]  # 找出新列表元素十个最大值
-                        average = sum(top_values) / 10  # 计算平均值
+                    if len(new_list) > 50:  # 如果新列表元素个数大于10
+                        top_values = sorted(new_list, reverse=True)[:50]  # 找出新列表元素十个最大值
+                        average = sum(top_values) / 50  # 计算平均值
                         return average
                     elif len(set(new_list)) == 1:  # 如果所有元素都相等
                         return new_list[0]  # 返回任意一个元素的值作为平均值
-                    elif 0 < len(new_list) <= 10:  # 如果新列表元素个数小于等于10且不为空
+                    elif 0 < len(new_list) <= 50:  # 如果新列表元素个数小于等于10且不为空
                         average = sum(new_list) / len(new_list)  # 计算所有元素的平均值
                         return average
                     else:
                         if len(new_list) == 0:  # 如果新列表为空
                             return 0
+
+
+                # 去除列表里面重复项，使用一个新列表来储存。并且不改变原来的排序
+                def remove_duplicates(data):
+                    # 如果数据少于2个元素，直接返回原数据
+                    if len(data) < 2:
+                        return data
+
+                    # 初始化一个新列表，添加第一个元素
+                    new_data = [data[0]]
+
+                    # 从第二个元素开始遍历数据
+                    for i in range(1, len(data)):
+                        # 如果当前元素与新列表的最后一个元素不同，添加到新列表
+                        if data[i] != new_data[-1]:
+                            new_data.append(data[i])
+
+                    return new_data
 
 
                 print('\n ————————————————    一天计算开始    ————————————————    \n')
@@ -262,10 +290,12 @@ for i in range(12, 15):  # 遍历所有数据  i=8  range=31.   取值范围：8
                             true_LiqlelM.append(round(row[LiqlelM], 2))  # 发电时，储存 内置水箱剩余燃料(mm) 的值到列表 true_LiqlelM
                             true_LiqlelL.append(round(row[LiqlelL], 2))  # 发电时，储存 外置水箱剩余燃料(mm) 的值到列表 true_LiqlelL
 
+                            # print(f"内置液位(mm):\n{true_LiqlelM}\n")
+                            # true_LiqlelL.clear()
+
                             A1_Stack_Temp_Value.append(round(row[A1_Stack_Temp], 1))  # 储存电堆A1的温度
                             A2_Stack_Temp_Value.append(round(row[A2_Stack_Temp], 1))  # 储存电堆A2的温度
                             B_Stack_Temp_Value.append(round(row[B_Stack_Temp], 1))  # 储存电堆B的温度
-
 
                         if prev_row[MSw] == False and row[MSw] == True:  # 开始发电时间 。 如果MSW的上一个值=false,并且当前的值=true
                             print(f"\n第一有开始 ###############\n")
@@ -327,6 +357,7 @@ for i in range(12, 15):  # 遍历所有数据  i=8  range=31.   取值范围：8
 
                                 start_LiqlelL.append(round(row[LiqlelL], 1))
                                 start_LiqlelM.append(round(row[LiqlelM], 1))
+
                         if prev_row[MSw] == True and row[MSw] == False:  # 结束发电时间。如果MSW的上一个值=true,并且当前的值=false
 
                             print(
@@ -392,6 +423,9 @@ for i in range(12, 15):  # 遍历所有数据  i=8  range=31.   取值范围：8
                             everytime_B_Stack_Temp.append(mean_B_Stack_Temp)
                             print(f'电堆B平均温度(℃):{mean_B_Stack_Temp}')
 
+                            # print(f"内置液位(mm):\n{true_LiqlelM}\n")
+                            # true_LiqlelL.clear()
+
                             Once_RemFuelIn = 0
 
                             # 一天只发一次电时，执行下面程序
@@ -429,7 +463,41 @@ for i in range(12, 15):  # 遍历所有数据  i=8  range=31.   取值范围：8
                                     print(f'每次发电消耗燃料（L）:{Once_RemFuelIn}')
                                     S_RemFuelIn_value.clear()  # 用完S_RemFuelIn_value列表后，要把列表清空，不然会叠加列表
                                 else:
-                                    differences = round(start_LiqlelM[-1] - end_LiqlelM[-1], 1)
+
+                                    max_fuel_mm.append(start_LiqlelM[-1])
+
+                                    # print(f'每次发电消耗燃料（mm）:{true_LiqlelM}\n')
+                                    remove_duplicates_LiqlelM = remove_duplicates(true_LiqlelM)
+                                    # print(f'每次发电消耗燃料,去除重复项（mm）:{remove_duplicates_LiqlelM}\n')
+                                    c = 0
+                                    while c < len(remove_duplicates_LiqlelM) - 21:
+                                        # for c in range(len(remove_duplicates_LiqlelM) - 21):
+                                        if remove_duplicates_LiqlelM[c] - remove_duplicates_LiqlelM[c + 1] < -0.5:
+                                            if all(remove_duplicates_LiqlelM[c] < xx for xx in
+                                                   remove_duplicates_LiqlelM[c + 1:c + 21]):
+                                                min_fuel_mm.append(remove_duplicates_LiqlelM[c])
+
+                                                # 找到 c + 1 到 c + 21 这 20 个数中的最大数
+                                                max_in_next_20 = max(remove_duplicates_LiqlelM[c + 1:c + 21],
+                                                                     default=None)
+                                                if max_in_next_20 is not None:  # 确保列表不为空
+                                                    max_fuel_mm.append(max_in_next_20)
+
+                                                c += 20
+                                                print(f'跳过20个项：{c}')
+                                        c += 1
+                                    min_fuel_mm.append(end_LiqlelM[-1])
+                                    print(f'每次发电消耗燃料,折线图最小值（mm）:{min_fuel_mm}\n')
+                                    print(f'每次发电消耗燃料,折线图最大值（mm）:{max_fuel_mm}\n')
+
+                                    differences = round(
+                                        sum([max_fuel_mm[i] - min_fuel_mm[i] for i in range(len(max_fuel_mm))]), 1)
+                                    # print(f'每次发电消耗燃料（mm）:{differences}')
+                                    true_LiqlelM.clear()
+                                    min_fuel_mm.clear()
+                                    max_fuel_mm.clear()
+
+
                                     if differences < 0:
                                         differences = 0
                                     Once_S_RemFuelIn.append(differences)
@@ -532,6 +600,10 @@ for i in range(12, 15):  # 遍历所有数据  i=8  range=31.   取值范围：8
                                 # 可以指定起始位置和结束位置，如果只有一个位置（索引），则表示从那个位置到列表末尾。 在这里，fuel_levels[len(last_fuel_levels):] 表示从
                                 # fuel_levels 列表中的索引 len(last_fuel_levels) 开始， 一直取到末尾，即取出 fuel_levels
                                 # 计算液位。 last_fuel_levels 多出来的部分元素。
+
+                                # fuel_List_mm = true_LiqlelM[len(last_fuel_mm):]
+                                # print(f'液位mm  : {fuel_List_mm}\n')
+
                                 fuel_List_value = S_RemFuelIn_value[len(last_fuel_levels):]
 
                                 # 计算电压重整室温度。每次发电期间 HGretem_List_value 重整室温度的值
@@ -583,13 +655,49 @@ for i in range(12, 15):  # 遍历所有数据  i=8  range=31.   取值范围：8
                                     differences = [fuel_List_value[i] - fuel_List_value[i + 1] for i in
                                                    range(len(fuel_List_value) - 1)]
                                     positive_differences = [x for x in differences if x > 0]
+                                    # print(f'每次发电消耗燃料----（L）:{positive_differences}')
                                     Once_RemFuelIn = round(sum(positive_differences), 2)
                                     if Once_RemFuelIn == 0:
                                         Once_RemFuelIn = 0.3
                                     Once_S_RemFuelIn.append(Once_RemFuelIn)
                                     print(f'每次发电消耗燃料（L）:{Once_RemFuelIn}')
                                 else:
-                                    differences = round(start_LiqlelM[-1] - end_LiqlelM[-1], 1)
+                                    max_fuel_mm.append(start_LiqlelM[-1])
+
+                                    # print(f'每次发电消耗燃料（mm）:{true_LiqlelM}\n')
+                                    remove_duplicates_LiqlelM = remove_duplicates(true_LiqlelM)
+                                    # print(f'每次发电消耗燃料,去除重复项（mm）:{remove_duplicates_LiqlelM}\n')
+                                    c = 0
+                                    while c < len(remove_duplicates_LiqlelM) - 21:
+                                        # for c in range(len(remove_duplicates_LiqlelM) - 21):
+                                        if remove_duplicates_LiqlelM[c] - remove_duplicates_LiqlelM[c + 1] < -0.5:
+                                            if all(remove_duplicates_LiqlelM[c] < xx for xx in
+                                                   remove_duplicates_LiqlelM[c + 1:c + 21]):
+                                                min_fuel_mm.append(remove_duplicates_LiqlelM[c])
+
+                                                # 找到 c + 1 到 c + 21 这 20 个数中的最大数
+                                                max_in_next_20 = max(remove_duplicates_LiqlelM[c + 1:c + 21],
+                                                                     default=None)
+                                                if max_in_next_20 is not None:  # 确保列表不为空
+                                                    max_fuel_mm.append(max_in_next_20)
+
+                                                c += 20
+                                                print(f'跳过20个项：{c}')
+                                        c += 1
+
+                                    min_fuel_mm.append(end_LiqlelM[-1])
+
+                                    print(f'每次发电消耗燃料,折线图最小值（mm）:{min_fuel_mm}\n')
+                                    print(f'每次发电消耗燃料,折线图最大值（mm）:{max_fuel_mm}\n')
+
+                                    differences = round(
+                                        sum([max_fuel_mm[i] - min_fuel_mm[i] for i in range(len(max_fuel_mm))]), 1)
+                                    # print(f'每次发电消耗燃料（mm）:{differences}')
+                                    true_LiqlelM.clear()
+                                    min_fuel_mm.clear()
+                                    max_fuel_mm.clear()
+
+                                    # differences = round(start_LiqlelM[-1] - end_LiqlelM[-1], 1)
                                     if differences < 0:
                                         differences = 0
                                     Once_S_RemFuelIn.append(differences)
@@ -671,6 +779,8 @@ for i in range(12, 15):  # 遍历所有数据  i=8  range=31.   取值范围：8
                                     print(f'提纯器最小温度(℃)：{min_Hfetem}')
 
                                 # 初始化,上一个的列表
+                                last_fuel_mm.clear()
+
                                 last_fuel_levels.clear()
                                 last_A_List.clear()
                                 last_B_List.clear()
@@ -684,6 +794,8 @@ for i in range(12, 15):  # 遍历所有数据  i=8  range=31.   取值范围：8
                                 # 在每次迭代结束后，将 fuel_levels 的值复制给 last_fuel_levels
                                 # 使用 copy 模块中的 deepcopy 函数来创建一个深层副本，确保每个元素都是独立的
                                 # 赋值，将当前列表的值赋于另一个列表，使另一个列表成为上一个列表的值
+
+                                last_fuel_mm = copy.deepcopy(true_LiqlelM)
 
                                 last_fuel_levels = copy.deepcopy(S_RemFuelIn_value)
 
@@ -765,232 +877,7 @@ for i in range(12, 15):  # 遍历所有数据  i=8  range=31.   取值范围：8
                                 everytime_B_Stack_Temp.append(mean_B_Stack_Temp)
                                 print(f'电堆B平均温度(℃):{mean_B_Stack_Temp}')
 
-                                # 计算液位。 last_fuel_levels 多出来的部分元素。
-                                fuel_List_value = S_RemFuelIn_value[len(last_fuel_levels):]
-                                # print(f'最后一次液位 >>>>>>>>>>>>：{fuel_List_value} \n')
-                                # 计算电压重整室温度。每次发电期间 HGretem_List_value 重整室温度的值
-                                HGretem_List_value = HGretem_value[len(last_HGretem_list):]
-                                # print(f'最后一次重整室温度 >>>>>>>>>>>>：{HGretem_List_value} \n')
-                                # 计算提纯器温度。每次发电期间 Hfetem_List_value 提纯器温度的值
-                                Hfetem_List_value = Hfetem_value[len(last_Hfetem_list):]
-                                # print(f'最后一次提纯器温度 >>>>>>>>>>>>：{Hfetem_List_value} \n')
-                                # 找出每次发电期间（A 电堆电压）A_List_value 的所有值
-                                A_List_value = A_StackV_value[len(last_A_List):]
-                                # print(f'最后一次 A 电堆电压 >>>>>>>>>>>>：{A_List_value} \n')
-                                # 找出每次发电期间（B 电堆电压）A_List_value 的所有值
-                                B_List_value = B_StackV_value[len(last_B_List):]
-                                # print(f'最后一次 B 电堆电压 >>>>>>>>>>>>：{B_List_value} \n')
-                                # 找出每次发电期间（发电功率）last_power_value_list 的所有值
-                                power_value_list = power_values[len(last_power_value_list):]
-                                # print(f'总功率平均值>>>>>>>>>>>>：{power_value_list} \n')
-
-                                power_A_value_list = A_Power_values[len(last_A_power_value_list):]
-                                power_B_value_list = B_Power_values[len(last_B_power_value_list):]
-
-                                current_voltage_List_value = current_voltage_value[
-                                                             len(last_current_voltage_List_value):]
-
-                                current_voltage = round(
-                                    sum(current_voltage_List_value) / len(current_voltage_List_value), 1)
-                                everytime_current_voltage.append(current_voltage)
-                                current_voltage_List_value.clear()
-                                print(f'母线电压平均值(W)：{current_voltage}')
-
-                                # print(f'总功率平均值>>>>>>>>>>>>：{power_value_list}')
-                                calculate_A_power = round(calculate_average(power_A_value_list), 1)
-                                everytime_A_power.append(calculate_A_power)
-                                power_A_value_list.clear()
-                                print(f'A堆功率平均值(W)：{calculate_A_power}')
-
-                                calculate_B_power = round(calculate_average(power_B_value_list), 1)
-                                everytime_B_power.append(calculate_B_power)
-                                power_B_value_list.clear()
-                                print(f'B堆功率平均值(W)：{calculate_B_power}')
-
-                                calculate_power = round(calculate_average(power_value_list), 1)
-                                everytime_power.append(calculate_power)
-                                power_value_list.clear()
-                                print(f'总功率平均值(W)：{calculate_power}')
-
-                                if S_RemFuelIn_value[0] > 0:
-                                    # 计算燃料使用，计算列表中两两元素的差,大于等于0的部分存到一个新的列表中
-                                    differences = [fuel_List_value[i] - fuel_List_value[i + 1] for i in
-                                                   range(len(fuel_List_value) - 1)]
-                                    positive_differences = [x for x in differences if x > 0]
-                                    Once_RemFuelIn = round(sum(positive_differences), 2)
-                                    if Once_RemFuelIn == 0:
-                                        Once_RemFuelIn = 0.3
-                                    Once_S_RemFuelIn.append(Once_RemFuelIn)
-                                    print(f'每次发电消耗燃料（L）:{Once_RemFuelIn}')
-                                else:
-                                    differences = round(start_LiqlelM[-1] - end_LiqlelM[-1], 1)
-                                    if differences < 0:
-                                        differences = 0
-                                    Once_S_RemFuelIn.append(differences)
-                                    print(f'每次发电消耗燃料（mm）:{differences}')
-
-                                # 计算发电过程中，A电堆电压平均值（过滤小于90和大于130的值）
-                                average_A_StackV = round(calculate_filtered_average(A_List_value), 1)
-                                everytime_A_StackV.append(average_A_StackV)
-                                #### 2023.1.16新增
-                                copy_everytime_A_StackV = copy.deepcopy(everytime_A_StackV)
-                                copys_everytime_A_StackV.append(copy_everytime_A_StackV)
-                                modified_A_StackV = [item[0] for item in copys_everytime_A_StackV]
-                                everytime_A_StackV.clear()
-                                ######
-                                print(f'A电堆平均电压(V):{average_A_StackV}', end="        ")
-
-                                # 计算发电过程中，B电堆电压平均值（过滤小于90和大于130的值）
-                                average_B_StackV = round(calculate_filtered_average(B_List_value), 1)
-                                everytime_B_StackV.append(average_B_StackV)
-                                #### 2023.1.16新增
-                                copy_everytime_B_StackV = copy.deepcopy(everytime_B_StackV)
-                                copys_everytime_B_StackV.append(copy_everytime_B_StackV)
-                                modified_B_StackV = [item[0] for item in copys_everytime_B_StackV]
-                                everytime_B_StackV.clear()
-                                ######
-                                print(f'B电堆平均电压(V):{average_B_StackV}')
-
-                                # print(f'重整室温度 HGretem_List_value ///////////// (℃) ：{HGretem_List_value}')
-                                if all(item == 0 for item in HGretem_List_value) and all(
-                                        item == 0 for item in Hfetem_List_value):
-
-                                    max_HGretem = 0
-                                    everytime_max_HGretem.append(max_HGretem)
-                                    print(f'重整室最大温度(℃)：{max_HGretem}', end="      ")
-
-                                    min_HGretem = 0
-                                    everytime_min_HGretem.append(min_HGretem)
-                                    print(f'重整室最小温度(℃)：{min_HGretem}')
-
-                                    # print(f'重整室最列表温度^^^^^^^^^^^^5(℃)：{HGretem_value}')
-                                    HGretem_value = []  # 用完HGretem_value列表后，要把列表清空，不然会叠加列表
-
-                                    max_Hfetem = 0
-                                    everytime_max_Hfetem.append(max_Hfetem)
-                                    print(f'提纯器最大温度(℃)：{max_Hfetem}', end="      ")
-
-                                    min_Hfetem = 0
-                                    everytime_min_Hfetem.append(min_Hfetem)
-                                    print(f'提纯器最小温度(℃)：{min_Hfetem}')
-
-                                    # print(f'提纯器温度列表^^^^^^^^^^^^^^^6(℃)：{Hfetem_value}')
-                                    Hfetem_value = []
-
-                                else:
-                                    # print(f'重整室温度列表(℃)>>>>>>>>>>>>>>>>>：{HGretem_List_value}\n')
-                                    # print(f'提纯器温度列表(℃)>>>>>>>>>>>>>>>>>：{Hfetem_List_value}\n')
-
-                                    #   使用列表推导式过滤了列表 HGretem_value 中值为 0 的元素，并将结果重新赋值给 HGretem_value
-                                    HGretem_List_value = [x for x in HGretem_List_value if x != 0]
-                                    max_HGretem = round(max(HGretem_List_value), 1)
-                                    everytime_max_HGretem.append(max_HGretem)
-                                    print(f'重整室最大温度(℃)：{max_HGretem}', end="      ")
-
-                                    min_HGretem = round(min(HGretem_List_value), 1)
-                                    everytime_min_HGretem.append(min_HGretem)
-                                    print(f'重整室最小温度(℃)：{min_HGretem}')
-                                    # print(f'重整室最温度列表 00000000  (℃)：{HGretem_List_value}')
-                                    # print(f'重整室最小温度 HGretem_List_value |||||||||||  (℃)：{HGretem_List_value}')
-
-                                    #   使用列表推导式过滤了列表 Hfetem_value 中值为 0 的元素，并将结果重新赋值给 Hfetem_value
-                                    Hfetem_List_value = [x for x in Hfetem_List_value if x != 0]
-                                    max_Hfetem = round(max(Hfetem_List_value), 1)
-                                    everytime_max_Hfetem.append(max_Hfetem)
-                                    print(f'提纯器最大温度(℃)：{max_Hfetem}', end="      ")
-
-                                    min_Hfetem = round(min(Hfetem_List_value), 1)
-                                    everytime_min_Hfetem.append(min_Hfetem)
-                                    print(f'提纯器最小温度(℃)：{min_Hfetem}')
-
-                                # 燃料耗率 / L.kWh - 1
-                                if Once_Topgen != 0:
-                                    Fuel_consumption = round((Once_RemFuelIn / Once_Topgen), 1)
-                                else:
-                                    Fuel_consumption = 0
-                                everytime_Fuel_consumption.append(Fuel_consumption)
-                                print(f'燃料消耗率 ：{Fuel_consumption}')
-
-                                # 初始化,上一个的列表
-                                last_fuel_levels.clear()
-                                last_A_List.clear()
-                                last_B_List.clear()
-                                last_Hfetem_list.clear()
-                                last_HGretem_list.clear()
-                                last_power_value_list.clear()
-                                last_A_power_value_list.clear()
-                                last_B_power_value_list.clear()
-                                last_current_voltage_List_value.clear()
-
-                                # 在每次迭代结束后，将 fuel_levels 的值复制给 last_fuel_levels
-                                # 使用 copy 模块中的 deepcopy 函数来创建一个深层副本，确保每个元素都是独立的
-                                # 赋值，将当前列表的值赋于另一个列表，使另一个列表成为上一个列表的值
-                                last_fuel_levels = copy.deepcopy(S_RemFuelIn_value)
-                                last_A_List = copy.deepcopy(A_StackV_value)
-                                last_B_List = copy.deepcopy(B_StackV_value)
-                                last_HGretem_list = copy.deepcopy(HGretem_value)
-                                last_Hfetem_list = copy.deepcopy(Hfetem_value)
-                                last_power_value_list = copy.deepcopy(power_values)
-                                last_A_power_value_list = copy.deepcopy(A_Power_values)
-                                last_B_power_value_list = copy.deepcopy(B_Power_values)
-                                last_current_voltage_List_value = copy.deepcopy(current_voltage_value)
-
-                            if start_time is None and (index == len(df) - 1) == True and last_row[MSw] == True and len(
-                                    count_end_datatime) > 1:
-                                print(
-                                    f"结束发电时间：{last_row[DateTime]}      "
-                                    f"内置水箱剩余燃料: {round(last_row[S_RemFuelIn], 2)}     "
-                                    f"外置水箱剩余燃料: {round(last_row[S_RemFuelOut], 2)}    "
-                                    f"内置水箱剩余燃料(mm): {round(prev_row[LiqlelM], 1)} "
-                                    f"外置水箱剩余燃料(mm): {round(prev_row[LiqlelL], 1)}"
-                                    f"总发电量:{last_row[Topgen]}    ")
-
-                                print(len(count_end_datatime))  # 计算当天发电次数
-                                Time_value.append(last_row[DateTime])
-                                end_datatime.append(last_row[DateTime])
-                                Topgen_value.append(last_row[Topgen])
-                                # 创建列表用于储存输出到excel表格和数据
-
-                                end_LiqlelL.append(round(prev_row[LiqlelL], 1))
-                                end_LiqlelM.append(round(prev_row[LiqlelM], 1))
-
-                                # 创建列表count_end_datatime，用于计数。一天发了多少次电
-
-                                end_S_RemFuelIn.append(round(last_row[S_RemFuelIn], 1))
-                                end_Topgen.append(round(last_row[Topgen], 1))
-                                end_S_RemFuelOut.append(round(last_row[S_RemFuelOut], 1))
-
-                                Once_Topgen = round(Topgen_value[-1] - Topgen_value[-2], 3)
-                                if Once_Topgen < 0:
-                                    Once_Topgen = 0
-                                print(f"每次发电量(kw/h)：{Once_Topgen}")
-                                Once_Topgen_value.append(Once_Topgen)
-
-                                Stwtims.append(last_row[Stwtim])
-                                print(f"发电次数：{row[Stwtim]}")
-
-                                Time_diff = round(
-                                    (pd.to_datetime(Time_value[-1]) - pd.to_datetime(
-                                        Time_value[-2])).total_seconds() / 60,
-                                    2)
-                                Time_diffs.append(Time_diff)
-                                print(f"每次发电时长(min)：{Time_diff}")
-
-                                mean_IC = round(sum(IC_value) / len(IC_value), 2)
-                                everytime_IC.append(mean_IC)
-                                print(f'芯片平均温度(℃):{mean_IC}')
-
-                                mean_A1_Stack_Temp = round(sum(A1_Stack_Temp_Value) / len(A1_Stack_Temp_Value), 2)
-                                everytime_A1_Stack_Temp.append(mean_A1_Stack_Temp)
-                                print(f'电堆A1平均温度(℃):{mean_A1_Stack_Temp}')
-
-                                mean_A2_Stack_Temp = round(sum(A2_Stack_Temp_Value) / len(A2_Stack_Temp_Value), 2)
-                                everytime_A2_Stack_Temp.append(mean_A2_Stack_Temp)
-                                print(f'电堆A2平均温度(℃):{mean_A2_Stack_Temp}')
-
-                                mean_B_Stack_Temp = round(sum(B_Stack_Temp_Value) / len(B_Stack_Temp_Value), 2)
-                                everytime_B_Stack_Temp.append(mean_B_Stack_Temp)
-                                print(f'电堆B平均温度(℃):{mean_B_Stack_Temp}')
+                                fuel_List_mm = true_LiqlelM[len(last_fuel_mm):]
 
                                 # 计算液位。 last_fuel_levels 多出来的部分元素。
                                 fuel_List_value = S_RemFuelIn_value[len(last_fuel_levels):]
@@ -1050,7 +937,40 @@ for i in range(12, 15):  # 遍历所有数据  i=8  range=31.   取值范围：8
                                     Once_S_RemFuelIn.append(Once_RemFuelIn)
                                     print(f'每次发电消耗燃料（L）:{Once_RemFuelIn}')
                                 else:
-                                    differences = round(start_LiqlelM[-1] - end_LiqlelM[-1], 1)
+
+                                    max_fuel_mm.append(start_LiqlelM[-1])
+
+                                    # print(f'每次发电消耗燃料（mm）:{true_LiqlelM}\n')
+                                    remove_duplicates_LiqlelM = remove_duplicates(true_LiqlelM)
+                                    # print(f'每次发电消耗燃料,去除重复项（mm）:{remove_duplicates_LiqlelM}\n')
+                                    c = 0
+                                    while c < len(remove_duplicates_LiqlelM) - 21:
+                                        # for c in range(len(remove_duplicates_LiqlelM) - 21):
+                                        if remove_duplicates_LiqlelM[c] - remove_duplicates_LiqlelM[c + 1] < -0.5:
+                                            if all(remove_duplicates_LiqlelM[c] < xx for xx in
+                                                   remove_duplicates_LiqlelM[c + 1:c + 21]):
+                                                min_fuel_mm.append(remove_duplicates_LiqlelM[c])
+
+                                                # 找到 c + 1 到 c + 21 这 20 个数中的最大数
+                                                max_in_next_20 = max(remove_duplicates_LiqlelM[c + 1:c + 21],
+                                                                     default=None)
+                                                if max_in_next_20 is not None:  # 确保列表不为空
+                                                    max_fuel_mm.append(max_in_next_20)
+
+                                                c += 20
+                                                print(f'跳过20个项：{c}')
+                                        c += 1
+                                    min_fuel_mm.append(end_LiqlelM[-1])
+                                    print(f'每次发电消耗燃料,折线图最小值（mm）:{min_fuel_mm}\n')
+                                    print(f'每次发电消耗燃料,折线图最大值（mm）:{max_fuel_mm}\n')
+
+                                    differences = round(
+                                        sum([max_fuel_mm[i] - min_fuel_mm[i] for i in range(len(max_fuel_mm))]), 1)
+                                    # print(f'每次发电消耗燃料（mm）:{differences}')
+                                    true_LiqlelM.clear()
+                                    min_fuel_mm.clear()
+                                    max_fuel_mm.clear()
+
                                     if differences < 0:
                                         differences = 0
                                     Once_S_RemFuelIn.append(differences)
@@ -1140,6 +1060,8 @@ for i in range(12, 15):  # 遍历所有数据  i=8  range=31.   取值范围：8
                                 print(f'燃料消耗率 ：{Fuel_consumption}')
 
                                 # 初始化,上一个的列表
+                                last_fuel_mm.clear()
+
                                 last_fuel_levels.clear()
                                 last_A_List.clear()
                                 last_B_List.clear()
@@ -1153,6 +1075,277 @@ for i in range(12, 15):  # 遍历所有数据  i=8  range=31.   取值范围：8
                                 # 在每次迭代结束后，将 fuel_levels 的值复制给 last_fuel_levels
                                 # 使用 copy 模块中的 deepcopy 函数来创建一个深层副本，确保每个元素都是独立的
                                 # 赋值，将当前列表的值赋于另一个列表，使另一个列表成为上一个列表的值
+
+                                last_fuel_mm = copy.deepcopy(true_LiqlelM)
+
+                                last_fuel_levels = copy.deepcopy(S_RemFuelIn_value)
+                                last_A_List = copy.deepcopy(A_StackV_value)
+                                last_B_List = copy.deepcopy(B_StackV_value)
+                                last_HGretem_list = copy.deepcopy(HGretem_value)
+                                last_Hfetem_list = copy.deepcopy(Hfetem_value)
+                                last_power_value_list = copy.deepcopy(power_values)
+                                last_A_power_value_list = copy.deepcopy(A_Power_values)
+                                last_B_power_value_list = copy.deepcopy(B_Power_values)
+                                last_current_voltage_List_value = copy.deepcopy(current_voltage_value)
+
+                            if start_time is None and (index == len(df) - 1) == True and last_row[MSw] == True and len(
+                                    count_end_datatime) > 1:
+                                print(
+                                    f"结束发电时间：{last_row[DateTime]}      "
+                                    f"内置水箱剩余燃料: {round(last_row[S_RemFuelIn], 2)}     "
+                                    f"外置水箱剩余燃料: {round(last_row[S_RemFuelOut], 2)}    "
+                                    f"内置水箱剩余燃料(mm): {round(prev_row[LiqlelM], 1)} "
+                                    f"外置水箱剩余燃料(mm): {round(prev_row[LiqlelL], 1)}"
+                                    f"总发电量:{last_row[Topgen]}    ")
+
+                                print(len(count_end_datatime))  # 计算当天发电次数
+                                Time_value.append(last_row[DateTime])
+                                end_datatime.append(last_row[DateTime])
+                                Topgen_value.append(last_row[Topgen])
+                                # 创建列表用于储存输出到excel表格和数据
+
+                                end_LiqlelL.append(round(prev_row[LiqlelL], 1))
+                                end_LiqlelM.append(round(prev_row[LiqlelM], 1))
+
+                                # 创建列表count_end_datatime，用于计数。一天发了多少次电
+
+                                end_S_RemFuelIn.append(round(last_row[S_RemFuelIn], 1))
+                                end_Topgen.append(round(last_row[Topgen], 1))
+                                end_S_RemFuelOut.append(round(last_row[S_RemFuelOut], 1))
+
+                                Once_Topgen = round(Topgen_value[-1] - Topgen_value[-2], 3)
+                                if Once_Topgen < 0:
+                                    Once_Topgen = 0
+                                print(f"每次发电量(kw/h)：{Once_Topgen}")
+                                Once_Topgen_value.append(Once_Topgen)
+
+                                Stwtims.append(last_row[Stwtim])
+                                print(f"发电次数：{row[Stwtim]}")
+
+                                Time_diff = round(
+                                    (pd.to_datetime(Time_value[-1]) - pd.to_datetime(
+                                        Time_value[-2])).total_seconds() / 60,
+                                    2)
+                                Time_diffs.append(Time_diff)
+                                print(f"每次发电时长(min)：{Time_diff}")
+
+                                mean_IC = round(sum(IC_value) / len(IC_value), 2)
+                                everytime_IC.append(mean_IC)
+                                print(f'芯片平均温度(℃):{mean_IC}')
+
+                                mean_A1_Stack_Temp = round(sum(A1_Stack_Temp_Value) / len(A1_Stack_Temp_Value), 2)
+                                everytime_A1_Stack_Temp.append(mean_A1_Stack_Temp)
+                                print(f'电堆A1平均温度(℃):{mean_A1_Stack_Temp}')
+
+                                mean_A2_Stack_Temp = round(sum(A2_Stack_Temp_Value) / len(A2_Stack_Temp_Value), 2)
+                                everytime_A2_Stack_Temp.append(mean_A2_Stack_Temp)
+                                print(f'电堆A2平均温度(℃):{mean_A2_Stack_Temp}')
+
+                                mean_B_Stack_Temp = round(sum(B_Stack_Temp_Value) / len(B_Stack_Temp_Value), 2)
+                                everytime_B_Stack_Temp.append(mean_B_Stack_Temp)
+                                print(f'电堆B平均温度(℃):{mean_B_Stack_Temp}')
+
+                                fuel_List_mm = true_LiqlelM[len(last_fuel_mm):]
+
+                                # 计算液位。 last_fuel_levels 多出来的部分元素。
+                                fuel_List_value = S_RemFuelIn_value[len(last_fuel_levels):]
+                                # print(f'最后一次液位 >>>>>>>>>>>>：{fuel_List_value} \n')
+                                # 计算电压重整室温度。每次发电期间 HGretem_List_value 重整室温度的值
+                                HGretem_List_value = HGretem_value[len(last_HGretem_list):]
+                                # print(f'最后一次重整室温度 >>>>>>>>>>>>：{HGretem_List_value} \n')
+                                # 计算提纯器温度。每次发电期间 Hfetem_List_value 提纯器温度的值
+                                Hfetem_List_value = Hfetem_value[len(last_Hfetem_list):]
+                                # print(f'最后一次提纯器温度 >>>>>>>>>>>>：{Hfetem_List_value} \n')
+                                # 找出每次发电期间（A 电堆电压）A_List_value 的所有值
+                                A_List_value = A_StackV_value[len(last_A_List):]
+                                # print(f'最后一次 A 电堆电压 >>>>>>>>>>>>：{A_List_value} \n')
+                                # 找出每次发电期间（B 电堆电压）A_List_value 的所有值
+                                B_List_value = B_StackV_value[len(last_B_List):]
+                                # print(f'最后一次 B 电堆电压 >>>>>>>>>>>>：{B_List_value} \n')
+                                # 找出每次发电期间（发电功率）last_power_value_list 的所有值
+                                power_value_list = power_values[len(last_power_value_list):]
+                                # print(f'总功率平均值>>>>>>>>>>>>：{power_value_list} \n')
+
+                                power_A_value_list = A_Power_values[len(last_A_power_value_list):]
+                                power_B_value_list = B_Power_values[len(last_B_power_value_list):]
+
+                                current_voltage_List_value = current_voltage_value[
+                                                             len(last_current_voltage_List_value):]
+
+                                current_voltage = round(
+                                    sum(current_voltage_List_value) / len(current_voltage_List_value), 1)
+                                everytime_current_voltage.append(current_voltage)
+                                current_voltage_List_value.clear()
+                                print(f'母线电压平均值(W)：{current_voltage}')
+
+                                # print(f'总功率平均值>>>>>>>>>>>>：{power_value_list}')
+                                calculate_A_power = round(calculate_average(power_A_value_list), 1)
+                                everytime_A_power.append(calculate_A_power)
+                                power_A_value_list.clear()
+                                print(f'A堆功率平均值(W)：{calculate_A_power}')
+
+                                calculate_B_power = round(calculate_average(power_B_value_list), 1)
+                                everytime_B_power.append(calculate_B_power)
+                                power_B_value_list.clear()
+                                print(f'B堆功率平均值(W)：{calculate_B_power}')
+
+                                calculate_power = round(calculate_average(power_value_list), 1)
+                                everytime_power.append(calculate_power)
+                                power_value_list.clear()
+                                print(f'总功率平均值(W)：{calculate_power}')
+
+                                if S_RemFuelIn_value[0] > 0:
+                                    # 计算燃料使用，计算列表中两两元素的差,大于等于0的部分存到一个新的列表中
+                                    differences = [fuel_List_value[i] - fuel_List_value[i + 1] for i in
+                                                   range(len(fuel_List_value) - 1)]
+                                    positive_differences = [x for x in differences if x > 0]
+                                    Once_RemFuelIn = round(sum(positive_differences), 2)
+                                    if Once_RemFuelIn == 0:
+                                        Once_RemFuelIn = 0.3
+                                    Once_S_RemFuelIn.append(Once_RemFuelIn)
+                                    print(f'每次发电消耗燃料（L）:{Once_RemFuelIn}')
+                                else:
+
+                                    max_fuel_mm.append(start_LiqlelM[-1])
+
+                                    # print(f'每次发电消耗燃料（mm）:{true_LiqlelM}\n')
+                                    remove_duplicates_LiqlelM = remove_duplicates(true_LiqlelM)
+                                    # print(f'每次发电消耗燃料,去除重复项（mm）:{remove_duplicates_LiqlelM}\n')
+                                    c = 0
+                                    while c < len(remove_duplicates_LiqlelM) - 21:
+                                        # for c in range(len(remove_duplicates_LiqlelM) - 21):
+                                        if remove_duplicates_LiqlelM[c] - remove_duplicates_LiqlelM[c + 1] < -0.5:
+                                            if all(remove_duplicates_LiqlelM[c] < xx for xx in
+                                                   remove_duplicates_LiqlelM[c + 1:c + 21]):
+                                                min_fuel_mm.append(remove_duplicates_LiqlelM[c])
+
+                                                # 找到 c + 1 到 c + 21 这 20 个数中的最大数
+                                                max_in_next_20 = max(remove_duplicates_LiqlelM[c + 1:c + 21],
+                                                                     default=None)
+                                                if max_in_next_20 is not None:  # 确保列表不为空
+                                                    max_fuel_mm.append(max_in_next_20)
+
+                                                c += 20
+                                                print(f'跳过20个项：{c}')
+                                        c += 1
+                                    min_fuel_mm.append(end_LiqlelM[-1])
+                                    print(f'每次发电消耗燃料,折线图最小值（mm）:{min_fuel_mm}\n')
+                                    print(f'每次发电消耗燃料,折线图最大值（mm）:{max_fuel_mm}\n')
+
+                                    differences = round(
+                                        sum([max_fuel_mm[i] - min_fuel_mm[i] for i in range(len(max_fuel_mm))]), 1)
+                                    # print(f'每次发电消耗燃料（mm）:{differences}')
+                                    true_LiqlelM.clear()
+                                    min_fuel_mm.clear()
+                                    max_fuel_mm.clear()
+
+                                    if differences < 0:
+                                        differences = 0
+                                    Once_S_RemFuelIn.append(differences)
+                                    print(f'每次发电消耗燃料（mm）:{differences}')
+                                    # print(f'液位(mm)******** ：{differences}')
+
+                                # 计算发电过程中，A电堆电压平均值（过滤小于90和大于130的值）
+                                average_A_StackV = round(calculate_filtered_average(A_List_value), 1)
+                                everytime_A_StackV.append(average_A_StackV)
+                                #### 2023.1.16新增
+                                copy_everytime_A_StackV = copy.deepcopy(everytime_A_StackV)
+                                copys_everytime_A_StackV.append(copy_everytime_A_StackV)
+                                modified_A_StackV = [item[0] for item in copys_everytime_A_StackV]
+                                everytime_A_StackV.clear()
+                                ######
+                                print(f'A电堆平均电压(V):{average_A_StackV}', end="        ")
+
+                                # 计算发电过程中，B电堆电压平均值（过滤小于90和大于130的值）
+                                average_B_StackV = round(calculate_filtered_average(B_List_value), 1)
+                                everytime_B_StackV.append(average_B_StackV)
+                                #### 2023.1.16新增
+                                copy_everytime_B_StackV = copy.deepcopy(everytime_B_StackV)
+                                copys_everytime_B_StackV.append(copy_everytime_B_StackV)
+                                modified_B_StackV = [item[0] for item in copys_everytime_B_StackV]
+                                everytime_B_StackV.clear()
+                                ######
+                                print(f'B电堆平均电压(V):{average_B_StackV}')
+
+                                # print(f'重整室温度 HGretem_List_value ///////////// (℃) ：{HGretem_List_value}')
+                                if all(item == 0 for item in HGretem_List_value) and all(
+                                        item == 0 for item in Hfetem_List_value):
+
+                                    max_HGretem = 0
+                                    everytime_max_HGretem.append(max_HGretem)
+                                    print(f'重整室最大温度(℃)：{max_HGretem}', end="      ")
+
+                                    min_HGretem = 0
+                                    everytime_min_HGretem.append(min_HGretem)
+                                    print(f'重整室最小温度(℃)：{min_HGretem}')
+
+                                    # print(f'重整室最列表温度^^^^^^^^^^^^5(℃)：{HGretem_value}')
+                                    HGretem_value = []  # 用完HGretem_value列表后，要把列表清空，不然会叠加列表
+
+                                    max_Hfetem = 0
+                                    everytime_max_Hfetem.append(max_Hfetem)
+                                    print(f'提纯器最大温度(℃)：{max_Hfetem}', end="      ")
+
+                                    min_Hfetem = 0
+                                    everytime_min_Hfetem.append(min_Hfetem)
+                                    print(f'提纯器最小温度(℃)：{min_Hfetem}')
+
+                                    # print(f'提纯器温度列表^^^^^^^^^^^^^^^6(℃)：{Hfetem_value}')
+                                    Hfetem_value = []
+
+                                else:
+                                    # print(f'重整室温度列表(℃)>>>>>>>>>>>>>>>>>：{HGretem_List_value}\n')
+                                    # print(f'提纯器温度列表(℃)>>>>>>>>>>>>>>>>>：{Hfetem_List_value}\n')
+
+                                    #   使用列表推导式过滤了列表 HGretem_value 中值为 0 的元素，并将结果重新赋值给 HGretem_value
+                                    HGretem_List_value = [x for x in HGretem_List_value if x != 0]
+                                    max_HGretem = round(max(HGretem_List_value), 1)
+                                    everytime_max_HGretem.append(max_HGretem)
+                                    print(f'重整室最大温度(℃)：{max_HGretem}', end="      ")
+
+                                    min_HGretem = round(min(HGretem_List_value), 1)
+                                    everytime_min_HGretem.append(min_HGretem)
+                                    print(f'重整室最小温度(℃)：{min_HGretem}')
+                                    # print(f'重整室最温度列表 00000000  (℃)：{HGretem_List_value}')
+                                    # print(f'重整室最小温度 HGretem_List_value |||||||||||  (℃)：{HGretem_List_value}')
+
+                                    #   使用列表推导式过滤了列表 Hfetem_value 中值为 0 的元素，并将结果重新赋值给 Hfetem_value
+                                    Hfetem_List_value = [x for x in Hfetem_List_value if x != 0]
+                                    max_Hfetem = round(max(Hfetem_List_value), 1)
+                                    everytime_max_Hfetem.append(max_Hfetem)
+                                    print(f'提纯器最大温度(℃)：{max_Hfetem}', end="      ")
+
+                                    min_Hfetem = round(min(Hfetem_List_value), 1)
+                                    everytime_min_Hfetem.append(min_Hfetem)
+                                    print(f'提纯器最小温度(℃)：{min_Hfetem}')
+
+                                # 燃料耗率 / L.kWh - 1
+                                if Once_Topgen != 0:
+                                    Fuel_consumption = round((Once_RemFuelIn / Once_Topgen), 1)
+                                else:
+                                    Fuel_consumption = 0
+                                everytime_Fuel_consumption.append(Fuel_consumption)
+                                print(f'燃料消耗率 ：{Fuel_consumption}')
+
+                                # 初始化,上一个的列表
+                                last_fuel_mm.clear()
+
+                                last_fuel_levels.clear()
+                                last_A_List.clear()
+                                last_B_List.clear()
+                                last_Hfetem_list.clear()
+                                last_HGretem_list.clear()
+                                last_power_value_list.clear()
+                                last_A_power_value_list.clear()
+                                last_B_power_value_list.clear()
+                                last_current_voltage_List_value.clear()
+
+                                # 在每次迭代结束后，将 fuel_levels 的值复制给 last_fuel_levels
+                                # 使用 copy 模块中的 deepcopy 函数来创建一个深层副本，确保每个元素都是独立的
+                                # 赋值，将当前列表的值赋于另一个列表，使另一个列表成为上一个列表的值
+
+                                last_fuel_mm = copy.deepcopy(true_LiqlelM)
+
                                 last_fuel_levels = copy.deepcopy(S_RemFuelIn_value)
                                 last_A_List = copy.deepcopy(A_StackV_value)
                                 last_B_List = copy.deepcopy(B_StackV_value)
@@ -1205,6 +1398,8 @@ for i in range(12, 15):  # 遍历所有数据  i=8  range=31.   取值范围：8
                 second_row = None
                 first_start_datatime = 0
                 second_end_datatime = 0
+
+                last_fuel_mm = []
 
                 A1_Stack_Temp_Value.clear()
                 A2_Stack_Temp_Value.clear()
@@ -1335,8 +1530,9 @@ if any(value > 0 for value in start_S_RemFuelIn) and any(value > 0 for value in 
             '消耗燃料(L)': Once_S_RemFuelIn,
             '发电量(kw/h)': Once_Topgen_value,
             '发电次数': Stwtims,
-            '燃料消耗率(L.kWh -1)': everytime_Fuel_consumption
+            '燃料消耗率(L.kWh -1)': everytime_Fuel_consumption,
 
+            # '液位测试': remove_duplicates_LiqlelM
         })
 
 else:
@@ -1379,7 +1575,7 @@ else:
             '消耗燃料(mm)': Once_S_RemFuelIn,
             '发电量(kw/h)': Once_Topgen_value,
             '发电次数': Stwtims,
-            '燃料消耗率(L.kWh -1)': everytime_Fuel_consumption
+            '燃料消耗率(L.kWh -1)': everytime_Fuel_consumption,
 
         })
 
