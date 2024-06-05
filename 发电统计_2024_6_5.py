@@ -23,6 +23,10 @@ import os
 
 # 2024_6_4 版本更新：2024.6.4
 # 修改发电时 ，楼下机房，白石机房，这些以mm计算液位高度的“燃料消耗” ，以折线图的最高值-最低值求出变化液位
+
+# 2024_6_5 版本更新：2024.6.5
+# 修改发电时 ，新增平均功率，最高功率（前10个最大值的平均值）
+
 # ================================================= #
 
 new_df = []
@@ -132,6 +136,9 @@ remove_duplicates_LiqlelM = []
 min_fuel_mm = []
 max_fuel_mm = []
 
+everytime_A_power_average = []  # A平均功率
+everytime_B_power_average = []  # B平均功率
+everytime_power_average = []      # 平均总功率
 b1 = '2024_6月2日5G汇聚机房01发电数据 test'  # 储存 EXCEL表格 的文件名称
 # adress2 = 'C:/Users/FCK/Desktop/12/test/%s.xlsx' % b1
 adress3 = f"E:/远程下载数据/5G汇聚机房01/{b1}.xlsx"  # 储存 EXCEL表格文件 的路径
@@ -233,18 +240,32 @@ for i in range(1, 33):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                     # 去掉小于100的元素并重新生成列表
                     new_list = [x for x in input_list if x >= 100]
 
-                    if len(new_list) > 50:  # 如果新列表元素个数大于10
-                        top_values = sorted(new_list, reverse=True)[:50]  # 找出新列表元素十个最大值
-                        average = sum(top_values) / 50  # 计算平均值
+                    if len(new_list) > 10:  # 如果新列表元素个数大于10
+                        top_values = sorted(new_list, reverse=True)[:10]  # 找出新列表元素十个最大值
+                        average = sum(top_values) / 10  # 计算平均值
                         return average
                     elif len(set(new_list)) == 1:  # 如果所有元素都相等
                         return new_list[0]  # 返回任意一个元素的值作为平均值
-                    elif 0 < len(new_list) <= 50:  # 如果新列表元素个数小于等于10且不为空
+                    elif 0 < len(new_list) <= 10:  # 如果新列表元素个数小于等于10且不为空
                         average = sum(new_list) / len(new_list)  # 计算所有元素的平均值
                         return average
                     else:
                         if len(new_list) == 0:  # 如果新列表为空
                             return 0
+
+
+                # 对发电功率算平均值,
+                def power_average(input_list):
+                    # 去掉小于100的元素并重新生成列表
+                    new_list = [x for x in input_list if x >= 100]
+
+                    # 计算平均值
+                    if len(new_list) > 0:
+                        average = sum(new_list) / len(new_list)
+                        return average
+
+                    else:
+                        return 0
 
 
                 # 去除列表里面重复项，使用一个新列表来储存。并且不改变原来的排序
@@ -437,21 +458,30 @@ for i in range(1, 33):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                                 print(f'母线电压平均值(W)：{current_voltage}')
 
                                 calculate_A_power = round(calculate_average(A_Power_values), 1)
+                                average_A_power = round(power_average(A_Power_values), 1)
                                 everytime_A_power.append(calculate_A_power)
+                                everytime_A_power_average.append(average_A_power)
                                 A_Power_values.clear()
-                                print(f'A堆功率平均值(W)：{calculate_A_power}')
+                                print(f'A堆功率平均值(W)：{average_A_power}')
+                                print(f'A堆功率最高值(W)：{calculate_A_power}')
 
                                 calculate_B_power = round(calculate_average(B_Power_values), 1)
+                                average_B_power = round(power_average(B_Power_values), 1)
+                                everytime_B_power_average.append(average_B_power)
                                 everytime_B_power.append(calculate_B_power)
                                 B_Power_values.clear()
-                                print(f'B堆功率平均值(W)：{calculate_B_power}')
+                                print(f'B堆功率平均值(W)：{average_B_power}')
+                                print(f'B堆功率最高值(W)：{calculate_B_power}')
 
                                 calculate_power = round(calculate_average(power_values), 1)
+                                average_power = round(power_average(power_values), 1)
+                                everytime_power_average.append(average_power)
                                 everytime_power.append(calculate_power)
                                 power_values.clear()
-                                print(f'总功率平均值(W)：{calculate_power}')
+                                print(f'总功率平均值(W)：{average_power}')
+                                print(f'总功率最高值(W)：{calculate_power}')
 
-                                print(f'S_RemFuelIn_value[0]：{S_RemFuelIn_value[0]}')
+                                # print(f'S_RemFuelIn_value[0]：{S_RemFuelIn_value[0]}')
                                 if S_RemFuelIn_value[0] > 0:
                                     differences = [S_RemFuelIn_value[i] - S_RemFuelIn_value[i + 1] for i in
                                                    range(len(S_RemFuelIn_value) - 1)]
@@ -496,7 +526,6 @@ for i in range(1, 33):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                                     true_LiqlelM.clear()
                                     min_fuel_mm.clear()
                                     max_fuel_mm.clear()
-
 
                                     if differences < 0:
                                         differences = 0
@@ -633,22 +662,29 @@ for i in range(1, 33):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                                 current_voltage_List_value.clear()
                                 print(f'母线电压平均值(W)：{current_voltage}')
 
-                                # print(f'总功率平均值>>>>>>>>>>>>：{power_value_list}')
-                                calculate_A_power = round(calculate_average(power_A_value_list), 1)
+                                calculate_A_power = round(calculate_average(A_Power_values), 1)
+                                average_A_power = round(power_average(A_Power_values), 1)
                                 everytime_A_power.append(calculate_A_power)
-                                power_A_value_list.clear()
-                                print(f'A堆功率平均值(W)：{calculate_A_power}')
+                                everytime_A_power_average.append(average_A_power)
+                                A_Power_values.clear()
+                                print(f'A堆功率平均值(W)：{average_A_power}')
+                                print(f'A堆功率最高值(W)：{calculate_A_power}')
 
-                                calculate_B_power = round(calculate_average(power_B_value_list), 1)
+                                calculate_B_power = round(calculate_average(B_Power_values), 1)
+                                average_B_power = round(power_average(B_Power_values), 1)
+                                everytime_B_power_average.append(average_B_power)
                                 everytime_B_power.append(calculate_B_power)
-                                power_B_value_list.clear()
-                                print(f'B堆功率平均值(W)：{calculate_B_power}')
+                                B_Power_values.clear()
+                                print(f'B堆功率平均值(W)：{average_B_power}')
+                                print(f'B堆功率最高值(W)：{calculate_B_power}')
 
-                                # print(f'总功率平均值>>>>>>>>>>>>：{power_value_list}')
-                                calculate_power = round(calculate_average(power_value_list), 1)
+                                calculate_power = round(calculate_average(power_values), 1)
+                                average_power = round(power_average(power_values), 1)
+                                everytime_power_average.append(average_power)
                                 everytime_power.append(calculate_power)
-                                power_value_list.clear()
-                                print(f'总功率平均值(W)：{calculate_power}')
+                                power_values.clear()
+                                print(f'总功率平均值(W)：{average_power}')
+                                print(f'总功率最高值(W)：{calculate_power}')
 
                                 if S_RemFuelIn_value[0] > 0:
                                     # 计算燃料使用，计算列表中两两元素的差,大于等于0的部分存到一个新的列表中
@@ -910,21 +946,29 @@ for i in range(1, 33):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                                 current_voltage_List_value.clear()
                                 print(f'母线电压平均值(W)：{current_voltage}')
 
-                                # print(f'总功率平均值>>>>>>>>>>>>：{power_value_list}')
-                                calculate_A_power = round(calculate_average(power_A_value_list), 1)
+                                calculate_A_power = round(calculate_average(A_Power_values), 1)
+                                average_A_power = round(power_average(A_Power_values), 1)
                                 everytime_A_power.append(calculate_A_power)
-                                power_A_value_list.clear()
-                                print(f'A堆功率平均值(W)：{calculate_A_power}')
+                                everytime_A_power_average.append(average_A_power)
+                                A_Power_values.clear()
+                                print(f'A堆功率平均值(W)：{average_A_power}')
+                                print(f'A堆功率最高值(W)：{calculate_A_power}')
 
-                                calculate_B_power = round(calculate_average(power_B_value_list), 1)
+                                calculate_B_power = round(calculate_average(B_Power_values), 1)
+                                average_B_power = round(power_average(B_Power_values), 1)
+                                everytime_B_power_average.append(average_B_power)
                                 everytime_B_power.append(calculate_B_power)
-                                power_B_value_list.clear()
-                                print(f'B堆功率平均值(W)：{calculate_B_power}')
+                                B_Power_values.clear()
+                                print(f'B堆功率平均值(W)：{average_B_power}')
+                                print(f'B堆功率最高值(W)：{calculate_B_power}')
 
-                                calculate_power = round(calculate_average(power_value_list), 1)
+                                calculate_power = round(calculate_average(power_values), 1)
+                                average_power = round(power_average(power_values), 1)
+                                everytime_power_average.append(average_power)
                                 everytime_power.append(calculate_power)
-                                power_value_list.clear()
-                                print(f'总功率平均值(W)：{calculate_power}')
+                                power_values.clear()
+                                print(f'总功率平均值(W)：{average_power}')
+                                print(f'总功率最高值(W)：{calculate_power}')
 
                                 if S_RemFuelIn_value[0] > 0:
                                     # 计算燃料使用，计算列表中两两元素的差,大于等于0的部分存到一个新的列表中
@@ -1178,21 +1222,29 @@ for i in range(1, 33):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                                 current_voltage_List_value.clear()
                                 print(f'母线电压平均值(W)：{current_voltage}')
 
-                                # print(f'总功率平均值>>>>>>>>>>>>：{power_value_list}')
-                                calculate_A_power = round(calculate_average(power_A_value_list), 1)
+                                calculate_A_power = round(calculate_average(A_Power_values), 1)
+                                average_A_power = round(power_average(A_Power_values), 1)
                                 everytime_A_power.append(calculate_A_power)
-                                power_A_value_list.clear()
-                                print(f'A堆功率平均值(W)：{calculate_A_power}')
+                                everytime_A_power_average.append(average_A_power)
+                                A_Power_values.clear()
+                                print(f'A堆功率平均值(W)：{average_A_power}')
+                                print(f'A堆功率最高值(W)：{calculate_A_power}')
 
-                                calculate_B_power = round(calculate_average(power_B_value_list), 1)
+                                calculate_B_power = round(calculate_average(B_Power_values), 1)
+                                average_B_power = round(power_average(B_Power_values), 1)
+                                everytime_B_power_average.append(average_B_power)
                                 everytime_B_power.append(calculate_B_power)
-                                power_B_value_list.clear()
-                                print(f'B堆功率平均值(W)：{calculate_B_power}')
+                                B_Power_values.clear()
+                                print(f'B堆功率平均值(W)：{average_B_power}')
+                                print(f'B堆功率最高值(W)：{calculate_B_power}')
 
-                                calculate_power = round(calculate_average(power_value_list), 1)
+                                calculate_power = round(calculate_average(power_values), 1)
+                                average_power = round(power_average(power_values), 1)
+                                everytime_power_average.append(average_power)
                                 everytime_power.append(calculate_power)
-                                power_value_list.clear()
-                                print(f'总功率平均值(W)：{calculate_power}')
+                                power_values.clear()
+                                print(f'总功率平均值(W)：{average_power}')
+                                print(f'总功率最高值(W)：{calculate_power}')
 
                                 if S_RemFuelIn_value[0] > 0:
                                     # 计算燃料使用，计算列表中两两元素的差,大于等于0的部分存到一个新的列表中
@@ -1438,6 +1490,10 @@ for i in range(1, 33):  # 遍历所有数据  i=8  range=31.   取值范围：8<
                 print(f"电堆A2温度 长度：{len(everytime_A2_Stack_Temp)}")
                 print(f"电堆B温度 长度：{len(everytime_B_Stack_Temp)}")
 
+                print(f"A堆功率平均值 长度：{len(everytime_A_power_average)}")
+                print(f"B堆功率平均值 长度：{len(everytime_B_power_average)}")
+                print(f"总功率平均值 长度：{len(everytime_power_average)}")
+
                 print(f'\n++++++++++++++   一天的计算结束   ++++++++++++++++++++++++\n')
 
             else:
@@ -1463,9 +1519,9 @@ print(f"开始内置水箱剩余燃料(L) 长度：{len(start_S_RemFuelIn)}")
 print(f"结束内置水箱剩余燃料(L) 长度：{len(end_S_RemFuelIn)}")
 print(f"开始总发电量 长度：{len(start_Topgen)}")
 print(f"结束总发电量 长度：{len(end_Topgen)}")
-print(f"总发电功率 长度：{len(everytime_power)}")
-print(f"A电堆功率 长度：{len(everytime_A_power)}")
-print(f"B电堆功率 长度：{len(everytime_B_power)}")
+print(f"最高总发电功率 长度：{len(everytime_power)}")
+print(f"最高A电堆功率 长度：{len(everytime_A_power)}")
+print(f"最高B电堆功率 长度：{len(everytime_B_power)}")
 print(f"芯片温度 长度：{len(everytime_IC)}")
 print(f"A电堆电压 长度：{len(modified_A_StackV)}")
 print(f"B电堆电压 长度：{len(modified_B_StackV)}")
@@ -1489,6 +1545,10 @@ print(f"电堆A1温度 长度：{len(everytime_A1_Stack_Temp)}")
 print(f"电堆A2温度 长度：{len(everytime_A2_Stack_Temp)}")
 print(f"电堆B温度 长度：{len(everytime_B_Stack_Temp)}")
 
+print(f"A堆功率平均值 长度：{len(everytime_A_power_average)}")
+print(f"B堆功率平均值 长度：{len(everytime_B_power_average)}")
+print(f"总功率平均值 长度：{len(everytime_power_average)}")
+
 count = 0
 if any(value > 0 for value in start_S_RemFuelIn) and any(value > 0 for value in end_S_RemFuelIn):
     count = 1
@@ -1510,18 +1570,24 @@ if any(value > 0 for value in start_S_RemFuelIn) and any(value > 0 for value in 
             '结束内置水箱剩余燃料(L)': end_S_RemFuelIn,
             '开始总发电量(kw/h)': start_Topgen,
             '结束总发电量(kw/h)': end_Topgen,
-            '母线电压(V)': everytime_current_voltage,
-            '总发电功率(W)': everytime_power,
-            'A电堆功率(W)': everytime_A_power,
-            'B电堆功率(W)': everytime_B_power,
-            '芯片温度(℃)': everytime_IC,
 
-            '电堆A1温度(℃)': everytime_A1_Stack_Temp,
-            '电堆A2温度(℃)': everytime_A2_Stack_Temp,
-            '电堆B温度(℃)': everytime_B_Stack_Temp,
+            '平均母线电压(V)': everytime_current_voltage,
 
-            'A电堆电压(V)': modified_A_StackV,
-            'B电堆电压(V)': modified_B_StackV,
+            '最高总发电功率(W)': everytime_power,
+            '最高A电堆功率(W)': everytime_A_power,
+            '最高B电堆功率(W)': everytime_B_power,
+            '平均总发电功率(W)': everytime_power_average,
+            '平均A电堆功率(W)': everytime_A_power_average,
+            '平均B电堆功率(W)': everytime_B_power_average,
+
+            '平均芯片温度(℃)': everytime_IC,
+
+            '平均电堆A1温度(℃)': everytime_A1_Stack_Temp,
+            '平均电堆A2温度(℃)': everytime_A2_Stack_Temp,
+            '平均电堆B温度(℃)': everytime_B_Stack_Temp,
+
+            '平均A电堆电压(V)': modified_A_StackV,
+            '平均B电堆电压(V)': modified_B_StackV,
             '重整室最高温度(℃)': everytime_max_HGretem,
             '重整室最低温度(℃)': everytime_min_HGretem,
             '提纯器最高温度(℃)': everytime_max_Hfetem,
@@ -1555,18 +1621,24 @@ else:
             '结束内置水箱剩余燃料(L)': end_S_RemFuelIn,
             '开始总发电量(kw/h)': start_Topgen,
             '结束总发电量(kw/h)': end_Topgen,
-            '母线电压(V)': everytime_current_voltage,
-            '总发电功率(W)': everytime_power,
-            'A电堆功率(W)': everytime_A_power,
-            'B电堆功率(W)': everytime_B_power,
-            '芯片温度(℃)': everytime_IC,
 
-            '电堆A1温度(℃)': everytime_A1_Stack_Temp,
-            '电堆A2温度(℃)': everytime_A2_Stack_Temp,
-            '电堆B温度(℃)': everytime_B_Stack_Temp,
+            '平均母线电压(V)': everytime_current_voltage,
 
-            'A电堆电压(V)': modified_A_StackV,
-            'B电堆电压(V)': modified_B_StackV,
+            '最高总发电功率(W)': everytime_power,
+            '最高A电堆功率(W)': everytime_A_power,
+            '最高B电堆功率(W)': everytime_B_power,
+            '平均总发电功率(W)': everytime_power_average,
+            '平均A电堆功率(W)': everytime_A_power_average,
+            '平均B电堆功率(W)': everytime_B_power_average,
+
+            '平均芯片温度(℃)': everytime_IC,
+
+            '平均电堆A1温度(℃)': everytime_A1_Stack_Temp,
+            '平均电堆A2温度(℃)': everytime_A2_Stack_Temp,
+            '平均电堆B温度(℃)': everytime_B_Stack_Temp,
+
+            '平均A电堆电压(V)': modified_A_StackV,
+            '平均B电堆电压(V)': modified_B_StackV,
             '重整室最高温度(℃)': everytime_max_HGretem,
             '重整室最低温度(℃)': everytime_min_HGretem,
             '提纯器最高温度(℃)': everytime_max_Hfetem,
