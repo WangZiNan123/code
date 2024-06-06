@@ -1,0 +1,49 @@
+import requests
+
+# ================================================= #
+
+# 2024.6.6  版本：2024_6_6
+# 自动下载网页excel数据
+
+
+# ================================================= #
+
+
+#   开始时间时间戳，选择每月1号时间戳，找到下载链接里面startTime的值  例示：startTime=1714492800000
+start_time = 1714492800000  # 2024.5.1
+
+end_time = start_time + 86399059  # 2024.5.1
+
+for i in range(1, 32):  # 日期，想要下载的几号到几号，例如1号到31号
+
+    file_path = f'E:/远程下载数据/川岛/202405/2024.5.{i}.xlsx'  # 替换为你想要保存的目录
+    # 定义要下载的网页URL
+    #  替换为你想要下载的网页URL
+
+    # 例示网页下载链接 ：
+    # url = f'http://47.113.86.137:8080/excel/download/singleDevice?startTime=1714492800000&endTime=1714579199059&deviceName=MFC6kD480022'
+
+    url = f'http://47.113.86.137:8080/excel/download/singleDevice?startTime={start_time}&endTime={end_time}&deviceName=MFC6kD480022'
+
+    start_time += 86400000
+    end_time = start_time + 86399059
+    response = requests.get(url)
+
+    # 检查请求是否成功
+    if response.status_code == 200:
+        # 确认响应的内容类型是否为Excel文件类型
+        content_type = response.headers.get('Content-Type')
+        if 'application/vnd.ms-excel' in content_type or response.headers.get(
+                'Content-Disposition') and '.xls' in response.headers.get(
+            'Content-Disposition') or '.xlsx' in response.headers.get('Content-Disposition'):
+            # 获取Excel文件的原始二进制数据
+            excel_data = response.content
+
+            # 打开文件进行写入，使用'wb'模式以写入二进制数据
+            with open(file_path, 'wb') as file:
+                file.write(excel_data)
+            print(f"Excel文件下载并保存成功。{file_path}.xlsx")
+        else:
+            print("下载的文件不是Excel文件。")
+    else:
+        print(f"请求失败，状态码：{response.status_code}")
