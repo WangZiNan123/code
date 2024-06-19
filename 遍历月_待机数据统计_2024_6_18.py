@@ -114,8 +114,10 @@ everytime_min_HGretem = []
 everytime_max_Hfetem = []
 everytime_min_Hfetem = []
 
+max_index_list = []
+
 # month = 1
-path1 = '三堡'
+path1 = '华安'
 
 for month in range(1, 6):
 
@@ -172,10 +174,11 @@ for month in range(1, 6):
                 print(f'索引最大值：{max_index}')
                 # prev_row = None
 
+
                 LiqlelL = 'LiqlelL'  # 外置液位（mm）
                 LiqlelM = 'LiqlelM'  # 内置液位（mm）
 
-                #   如果电压小于85，则跳过当天计算
+                #   如果有任意一个电堆电压大于0，则当天有发电，不计算
                 if any(df['StaV'] >= 0):
                     # second_row = df.iloc[1]  # 这行代码将DataFrame中的第二行数据存储在变量second_row中，以便后续对第二行数据进行操作和分析
                     # last_row = df.iloc[-1]  # 这行代码将DataFrame中的最后一行数据存储在变量last_row中，以便后续对最后一行数据进行操作和分析
@@ -259,6 +262,9 @@ for month in range(1, 6):
 
                         One_DateTime.append(date_only[0])
                         # print(f'时间：{NO_DateTime}')
+
+                        # 增加最大索引值
+                        max_index_list.append(max_index)
 
                         if all(item == 0 for item in HGretem_value) and all(item == 0 for item in Hfetem_value):
 
@@ -662,6 +668,8 @@ for month in range(1, 6):
                         everytime_max_Hfetem.append(o1)
                         everytime_min_Hfetem.append(o1)
 
+                        max_index_list.append(o1)
+
                         print(f'\n===========   {date_only[0]} 当天有发电，不计算燃料消耗   ==========\n')
 
                     # print(f"总燃料消耗(L)：{Sum_S_RemFuelIn}")
@@ -715,6 +723,8 @@ for month in range(1, 6):
                     print(f"提纯器最高温度 长度：{len(everytime_max_Hfetem)}")
                     print(f"提纯器最低温度 长度：{len(everytime_min_Hfetem)}")
 
+                    print(f"MAX索引值 长度：{len(max_index_list)}")
+
                     print(f'\n++++++++++++++  {date_only[0]} 一天的计算结束   ++++++++++++++++++++++++\n')
 
                     # 储存 a1时间点 到 Timer_RemFuelIn列表 里面，用于在excel表格打印
@@ -752,6 +762,8 @@ for month in range(1, 6):
                     everytime_min_HGretem.append(o1)
                     everytime_max_Hfetem.append(o1)
                     everytime_min_Hfetem.append(o1)
+
+                    max_index_list.append(o1)
 
                     print(
                         f'\n++++++++++++++   {One_DateTime[-1]}    当天没有数据，下载数据为空 ！！！    ++++++++++++++++++++++++\n')
@@ -805,6 +817,8 @@ for month in range(1, 6):
     print(f"提纯器最高温度 长度：{len(everytime_max_Hfetem)}")
     print(f"提纯器最低温度 长度：{len(everytime_min_Hfetem)}")
 
+    print(f"MAX索引值 长度：{len(max_index_list)}")
+
     conut = 0  # 标记位conut，用于记录程序进入哪个文件保存条件
 
     # 如果产氢次数大于0，执行下面程序
@@ -838,6 +852,8 @@ for month in range(1, 6):
                 '电堆A1平均温度(℃)': everytime_A1_Stack_Temp,
                 '电堆A2平均温度(℃)': everytime_A2_Stack_Temp,
                 '电堆B平均温度(℃)': everytime_B_Stack_Temp,
+
+                '数据总量（行)': max_index_list,
 
                 '备注': remark,
 
@@ -874,6 +890,8 @@ for month in range(1, 6):
                 '电堆A2平均温度(℃)': everytime_A2_Stack_Temp,
                 '电堆B平均温度(℃)': everytime_B_Stack_Temp,
 
+                '数据总量（行)': max_index_list,
+
                 '备注': remark,
 
             })
@@ -908,6 +926,8 @@ for month in range(1, 6):
                 '电堆A1平均温度(℃)': everytime_A1_Stack_Temp,
                 '电堆A2平均温度(℃)': everytime_A2_Stack_Temp,
                 '电堆B平均温度(℃)': everytime_B_Stack_Temp,
+
+                '数据总量（行)': max_index_list,
 
                 '备注': remark,
 
@@ -944,7 +964,7 @@ for month in range(1, 6):
     everytime_A2_Stack_Temp.clear()
     everytime_B_Stack_Temp.clear()
     remark.clear()
-
+    max_index_list.clear()
 
     # 打开现有的Excel文件
     workbook = openpyxl.load_workbook(file_path)
