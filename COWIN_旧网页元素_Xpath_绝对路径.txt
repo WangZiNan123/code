@@ -1,0 +1,523 @@
+=========================		  1	管委会10KW		Xpath （网页元素绝对路径）		=========================================
+
+						绝对路径	：▼											网页元素 ：▼
+
+设备信息：
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/span[1]/span				Equipment Name	（设备编号）
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[2]/div[1]				Remark（设备名称）
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[8]/div[2]				Current Voltage(V)：（设备母线电压）
+制氢机A:
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[1]			A_H2 Pressure(psi): 	（A_氢气压力）
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[3]			A_Blower temperature(℃): （A_鼓风机温度）
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[1]			A_Purifier temperature(℃):（A_提纯器温度）
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[2]			A_Reformer Temperature(℃): （A_重整室温度）
+制氢机B:
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[2]/div[2]/div[2]/div[1]/div[1]			B_H2 Pressure(psi): 	（B_氢气压力）
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[2]/div[2]/div[2]/div[1]/div[3]			B_Blower temperature(℃): （B_鼓风机温度）
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[2]/div[2]/div[2]/div[3]/div[1]			B_Purifier temperature(℃):（B_提纯器温度）
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[2]/div[2]/div[2]/div[3]/div[2]			B_Reformer Temperature(℃): （B_重整室温度）
+电堆A:
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[1]			A_Stack voltage(V):	(A_电堆电压)
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[2]			A_Stack current(A):	(A_电堆电流)
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[3]			A_Stack power(W):	(A_电堆功率)
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[2]/div[1]			A_Stack temperature(℃):	(A_电堆温度)
+电堆B:
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[3]/div[2]/div[2]/div[1]/div[1]			B_Stack voltage(V):	(B_电堆电压)
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[3]/div[2]/div[2]/div[1]/div[2]			B_Stack current(A):	(B_电堆电流)
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[3]/div[2]/div[2]/div[1]/div[3]			B_Stack power(W):	(B_电堆功率)
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[3]/div[2]/div[2]/div[2]/div[1]			B_Stack temperature(℃)：	(B_电堆温度)
+仓内温度：
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[5]/div[2]/div[1]/div[2]				HG Cabin temperature A(℃)：	（A_制氢仓温度）
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[5]/div[2]/div[1]/div[3]				HG Cabin temperature B(℃)：	（B_制氢仓温度）
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[5]/div[2]/div[2]/div[1]				FC Cabin temperature A(℃)：	（A_发电仓温度）
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[5]/div[2]/div[2]/div[2]				FC Cabin temperature B(℃)：	（B_发电仓温度）
+液位高度：
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[8]/div[2]			液位小水箱(L):		单位：mm
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[8]/div[1]			液位大水箱(L):		单位：mm
+告警：
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[8]/div[2]/div/div/div/div/div/div/table/tbody/tr/td[1] 			设备故障告警
+
+
+=========================			管委会10KW		Xpath （网页元素绝对路径）		=========================================
+
+
+
+
+======================================			5G汇聚机房1			==================================================
+
+设备信息：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/span[1]/span			Equipment Name	（设备编号）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[2]/div[1]				Remark（设备名称）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[8]/div[2]				Current Voltage(V)：（设备母线电压）
+制氢机A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[1]			A_H2 Pressure(psi): 	（A_氢气压力）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[3]			A_Blower temperature(℃): （A_鼓风机温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[1]			A_Purifier temperature(℃):（A_提纯器温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[2]			A_Reformer Temperature(℃): （A_重整室温度）
+电堆A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[1]			A_Stack voltage(V):	(A_电堆电压)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[2]			A_Stack current(A):	(A_电堆电流)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[3]			A_Stack power(W):	(A_电堆功率)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[2]/div[1]			A_Stack temperature(℃):	(A_电堆温度)
+仓内温度：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[7]/div[1]			发电仓温度(℃): 
+液位高度：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[8]/div[2]			液位小水箱(L):		单位：mm
+
+======================================			5G汇聚机房1			==================================================
+
+
+
+
+======================================			5G汇聚机房2			==================================================
+
+
+设备信息：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/span[1]/span			Equipment Name	（设备编号）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[2]/div[1]				Remark（设备名称）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[8]/div[2]				Current Voltage(V)：（设备母线电压）
+制氢机A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[1]			A_H2 Pressure(psi): 	（A_氢气压力）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[3]			A_Blower temperature(℃): （A_鼓风机温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[1]			A_Purifier temperature(℃):（A_提纯器温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[2]			A_Reformer Temperature(℃): （A_重整室温度）
+电堆A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[1]			A_Stack voltage(V):	(A_电堆电压)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[2]			A_Stack current(A):	(A_电堆电流)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[3]			A_Stack power(W):	(A_电堆功率)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[2]/div[1]			A_Stack temperature(℃):	(A_电堆温度)
+仓内温度：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[7]/div[1]			发电仓温度(℃): 
+液位高度：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[8]/div[2]			液位小水箱(L):		单位：mm
+
+
+======================================			5G汇聚机房2			==================================================
+
+
+
+======================================			江门电信白石机房1		  ================================================
+
+
+设备信息：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/span[1]/span				Equipment Name	（设备编号）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[2]/div[1]				Remark（设备名称）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[8]/div[2]				Current Voltage(V)：（设备母线电压）
+制氢机A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[1]			A_H2 Pressure(psi): 	（A_氢气压力）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[3]			A_Blower temperature(℃): （A_鼓风机温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[1]			A_Purifier temperature(℃):（A_提纯器温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[2]			A_Reformer Temperature(℃): （A_重整室温度）
+电堆A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[1]			A_Stack voltage(V):	(A_电堆电压)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[2]			A_Stack current(A):	(A_电堆电流)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[3]			A_Stack power(W):	(A_电堆功率)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[2]/div[1]			A_Stack temperature(℃):	(A_电堆温度)
+仓内温度：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[7]/div[1]			发电仓温度(℃): 
+液位高度：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[8]/div[2]			液位小水箱(L):		单位：mm
+
+
+======================================			江门电信白石机房1		  ================================================
+
+
+
+
+
+======================================			江门电信白石机房2		  ================================================
+
+
+设备信息：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/span[1]/span				Equipment Name	（设备编号）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[2]/div[1]				Remark（设备名称）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[8]/div[2]				Current Voltage(V)：（设备母线电压）
+
+制氢机A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[1]			A_H2 Pressure(psi): 	（A_氢气压力）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[3]			A_Blower temperature(℃): （A_鼓风机温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[1]			A_Purifier temperature(℃):（A_提纯器温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[2]			A_Reformer Temperature(℃): （A_重整室温度）
+电堆A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[1]			A_Stack voltage(V):	(A_电堆电压)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[2]			A_Stack current(A):	(A_电堆电流)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[3]			A_Stack power(W):	(A_电堆功率)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[2]/div[1]			A_Stack temperature(℃):	(A_电堆温度)
+
+仓内温度：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[7]/div[1]			发电仓温度(℃): 
+
+液位高度：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[8]/div[2]			液位小水箱(L):		单位：mm
+
+
+
+======================================			江门电信白石机房2		  ================================================
+
+
+
+
+======================================		江门新会洋美接入网机房		================================================
+
+
+设备信息：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/span[1]/span				Equipment Name	（设备编号）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[2]/div[1]				Remark（设备名称）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[8]/div[2]				Current Voltage(V)：（设备母线电压）
+
+
+制氢机A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[1]			A_H2 Pressure(psi): 	（A_氢气压力）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[3]			A_Blower temperature(℃): （A_鼓风机温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[1]			A_Purifier temperature(℃):（A_提纯器温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[2]			A_Reformer Temperature(℃): （A_重整室温度）
+
+电堆A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[1]			A_Stack voltage(V):	(A_电堆电压)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[2]			A_Stack current(A):	(A_电堆电流)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[3]			A_Stack power(W):	(A_电堆功率)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[2]/div[1]			A_Stack temperature(℃):	(A_电堆温度)
+
+仓内温度：	
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[5]/div[2]/div[1]/div[2]					HG Cabin temperature A(℃)：(A_制氢仓温度)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[7]/div[1]			发电仓温度(℃):
+
+液位高度：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[8]/div[1]			液位大水箱(L):		单位：mm
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[8]/div[2]			液位小水箱(L):		单位：mm
+
+
+======================================		江门新会洋美接入网机房		================================================
+
+
+
+
+
+====================================   		 江门新会红关接入网机房			=============================================
+
+
+设备信息：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/span[1]/span				Equipment Name	（设备编号）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[2]/div[1]				Remark（设备名称）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[8]/div[2]				Current Voltage(V)：（设备母线电压）
+
+制氢机A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[1]			A_H2 Pressure(psi): 	（A_氢气压力）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[3]			A_Blower temperature(℃): （A_鼓风机温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[1]			A_Purifier temperature(℃):（A_提纯器温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[2]			A_Reformer Temperature(℃): （A_重整室温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[4]/div[2]			Module status:  (制氢机状态)
+电堆A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[1]			A_Stack voltage(V):	(A_电堆电压)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[2]			A_Stack current(A):	(A_电堆电流)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[3]			A_Stack power(W):	(A_电堆功率)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[2]/div[1]			A_Stack temperature(℃):	(A_电堆温度)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[4]/div[2]			Module status: （电堆状态）
+仓内温度：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[5]/div[2]/div[1]/div[2]					HG Cabin temperature A(℃)：(A_制氢仓温度)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[7]/div[1]			发电仓温度(℃):
+
+液位高度：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[8]/div[1]			液位大水箱(L):		单位：mm
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[8]/div[2]			液位小水箱(L):		单位：mm
+
+
+
+====================================   		 江门新会红关接入网机房			=============================================
+
+
+
+
+
+====================================   		 江门台山墩寨综合机房 			=============================================
+
+
+设备信息：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/span[1]/span				Equipment Name	（设备编号）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[2]/div[1]				Remark（设备名称）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[8]/div[2]				Current Voltage(V)：（设备母线电压）
+
+制氢机A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[1]			A_H2 Pressure(psi): 	（A_氢气压力）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[3]			A_Blower temperature(℃): （A_鼓风机温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[1]			A_Purifier temperature(℃):（A_提纯器温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[2]			A_Reformer Temperature(℃): （A_重整室温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[4]/div[2]			Module status:  (制氢机状态)
+电堆A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[1]			A_Stack voltage(V):	(A_电堆电压)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[2]			A_Stack current(A):	(A_电堆电流)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[3]			A_Stack power(W):	(A_电堆功率)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[2]/div[1]			A_Stack temperature(℃):	(A_电堆温度)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[4]/div[2]			Module status: （电堆状态）
+仓内温度：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[5]/div[2]/div[1]/div[2]					HG Cabin temperature A(℃)：(A_制氢仓温度)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[7]/div[1]			发电仓温度(℃):
+
+液位高度：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[8]/div[1]			液位大水箱(L):		单位：mm
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[8]/div[2]			液位小水箱(L):		单位：mm
+
+
+
+====================================   		 江门台山墩寨综合机房 		=============================================
+
+
+
+
+
+
+====================================   		江门开平潭溪综合机房			=============================================
+
+
+设备信息：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/span[1]/span				Equipment Name	（设备编号）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[2]/div[1]				Remark（设备名称）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[8]/div[2]				Current Voltage(V)：（设备母线电压）
+
+制氢机A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[1]			A_H2 Pressure(psi): 	（A_氢气压力）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[3]			A_Blower temperature(℃): （A_鼓风机温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[1]			A_Purifier temperature(℃):（A_提纯器温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[2]			A_Reformer Temperature(℃): （A_重整室温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[4]/div[2]			Module status:  (制氢机状态)
+电堆A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[1]			A_Stack voltage(V):	(A_电堆电压)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[2]			A_Stack current(A):	(A_电堆电流)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[3]			A_Stack power(W):	(A_电堆功率)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[2]/div[1]			A_Stack temperature(℃):	(A_电堆温度)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[4]/div[2]			Module status: （电堆状态）
+仓内温度：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[5]/div[2]/div[1]/div[2]					HG Cabin temperature A(℃)：(A_制氢仓温度)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[7]/div[1]			发电仓温度(℃):
+
+液位高度：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[8]/div[1]			液位大水箱(L):		单位：mm
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[8]/div[2]			液位小水箱(L):		单位：mm
+
+
+
+====================================   		江门开平潭溪综合机房			=============================================
+
+
+
+
+
+====================================   		江门台山华安接入网机房		=============================================
+
+
+设备信息：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/span[1]/span				Equipment Name	（设备编号）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[2]/div[1]				Remark（设备名称）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[8]/div[2]				Current Voltage(V)：（设备母线电压）
+
+制氢机A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[1]			A_H2 Pressure(psi): 	（A_氢气压力）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[3]			A_Blower temperature(℃): （A_鼓风机温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[1]			A_Purifier temperature(℃):（A_提纯器温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[2]			A_Reformer Temperature(℃): （A_重整室温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[4]/div[2]			Module status:  (制氢机状态)
+电堆A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[1]			A_Stack voltage(V):	(A_电堆电压)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[2]			A_Stack current(A):	(A_电堆电流)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[3]			A_Stack power(W):	(A_电堆功率)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[2]/div[1]			A_Stack temperature(℃):	(A_电堆温度)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[4]/div[2]			Module status: （电堆状态）
+仓内温度：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[5]/div[2]/div[1]/div[2]					HG Cabin temperature A(℃)：(A_制氢仓温度)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[7]/div[1]			发电仓温度(℃):
+
+液位高度：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[8]/div[1]			液位大水箱(L):		单位：mm
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[8]/div[2]			液位小水箱(L):		单位：mm
+
+
+
+====================================   		江门台山华安接入网机房		=============================================
+
+
+
+
+
+
+====================================   		 江门开平新美接入网机房			=============================================
+
+
+设备信息：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/span[1]/span				Equipment Name	（设备编号）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[2]/div[1]				Remark（设备名称）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[8]/div[2]				Current Voltage(V)：（设备母线电压）
+
+制氢机A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[1]			A_H2 Pressure(psi): 	（A_氢气压力）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[3]			A_Blower temperature(℃): （A_鼓风机温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[1]			A_Purifier temperature(℃):（A_提纯器温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[2]			A_Reformer Temperature(℃): （A_重整室温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[4]/div[2]			Module status:  (制氢机状态)
+电堆A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[1]			A_Stack voltage(V):	(A_电堆电压)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[2]			A_Stack current(A):	(A_电堆电流)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[3]			A_Stack power(W):	(A_电堆功率)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[2]/div[1]			A_Stack temperature(℃):	(A_电堆温度)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[4]/div[2]			Module status: （电堆状态）
+仓内温度：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[5]/div[2]/div[1]/div[2]					HG Cabin temperature A(℃)：(A_制氢仓温度)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[7]/div[1]					发电仓温度(℃):
+
+液位高度：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[8]/div[1]			液位大水箱(L):		单位：mm
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[8]/div[2]			液位小水箱(L):		单位：mm
+
+
+
+====================================   		 江门开平新美接入网机房		=============================================
+
+
+
+
+
+====================================   		江门鹤山升平接入网机房 			=============================================
+
+
+设备信息：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/span[1]/span				Equipment Name	（设备编号）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[2]/div[1]				Remark（设备名称）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[8]/div[2]				Current Voltage(V)：（设备母线电压）
+
+制氢机A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[1]			A_H2 Pressure(psi): 	（A_氢气压力）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[3]			A_Blower temperature(℃): （A_鼓风机温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[1]			A_Purifier temperature(℃):（A_提纯器温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[2]			A_Reformer Temperature(℃): （A_重整室温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[4]/div[2]			Module status:  (制氢机状态)
+电堆A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[1]			A_Stack voltage(V):	(A_电堆电压)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[2]			A_Stack current(A):	(A_电堆电流)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[3]			A_Stack power(W):	(A_电堆功率)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[2]/div[1]			A_Stack temperature(℃):	(A_电堆温度)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[4]/div[2]			Module status: （电堆状态）
+仓内温度：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[5]/div[2]/div[1]/div[2]					HG Cabin temperature A(℃)：(A_制氢仓温度)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[7]/div[1]					发电仓温度(℃):
+
+液位高度：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[8]/div[1]			液位大水箱(L):		单位：mm
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[8]/div[2]			液位小水箱(L):		单位：mm
+
+
+
+====================================   		江门鹤山升平接入网机房 			=============================================
+
+
+
+
+
+
+====================================   		 江门恩平平石接入网机房		=============================================
+
+
+设备信息：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/span[1]/span				Equipment Name	（设备编号）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[2]/div[1]				Remark（设备名称）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[8]/div[2]				Current Voltage(V)：（设备母线电压）
+
+制氢机A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[1]			A_H2 Pressure(psi): 	（A_氢气压力）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[3]			A_Blower temperature(℃): （A_鼓风机温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[1]			A_Purifier temperature(℃):（A_提纯器温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[2]			A_Reformer Temperature(℃): （A_重整室温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[4]/div[2]			Module status:  (制氢机状态)
+电堆A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[1]			A_Stack voltage(V):	(A_电堆电压)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[2]			A_Stack current(A):	(A_电堆电流)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[3]			A_Stack power(W):	(A_电堆功率)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[2]/div[1]			A_Stack temperature(℃):	(A_电堆温度)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[4]/div[2]			Module status: （电堆状态）
+仓内温度：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[5]/div[2]/div[1]/div[2]					HG Cabin temperature A(℃)：(A_制氢仓温度)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[7]/div[1]					发电仓温度(℃):
+
+液位高度：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[8]/div[1]			液位大水箱(L):		单位：mm
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[8]/div[2]			液位小水箱(L):		单位：mm
+
+
+
+====================================   		江门恩平平石接入网机房		=============================================
+
+
+
+
+
+
+====================================   		江门恩平三联接入网机房		=============================================
+
+
+设备信息：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/span[1]/span				Equipment Name	（设备编号）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[2]/div[1]				Remark（设备名称）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[8]/div[2]				Current Voltage(V)：（设备母线电压）
+
+制氢机A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[1]			A_H2 Pressure(psi): 	（A_氢气压力）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[3]			A_Blower temperature(℃): （A_鼓风机温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[1]			A_Purifier temperature(℃):（A_提纯器温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[2]			A_Reformer Temperature(℃): （A_重整室温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[4]/div[2]			Module status:  (制氢机状态)
+电堆A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[1]			A_Stack voltage(V):	(A_电堆电压)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[2]			A_Stack current(A):	(A_电堆电流)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[3]			A_Stack power(W):	(A_电堆功率)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[2]/div[1]			A_Stack temperature(℃):	(A_电堆温度)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[4]/div[2]			Module status: （电堆状态）
+仓内温度：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[5]/div[2]/div[1]/div[2]					HG Cabin temperature A(℃)：(A_制氢仓温度)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[7]/div[1]					发电仓温度(℃):
+
+液位高度：
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[8]/div[1]			液位大水箱(L):		单位：mm
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[8]/div[2]			液位小水箱(L):		单位：mm
+
+
+
+====================================   		江门恩平三联接入网机房		=============================================
+
+
+
+
+
+
+====================================   		江门鹤山三堡接入网机房 			=============================================
+
+
+设备信息：
+				Equipment Name	（设备编号）
+				Remark（设备名称）
+				Current Voltage(V)：（设备母线电压）
+
+制氢机A:
+			A_H2 Pressure(psi): 	（A_氢气压力）
+			A_Blower temperature(℃): （A_鼓风机温度）
+			A_Purifier temperature(℃):（A_提纯器温度）
+			A_Reformer Temperature(℃): （A_重整室温度）
+			Module status:  (制氢机状态)
+电堆A:
+			A_Stack voltage(V):	(A_电堆电压)
+			A_Stack current(A):	(A_电堆电流)
+			A_Stack power(W):	(A_电堆功率)
+			A_Stack temperature(℃):	(A_电堆温度)
+			Module status: （电堆状态）
+仓内温度：
+					HG Cabin temperature A(℃)：(A_制氢仓温度)
+					发电仓温度(℃):
+
+液位高度：
+			液位大水箱(L):		单位：mm
+			液位小水箱(L):		单位：mm
+
+
+
+====================================   		江门鹤山三堡接入网机房 		=============================================
+
+
+
+
