@@ -18,6 +18,9 @@ import time
 版本更新：2024_6_22   更新时间2024.6.22
 更新内容：新增 A1电堆顶部温度（发电仓温度(℃):），A2电堆顶部温度（环境温度(℃):），B1电堆顶部温度（环境湿度(%):），B2电堆顶部温度（电堆风机馈速(%): ）
         系统状态（System: ），母线电压（Current Voltage(V)：）
+        
+ 版本更新：2024_6_23   更新时间2024.6.23
+更新内容：新增 优化代码格式  ，新增跳转到第二页 ，处理第二页的数据      
 ================================================= 
 '''
 
@@ -77,18 +80,22 @@ def Program_Init():
     return driver, wait
 
 
-def JMP(driver, wait):
-    # 等待下拉菜单标题加载完成
-    # wait = WebDriverWait(driver, 10)
+def click_Equipment_List(wait, driver):
+    """
+    点击 ‘ Equipment_List ’，跳转页面到设备选项页面
+
+    参数:
+    - driver:   从外部传入driver ，否则无法使用driver方法
+    - wait: 从外部传入wait ，否则无法使用wait方法
+
+    :return:
+    """
+
     # 使用更具体的CSS选择器，确保选中的是可点击的元素
     submenu_title = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.ant-menu-submenu-title')))
 
     # 点击下拉菜单标题以展开菜单
     submenu_title.click()
-
-    # 使用XPath等待“Equipment List”菜单项变得可见
-    # 这里假设下拉菜单展开后，包含Equipment List文本的<a>标签会直接成为可见元素
-    wait.until(EC.visibility_of_element_located((By.XPATH, '//a/span[text()="Equipment List"]')))
 
     # 定位并点击“Equipment List”列表项
     # 如果菜单项是一个<a>标签包裹<span>，确保XPath正确地定位到这个<a>标签
@@ -96,6 +103,20 @@ def JMP(driver, wait):
     # 使用 JavaScript 执行点击操作
 
     driver.execute_script("arguments[0].click();", equipment_list_item)
+
+
+def click_find_target_Details(driver, row_key):
+    """
+    找到目标行，并点击 "Details"
+
+    参数:
+
+    - driver: 从外部传入driver，否则无法使用‘driver’
+
+    - row_key：目标表格行 ‘<tr> data-row-key’
+
+    :return:
+    """
 
     # 等待表格体元素加载完成
     wait = WebDriverWait(driver, 30)
@@ -112,9 +133,6 @@ def JMP(driver, wait):
     # 滚动到最右侧
     driver.execute_script(f"arguments[0].scrollLeft = {scroll_to};", table_body_element)
 
-    # 目标表格行的 data-row-key
-    row_key = '14'
-
     # 等待表格行元素加载完成
 
     row_css_selector = f".ant-table-row[data-row-key='{row_key}']"
@@ -124,6 +142,7 @@ def JMP(driver, wait):
     # 这里我们传递了 true 作为第二个参数给 scrollIntoView 方法
     driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'end'});", row_element)
 
+    # < tbody >  ->   <tr> ->  "Details"
     # 定位到 <tbody> 元素
     tbody_selector = ".ant-table-tbody"
     tbody_element = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, tbody_selector)))
@@ -137,20 +156,39 @@ def JMP(driver, wait):
     # 假设 "Details" 链接具有 data-v-11b2bf7e 属性
     details_link_selector = "a[data-v-11b2bf7e]"
     details_link = target_row_element.find_element(By.CSS_SELECTOR, details_link_selector)
-
+    # print(type(details_link))
     # 点击 "Details"
     details_link.click()
-
     # 使用 JavaScript 滚动到页面顶部
     driver.execute_script("window.scrollTo(0, 0);")
 
-    # 这里添加10秒的等待时间
-    time.sleep(5)
+    time.sleep(4)
+
+
+#   跳转函数
+def JMP(driver, wait, row_key):
+    """
+    跳转页面函数，找到对应设备的参数页面
+
+    :param wait: 从外部传入
+    :param row_key: 从外部传入，指定要跳转到哪行
+    :param driver: 从外部传入
+    :return:
+    """
+    # 等待下拉菜单标题加载完成
+    # 点击 ‘ Equipment_List ’，跳转页面到设备选项页面
+    click_Equipment_List(wait, driver)
+
+    # 找到目标行，并点击"Details"
+    click_find_target_Details(driver, row_key)
+
+    # # 这里添加10秒的等待时间
+    # time.sleep(5)
 
 
 def split_text_by_colon(wait, Xpath, split_located):
     """
-
+    找出对应的抓取目标的值。
     使用正则表达式在英文冒号或中文冒号处分割文本，并返回最后一个分割的部分。
 
     参数:
@@ -172,6 +210,30 @@ def split_text_by_colon(wait, Xpath, split_located):
     if len(parts) == 0:
         parts = 0
     return parts
+
+
+def jum_page_2(driver, wait):
+    """
+    跳转到设备列表第2页
+
+    :param wait:    从外部传入
+    :param driver: 从外部传入
+    :return:
+    """
+    # 回到设备选择页面
+    click_Equipment_List(wait, driver)
+
+    time.sleep(3)
+
+    # 使用 JavaScript 滚动到页面底部
+    driver.execute_script("window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });")
+    time.sleep(3)
+    # details_link_selector = "ant-pagination-item ant-pagination-item-2"
+    # 使用 title 属性定位分页项
+    page2 = wait.until(EC.element_to_be_clickable((By.XPATH, '//li[@title="2"]')))
+    # details_link = driver.find_element(By.CSS_SELECTOR, details_link_selector)
+    # details_link.click()
+    driver.execute_script("arguments[0].click();", page2)
 
 
 def data_processing(driver, wait):
@@ -367,16 +429,45 @@ def data_processing(driver, wait):
         print(f'\n=================        =================\n')
 
 
+def page2_data_processing(driver, wait, row_key):
+    """
+    第二页设备列表，数据采集
+    :param driver:
+    :param wait:
+    :param row_key:
+    :return:
+    """
+    # 跳转到第二页去
+    jum_page_2(driver, wait)
+    # 使用 JavaScript 滚动到页面顶部
+    # driver.execute_script("window.scrollTo(0, 0);")
+    time.sleep(3)
+    click_find_target_Details(driver, row_key)
+    # 读取设备页面指定数据
+    data_processing(driver, wait)
+
 # 主函数入口
 def main():
+    # 初始化网页登录
     driver, wait = Program_Init()
-    JMP(driver, wait)
 
-    count = 3
-    while count:
-        data_processing(driver, wait)
-        time.sleep(10)
-        count -= 1
+    # 跳转到指定设备页面
+    JMP(driver, wait, 14)
+    # 读取设备页面指定数据
+    data_processing(driver, wait)
+    # 跳转到指定设备页面
+    JMP(driver, wait, 15)
+    # 读取设备页面指定数据
+    data_processing(driver, wait)
+
+    page2_data_processing(driver, wait, 8)
+    page2_data_processing(driver, wait, 9)
+    page2_data_processing(driver, wait, 10)
+    page2_data_processing(driver, wait, 11)
+    page2_data_processing(driver, wait, 12)
+    page2_data_processing(driver, wait, 13)
+    page2_data_processing(driver, wait, 14)
+
 
     # 等待页面加载完成，可能需要根据实际情况调整等待条件
     try:
