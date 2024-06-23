@@ -1,5 +1,4 @@
 import re
-
 from selenium import webdriver
 from selenium.common import TimeoutException
 from selenium.webdriver.chrome.service import Service
@@ -7,6 +6,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
+import pandas as pd
+import openpyxl
+import os
 
 '''
 ================================================= 
@@ -19,20 +21,24 @@ import time
 更新内容：新增 A1电堆顶部温度（发电仓温度(℃):），A2电堆顶部温度（环境温度(℃):），B1电堆顶部温度（环境湿度(%):），B2电堆顶部温度（电堆风机馈速(%): ）
         系统状态（System: ），母线电压（Current Voltage(V)：）
         
- 版本更新：2024_6_23   更新时间2024.6.23
-更新内容：新增 优化代码格式  ，新增跳转到第二页 ，处理第二页的数据      
+版本更新：2024_6_23   更新时间2024.6.23
+更新内容：新增 优化代码格式  ，新增跳转到第二页 ，处理第二页的数据  。
+        新增 A2电堆堆心温度（电堆温度2(℃):）
+        新增 文件保存，将读取的数据保存为excel格式
 ================================================= 
 '''
 
 time_localtime_list = []
 Serial_No_list = []
-Remark_list = []
+machine_name_list = []
 A_H2_Pressure_list = []
 A_Purifier_temperature_list = []
 A_Reformer_Temperature_list = []
 A_Blower_temperature_list = []
 A_Stack_voltage_list = []
-A_Stack_temperature_list = []
+A1_Stack_temperature_list = []
+A2_Stack_temperature_list = []
+
 A_Stack_current_list = []
 A_Stack_power_list = []
 
@@ -45,6 +51,8 @@ A_HG_Module_status_list = []  # 制氢机状态
 A_Stack_Module_status_list = []  # 电堆状态
 System_status_list = []  # 系统状态
 Current_Voltage_list = []  # 母线电压
+
+remark = []  # 备注
 
 
 def Program_Init():
@@ -96,12 +104,12 @@ def click_Equipment_List(wait, driver):
 
     # 点击下拉菜单标题以展开菜单
     submenu_title.click()
-
+    time.sleep(0.5)
     # 定位并点击“Equipment List”列表项
     # 如果菜单项是一个<a>标签包裹<span>，确保XPath正确地定位到这个<a>标签
     equipment_list_item = wait.until(EC.element_to_be_clickable((By.XPATH, '//a/span[text()="Equipment List"]')))
     # 使用 JavaScript 执行点击操作
-
+    time.sleep(0.5)
     driver.execute_script("arguments[0].click();", equipment_list_item)
 
 
@@ -132,7 +140,7 @@ def click_find_target_Details(driver, row_key):
     scroll_to = scroll_width - current_scroll
     # 滚动到最右侧
     driver.execute_script(f"arguments[0].scrollLeft = {scroll_to};", table_body_element)
-
+    time.sleep(1)
     # 等待表格行元素加载完成
 
     row_css_selector = f".ant-table-row[data-row-key='{row_key}']"
@@ -141,7 +149,7 @@ def click_find_target_Details(driver, row_key):
     # 使用 JavaScript 滚动到表格行，并使其位于视窗底部
     # 这里我们传递了 true 作为第二个参数给 scrollIntoView 方法
     driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'end'});", row_element)
-
+    time.sleep(1.5)
     # < tbody >  ->   <tr> ->  "Details"
     # 定位到 <tbody> 元素
     tbody_selector = ".ant-table-tbody"
@@ -158,6 +166,7 @@ def click_find_target_Details(driver, row_key):
     details_link = target_row_element.find_element(By.CSS_SELECTOR, details_link_selector)
     # print(type(details_link))
     # 点击 "Details"
+    time.sleep(0.5)
     details_link.click()
     # 使用 JavaScript 滚动到页面顶部
     driver.execute_script("window.scrollTo(0, 0);")
@@ -223,11 +232,11 @@ def jum_page_2(driver, wait):
     # 回到设备选择页面
     click_Equipment_List(wait, driver)
 
-    time.sleep(3)
+    time.sleep(2)
 
     # 使用 JavaScript 滚动到页面底部
     driver.execute_script("window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });")
-    time.sleep(3)
+    time.sleep(2)
     # details_link_selector = "ant-pagination-item ant-pagination-item-2"
     # 使用 title 属性定位分页项
     page2 = wait.until(EC.element_to_be_clickable((By.XPATH, '//li[@title="2"]')))
@@ -251,8 +260,11 @@ def data_processing(driver, wait):
     H2_Pressure_XPath = "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[1]"
     #  A电堆电压 绝对地址
     Stack_voltage_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[1]'
-    #   A电堆堆心温度 绝对地址
-    Stack_temperature_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[2]/div[1]'
+    #   A1电堆堆心温度 绝对地址
+    A1_Stack_temperature_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[2]/div[1]'
+
+    #   A2电堆堆心温度 绝对地址
+    A2_Stack_temperature_XPath = '/html/body/div/div/div[2]/div[2]/div/div/div/div/div[7]/div[2]/div[2]/div[2]/div[3]'
 
     #   A电堆电流 绝对地址
     Stack_current_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[2]'
@@ -297,7 +309,9 @@ def data_processing(driver, wait):
 
         A_Stack_voltage = split_text_by_colon(wait, Stack_voltage_XPath, -1)
 
-        A_Stack_temperature = split_text_by_colon(wait, Stack_temperature_XPath, -1)
+        A1_Stack_temperature = split_text_by_colon(wait, A1_Stack_temperature_XPath, -1)
+
+        A2_Stack_temperature = split_text_by_colon(wait, A2_Stack_temperature_XPath, -1)
 
         A1_Stack_top_temperature = split_text_by_colon(wait, A1_Stack_top_temperature_XPath, -1)
 
@@ -326,13 +340,15 @@ def data_processing(driver, wait):
 
         time_localtime_list.append(time_localtime)
         Serial_No_list.append(Serial_No)
-        Remark_list.append(Remark)
+        machine_name_list.append(Remark)
         A_H2_Pressure_list.append(round(float(A_H2_Pressure), 2))
         A_Purifier_temperature_list.append(round(float(A_Purifier_temperature), 2))
         A_Reformer_Temperature_list.append(round(float(A_Reformer_Temperature), 2))
         A_Blower_temperature_list.append(round(float(A_Blower_temperature), 2))
         A_Stack_voltage_list.append(round(float(A_Stack_voltage), 2))
-        A_Stack_temperature_list.append(round(float(A_Stack_temperature), 2))
+        A1_Stack_temperature_list.append(round(float(A1_Stack_temperature), 2))
+        A2_Stack_temperature_list.append(round(float(A2_Stack_temperature), 2))
+
         A1_Stack_top_temperature_list.append(round(float(A1_Stack_top_temperature), 2))
         A2_Stack_top_temperature_list.append(round(float(A2_Stack_top_temperature), 2))
         B1_Stack_top_temperature_list.append(round(float(B1_Stack_top_temperature), 2))
@@ -350,7 +366,7 @@ def data_processing(driver, wait):
 
         print("设备编号：", Serial_No_list[-1])
 
-        print("设备名称：", Remark_list[-1])
+        print("设备名称：", machine_name_list[-1])
 
         print("设备状态：", System_status_list[-1])
 
@@ -395,10 +411,15 @@ def data_processing(driver, wait):
         else:
             print("A电堆功率(W)：", A_Stack_power_list[-1], "         电堆功率异常      !!!")
 
-        if float(A_Stack_temperature_list[-1]) <= 50:
-            print("A电堆堆心温度(℃)：", A_Stack_temperature_list[-1])
+        if float(A1_Stack_temperature_list[-1]) <= 50:
+            print("A1电堆堆心温度(℃)：", A1_Stack_temperature_list[-1])
         else:
-            print(f"A电堆堆心温度(℃)：{A_Stack_temperature_list[-1]}         A电堆堆心温度异常      !!!")
+            print(f"A1电堆堆心温度(℃)：{A1_Stack_temperature_list[-1]}         A电堆堆心温度异常      !!!")
+
+        if float(A2_Stack_temperature_list[-1]) <= 50:
+            print("A2电堆堆心温度(℃)：", A2_Stack_temperature_list[-1])
+        else:
+            print(f"A2电堆堆心温度(℃)：{A2_Stack_temperature_list[-1]}         A电堆堆心温度异常      !!!")
 
         if float(A1_Stack_top_temperature_list[-1]) <= 50:
             print("A1电堆顶部温度(℃)：", A1_Stack_top_temperature_list[-1])
@@ -429,6 +450,20 @@ def data_processing(driver, wait):
         print(f'\n=================        =================\n')
 
 
+def page1_data_processing(driver, wait, row_key):
+    """
+    第一页设备列表，数据采集
+    :param driver:
+    :param wait:
+    :param row_key:
+    :return:
+    """
+    # 跳转到指定设备页面
+    JMP(driver, wait, row_key)
+    # 读取设备页面指定数据
+    data_processing(driver, wait)
+
+
 def page2_data_processing(driver, wait, row_key):
     """
     第二页设备列表，数据采集
@@ -441,51 +476,107 @@ def page2_data_processing(driver, wait, row_key):
     jum_page_2(driver, wait)
     # 使用 JavaScript 滚动到页面顶部
     # driver.execute_script("window.scrollTo(0, 0);")
-    time.sleep(3)
+    time.sleep(2)
     click_find_target_Details(driver, row_key)
     # 读取设备页面指定数据
     data_processing(driver, wait)
 
+
+def excelfile_save(file_path):
+    new_pd = pd.DataFrame({
+
+        "日期时间": time_localtime_list,
+        "设备编号": Serial_No_list,
+        "设备名称": machine_name_list,
+        "设备状态": System_status_list,
+        "设备母线电压(V)": Current_Voltage_list,
+
+        "A_制氢机状态": A_HG_Module_status_list,
+        'A_氢气压力(Psi)': A_H2_Pressure_list,
+        'A_鼓风机温度(℃)': A_Blower_temperature_list,
+        'A_提纯器温度(℃)': A_Purifier_temperature_list,
+        'A_重整室温度(℃)': A_Reformer_Temperature_list,
+
+        'A_电堆状态': A_Stack_Module_status_list,
+        'A_电堆电压(V)': A_Stack_voltage_list,
+        'A_电堆电流(A)': A_Stack_current_list,
+        'A_电堆功率(W)': A_Stack_power_list,
+        'A1_电堆堆心温度(℃)': A1_Stack_temperature_list,
+        'A2_电堆堆心温度(℃)': A2_Stack_temperature_list,
+        'A1_电堆顶部温度(℃)': A1_Stack_top_temperature_list,
+        'A2_电堆顶部温度(℃)': A2_Stack_top_temperature_list
+
+    })
+
+    if os.path.exists(file_path):
+        # 文件存在，生成新的文件名
+        base_name, extension = os.path.splitext(file_path)
+        counter = 1
+        new_file_path = f"{base_name}_{counter}{extension}"
+        while os.path.exists(new_file_path):
+            counter += 1
+            new_file_path = f"{base_name}_{counter}{extension}"
+        file_path = new_file_path  # 更新文件路径
+
+    new_pd.to_excel(file_path, index=False)
+    # 检查文件是否已存在
+    # 保存DataFrame到Excel
+    # 打开现有的Excel文件
+    workbook = openpyxl.load_workbook(file_path)
+    # 选择第一个工作表
+    sheet = workbook.active
+    # 设置第一行的行高
+    sheet.row_dimensions[1].height = 50
+    # 设置第一列和第二列的宽度为 25
+    sheet.column_dimensions['A'].width = 21  # 第一列
+    sheet.column_dimensions['B'].width = 21  # 第二列
+    sheet.column_dimensions['C'].width = 25  # 第三列
+    # 设置其余列的宽度为 10
+    for col in sheet.columns:
+        if col[0].column_letter not in ['A', 'B', 'C']:
+            sheet.column_dimensions[col[0].column_letter].width = 15
+    # 遍历第一行的所有单元格，并为每个单元格对象同时设置自动换行、水平居中和垂直居中。
+    for cell in sheet[1]:
+        cell_obj = cell
+        cell_obj.alignment = openpyxl.styles.Alignment(wrap_text=True, horizontal='center', vertical='center')
+
+    workbook.save(file_path)
+    print(f'文件保存成功  ！ 保存路径：{file_path}')
+
+
 # 主函数入口
 def main():
     # 初始化网页登录
+    file_path = 'D:/爬虫数据/网页采集数据.xlsx'
+    sleeptime = 5      # 程序暂停运行,时间单位：min
     driver, wait = Program_Init()
+    print('\n~~~~~~~~~    开始爬虫     ~~~~~~~~~~\n')
+    for i in range(1, 5):
+        page1_data_processing(driver, wait, 3)  # 管委会                   row_key=3
+        page1_data_processing(driver, wait, 14)  # 楼下机房1号机             row_key=14
+        page1_data_processing(driver, wait, 15)  # 楼下机房2号机             row_key=15
 
-    # 跳转到指定设备页面
-    JMP(driver, wait, 14)
-    # 读取设备页面指定数据
-    data_processing(driver, wait)
-    # 跳转到指定设备页面
-    JMP(driver, wait, 15)
-    # 读取设备页面指定数据
-    data_processing(driver, wait)
+        page2_data_processing(driver, wait, 0)  # 白石机房1号机              row_key=0
+        # page2_data_processing(driver, wait, 1)  # 龙榜机房                  row_key=1
+        page2_data_processing(driver, wait, 2)  # 白石机房2号机              row_key=2
+        page2_data_processing(driver, wait, 8)  # 洋美                     row_key=8
+        page2_data_processing(driver, wait, 9)  # 红关                     row_key=9
+        page2_data_processing(driver, wait, 10)  # 墩寨                     row_key=10
+        page2_data_processing(driver, wait, 11)  # 谭溪                     row_key=11
+        page2_data_processing(driver, wait, 12)  # 华安                     row_key=12
+        page2_data_processing(driver, wait, 13)  # 新美                     row_key=13
+        page2_data_processing(driver, wait, 14)  # 升平                     row_key=14
+        page2_data_processing(driver, wait, 15)  # 平石                     row_key=15
+        page2_data_processing(driver, wait, 16)  # 三联                     row_key=16
+        page2_data_processing(driver, wait, 17)  # 三堡                     row_key=17
+        page2_data_processing(driver, wait, 18)  # 上川岛长堤                row_key=18
+        page2_data_processing(driver, wait, 19)  # 四川江油太平唐僧           row_key=19
 
-    page2_data_processing(driver, wait, 8)
-    page2_data_processing(driver, wait, 9)
-    page2_data_processing(driver, wait, 10)
-    page2_data_processing(driver, wait, 11)
-    page2_data_processing(driver, wait, 12)
-    page2_data_processing(driver, wait, 13)
-    page2_data_processing(driver, wait, 14)
+        excelfile_save(file_path)
+        print(f'第 {i} 次系统进入休眠 ， 休眠时长：{sleeptime} min')
+        time.sleep(60 * sleeptime)
 
-
-    # 等待页面加载完成，可能需要根据实际情况调整等待条件
-    try:
-        WebDriverWait(driver, 100).until(
-            EC.presence_of_element_located((By.ID, "某个元素的ID"))  # 根据页面元素调整
-        )
-        # 或者等待页面的某个特定元素加载完成
-        # WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.CLASS_NAME, "某个元素的类名")))
-    except TimeoutException:
-        print("页面加载超时")
-
-    # 获取页面源代码
-    html_content = driver.page_source
-
-    # 打印或处理html_content
-    print(html_content)
-
-    # 完成后关闭浏览器
+    print('\n~~~~~~~~~    结束爬虫     ~~~~~~~~~~')
     driver.quit()
 
 
