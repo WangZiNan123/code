@@ -29,7 +29,10 @@ import os
         
 版本更新：2024_6_24   更新时间2024.6.24
 更新内容：新增 内置燃料值（Remaining Fuel(LIn)：），‘备注’可以将有异常的故障展示出来 ，设备网络状态（Off-line/On-line）  。
-       
+        新增 B制氢机参数（Hydrogen production module B）：
+            氢气压力（H2_Pressure），鼓风机温度（Blower_temperature），提纯器温度（Purifier_temperature），重整室温度（Reformer_Temperature），制氢机运行状态（Module status: ）
+        新增 B电堆参数（Power generation module B）：    
+            电堆电压（Stack_voltage），电堆电流（Stack_current），电堆功率（Stack_power），B电堆堆心温度（Stack_temperature），电堆运行状态（Module status: ）
 ================================================= 
 '''
 
@@ -62,6 +65,18 @@ remark_set = []  # 备注
 
 network_state_list = []  # 设备网络状态
 Remaining_Fuel_list = []  # 内置水箱液位（L）
+
+B_HG_Module_status_list = []
+B_H2_Pressure_list = []
+B_Blower_temperature_list = []
+B_Purifier_temperature_list = []
+B_Reformer_Temperature_list = []
+
+B_Stack_voltage_list = []
+B_Stack_current_list = []
+B_Stack_power_list = []
+B_Stack_Module_status_list = []
+B_Stack_temperature_list = []
 
 
 def Program_Init():
@@ -186,7 +201,7 @@ def click_find_target_Details(driver, row_key):
     time.sleep(0.5)
     driver.execute_script("window.scrollTo(0, 0);")
 
-    time.sleep(4)
+    time.sleep(5)
 
 
 def split_text_by_colon(wait, Xpath, split_located):
@@ -265,6 +280,16 @@ def data_processing(driver, wait):
     Serial_No_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/span[1]/span'
     #   设备名称 绝对地址
     Remark_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[2]/div[1]'
+    #   系统状态 绝对地址
+    System_status_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[9]/div[3]'
+    #   母线电压 绝对地址
+    Current_Voltage_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[8]/div[2]'
+    #   内置燃料剩余液位
+    Remaining_Fuel_XPath = '/html/body/div/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[4]/div[3]'
+
+
+    #   A制氢机状态 绝对地址
+    HG_Module_status_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[4]/div[2]'
     #   A重整室温度 绝对地址
     Reformer_Temperature_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[2]'
     #   A鼓风机温度 绝对地址
@@ -273,38 +298,54 @@ def data_processing(driver, wait):
     Purifier_temperature_XPath = "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[1]"
     # A缓冲罐氢气压力。使用提供的XPath定位元素
     H2_Pressure_XPath = "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[1]"
-    #  A电堆电压 绝对地址
-    Stack_voltage_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[1]'
-    #   A1电堆堆心温度 绝对地址
-    A1_Stack_temperature_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[2]/div[1]'
 
-    #   A2电堆堆心温度 绝对地址
-    A2_Stack_temperature_XPath = '/html/body/div/div/div[2]/div[2]/div/div/div/div/div[7]/div[2]/div[2]/div[2]/div[3]'
 
+    #   A电堆状态 绝对地址
+    Stack_Module_status_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[4]/div[2]'
     #   A电堆电流 绝对地址
     Stack_current_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[2]'
     #   A电堆功率 绝对地址
     Stack_power_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[3]'
-
+    #  A电堆电压 绝对地址
+    Stack_voltage_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[1]'
+    #   A1电堆堆心温度 绝对地址
+    A1_Stack_temperature_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[2]/div[1]'
+    #   A2电堆堆心温度 绝对地址
+    A2_Stack_temperature_XPath = '/html/body/div/div/div[2]/div[2]/div/div/div/div/div[7]/div[2]/div[2]/div[2]/div[3]'
     #   A1电堆顶部温度 绝对地址
     A1_Stack_top_temperature_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[7]/div[1]'
     #   A2电堆顶部温度 绝对地址
     A2_Stack_top_temperature_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[7]/div[2]'
+
+
+
+    #   B制氢机运行状态
+    B_HG_Module_status_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[2]/div[2]/div[4]/div[2]'
+    # B制氢机氢气压力
+    B_H2_Pressure_XPath = '/html/body/div/div/div[2]/div[2]/div/div/div/div/div[2]/div[2]/div[2]/div[1]/div[1]'
+    #   B制氢机鼓风机温度
+    B_Blower_temperature_XPath = '/html/body/div/div/div[2]/div[2]/div/div/div/div/div[2]/div[2]/div[2]/div[1]/div[3]'
+    #   B制氢机提纯器温度
+    B_Purifier_temperature_XPath = '/html/body/div/div/div[2]/div[2]/div/div/div/div/div[2]/div[2]/div[2]/div[3]/div[1]'
+    #   B制氢机重整室温度
+    B_Reformer_Temperature_XPath = '/html/body/div/div/div[2]/div[2]/div/div/div/div/div[2]/div[2]/div[2]/div[3]/div[2]'
+
+
+    #  B电堆电压 绝对地址
+    B_Stack_voltage_XPath = '/html/body/div/div/div[2]/div[2]/div/div/div/div/div[3]/div[2]/div[2]/div[1]/div[1]'
+    #   B电堆电流 绝对地址
+    B_Stack_current_XPath = '/html/body/div/div/div[2]/div[2]/div/div/div/div/div[3]/div[2]/div[2]/div[1]/div[2]'
+    #   B电堆功率 绝对地址
+    B_Stack_power_XPath = '/html/body/div/div/div[2]/div[2]/div/div/div/div/div[3]/div[2]/div[2]/div[1]/div[3]'
+    #   B电堆状态 绝对地址
+    B_Stack_Module_status_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[2]/div[2]/div[4]/div[2]'
+    #   B电堆堆心温度 绝对地址
+    B_Stack_temperature_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[2]/div[2]/div[2]/div[1]'
     #   B1电堆顶部温度 绝对地址
     B1_Stack_top_temperature_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[7]/div[3]'
     #   B2电堆顶部温度 绝对地址
     B2_Stack_top_temperature_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[2]/div[2]/div[6]/div[3]'
 
-    #   A制氢机状态 绝对地址
-    HG_Module_status_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[4]/div[2]'
-    #   A电堆状态 绝对地址
-    Stack_Module_status_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[4]/div[2]'
-    #   系统状态 绝对地址
-    System_status_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[9]/div[3]'
-    #   母线电压 绝对地址
-    Current_Voltage_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[8]/div[2]'
-   #    内置燃料剩余液位
-    Remaining_Fuel_XPath = '/html/body/div/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[4]/div[3]'
     try:
 
         #   日期时间
@@ -353,10 +394,26 @@ def data_processing(driver, wait):
 
         Remaining_Fuel = split_text_by_colon(wait,Remaining_Fuel_XPath, -1)
 
-        # print(f'Current_Voltage字符串长度：{len(Current_Voltage)}')
+        B_HG_Module_status = split_text_by_colon(wait, B_HG_Module_status_XPath, -1)
 
-        # print(type(Current_Voltage))
-        # print(Current_Voltage)
+        B_H2_Pressure = split_text_by_colon(wait, B_H2_Pressure_XPath, -1)
+
+        B_Blower_temperature = split_text_by_colon(wait, B_Blower_temperature_XPath, -1)
+
+        B_Purifier_temperature = split_text_by_colon(wait, B_Purifier_temperature_XPath, -1)
+
+        B_Reformer_Temperature = split_text_by_colon(wait, B_Reformer_Temperature_XPath, -1)
+
+        B_Stack_voltage = split_text_by_colon(wait, B_Stack_voltage_XPath, -1)
+
+        B_Stack_power = split_text_by_colon(wait, B_Stack_power_XPath, -1)
+
+        B_Stack_Module_status = split_text_by_colon(wait, B_Stack_Module_status_XPath, -1)
+
+        B_Stack_temperature = split_text_by_colon(wait, B_Stack_temperature_XPath, -1)
+
+        B_Stack_current = split_text_by_colon(wait, B_Stack_current_XPath, -1)
+
 
         time_localtime_list.append(time_localtime)
         Serial_No_list.append(Serial_No)
@@ -382,6 +439,19 @@ def data_processing(driver, wait):
         System_status_list.append(System_status)
         Current_Voltage_list.append(round(float(Current_Voltage), 2))
         Remaining_Fuel_list.append(round(float(Remaining_Fuel), 2))
+
+        B_HG_Module_status_list.append(B_HG_Module_status)
+        B_H2_Pressure_list.append(round(float(B_H2_Pressure), 2))
+        B_Blower_temperature_list.append(round(float(B_Blower_temperature), 2))
+        B_Purifier_temperature_list.append(round(float(B_Purifier_temperature), 2))
+        B_Reformer_Temperature_list.append(round(float(B_Reformer_Temperature), 2))
+
+        B_Stack_voltage_list.append(round(float(B_Stack_voltage), 2))
+        B_Stack_power_list.append(round(float(B_Stack_power), 2))
+        B_Stack_Module_status_list.append(B_Stack_Module_status)
+        B_Stack_temperature_list.append(round(float(B_Stack_temperature), 2))
+        B_Stack_current_list.append(round(float(B_Stack_current), 2))
+
 
         print("日期时间：", time_localtime_list[-1])
 
@@ -444,6 +514,49 @@ def data_processing(driver, wait):
             print("A鼓风机温度(℃)：", A_Blower_temperature_list[-1], "        鼓风机温度太高异常      !!!", end='\n\n')
             remark.append(' A_鼓风机温度太高异常 ！')
 
+
+        print("B制氢机状态：", B_HG_Module_status_list[-1])
+
+        if Serial_No_list[-1] == 'CW-10KW-0007':
+
+            if 15 <= float(B_H2_Pressure_list[-1]) <= 25:
+                print("B氢气压力(Psi)：", B_H2_Pressure_list[-1])
+            elif 15 > float(B_H2_Pressure_list[-1]):
+                print("B氢气压力(Psi)：", B_H2_Pressure_list[-1], "        氢气压力太低异常      !!!")
+                remark.append(' B_氢气压力太低异常 ！')
+            else:
+                print("B氢气压力(Psi)：", B_H2_Pressure_list[-1], "        氢气压力太高异常      !!!")
+                remark.append(' B_氢气压力太高异常 ！')
+
+            if 350 <= float(B_Purifier_temperature_list[-1]) <= 403:
+                print("B提纯器温度(℃)：", B_Purifier_temperature_list[-1])
+            elif 350 > float(A_Purifier_temperature_list[-1]):
+                print("B提纯器温度(℃)：", B_Purifier_temperature_list[-1], "        提纯器温度太低异常      !!!")
+                remark.append(' B_提纯器温度太低异常 ！')
+            else:
+                print("B提纯器温度(℃)：", B_Purifier_temperature_list[-1], "        提纯器温度太高异常      !!!")
+                remark.append(' B_提纯器温度太高异常 ！')
+
+            if 350 <= float(B_Reformer_Temperature_list[-1]) <= 403:
+                print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1])
+            elif 350 > float(B_Reformer_Temperature_list[-1]):
+                print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1], "        提纯器温度太低异常      !!!")
+                remark.append(' B_重整室温度太低异常 ！')
+            else:
+                print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1], "         重整室温度太高异常      !!!")
+                remark.append(' B_重整室温度太高异常 ！')
+
+            if 0 <= float(B_Blower_temperature_list[-1]) <= 60:
+                print("B鼓风机温度(℃)：", B_Blower_temperature_list[-1], end='\n\n')
+            else:
+                print("B鼓风机温度(℃)：", B_Blower_temperature_list[-1], "        鼓风机温度太高异常      !!!", end='\n\n')
+                remark.append(' B_鼓风机温度太高异常 ！')
+        else:
+            print("B氢气压力(Psi)：", B_H2_Pressure_list[-1])
+            print("B提纯器温度(℃)：", B_Purifier_temperature_list[-1])
+            print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1])
+            print("B鼓风机温度(℃)：", B_Blower_temperature_list[-1], end='\n\n')
+
         print("A电堆状态：", A_Stack_Module_status_list[-1])
 
         if 0 <= float(A_Stack_voltage_list[-1]) <= 10:
@@ -483,10 +596,58 @@ def data_processing(driver, wait):
             remark.append(' A1_电堆顶部温度太高异常 ！')
 
         if float(A2_Stack_top_temperature_list[-1]) <= 50:
-            print(f"A2电堆顶部温度(℃)：{A2_Stack_top_temperature_list[-1]}")
+            print(f"A2电堆顶部温度(℃)：{A2_Stack_top_temperature_list[-1]}\n")
         else:
-            print(f"A2电堆顶部温度(℃)：{A2_Stack_top_temperature_list[-1]}         A2电堆顶部温度太高异常      !!!")
+            print(f"A2电堆顶部温度(℃)：{A2_Stack_top_temperature_list[-1]}         A2电堆顶部温度太高异常      !!\n")
             remark.append(' A2_电堆顶部温度太高异常 ！')
+
+        print("B电堆状态：", B_Stack_Module_status_list[-1])
+
+        if Serial_No_list[-1] == 'CW-10KW-0007':
+
+            if 0 <= float(B_Stack_voltage_list[-1]) <= 10:
+                print("B电堆电压(V)：", B_Stack_voltage_list[-1])
+            else:
+                print("B电堆电压(V)：", B_Stack_voltage_list[-1], "        电堆电压异常      !!!")
+                remark.append(' B_电堆电压异常 ！')
+
+            if 0 <= float(B_Stack_current_list[-1]) <= 3:
+                print("B电堆电流(A)：", B_Stack_current_list[-1])
+            else:
+                print("B电堆电流(A)：", B_Stack_current_list[-1], "         电堆电流异常      !!!")
+                remark.append(' B_电堆电流异常 ！')
+
+            if 0 <= float(B_Stack_power_list[-1]) <= 300:
+                print("B电堆功率(W)：", B_Stack_power_list[-1])
+            else:
+                print("B电堆功率(W)：", B_Stack_power_list[-1], "         电堆功率异常      !!!")
+                remark.append(' B_电堆功率异常 ！')
+
+            if float(B_Stack_temperature_list[-1]) <= 50:
+                print("B电堆堆心温度(℃)：", B_Stack_temperature_list[-1])
+            else:
+                print(f"B电堆堆心温度(℃)：{B_Stack_temperature_list[-1]}         A1电堆堆心温度太高异常      !!!")
+                remark.append(' B_电堆堆心温度太高异常 ！')
+
+            if float(B1_Stack_top_temperature_list[-1]) <= 50:
+                print("B1电堆顶部温度(℃)：", B1_Stack_top_temperature_list[-1])
+            else:
+                print(f"B1电堆顶部温度(℃)：{B1_Stack_top_temperature_list[-1]}         A1电堆顶部温度太高异常      !!!")
+                remark.append(' B1_电堆顶部温度太高异常 ！')
+
+            if float(B2_Stack_top_temperature_list[-1]) <= 50:
+                print(f"B2电堆顶部温度(℃)：{B2_Stack_top_temperature_list[-1]}")
+            else:
+                print(f"B2电堆顶部温度(℃)：{B2_Stack_top_temperature_list[-1]}         A2电堆顶部温度太高异常      !!!")
+                remark.append(' B2_电堆顶部温度太高异常 ！')
+
+        else:
+            print("B电堆电压(V)：", B_Stack_voltage_list[-1])
+            print("B电堆电流(A)：", B_Stack_current_list[-1])
+            print("B电堆功率(W)：", B_Stack_power_list[-1])
+            print("B电堆堆心温度(℃)：", B_Stack_temperature_list[-1])
+            print("B1电堆顶部温度(℃)：", B1_Stack_top_temperature_list[-1])
+            print(f"B2电堆顶部温度(℃)：{B2_Stack_top_temperature_list[-1]}")
 
         #  将所有故障加入remark_set，最后生成excel表格的时候提取出来
         #   ' , '.join(remark)会取出remark列表中的每个元素，并将它们用一个逗号连接起来，形成一个单独的字符串。
@@ -566,6 +727,12 @@ def excelfile_save(file_path):
         'A_提纯器温度(℃)': A_Purifier_temperature_list,
         'A_重整室温度(℃)': A_Reformer_Temperature_list,
 
+        "B_制氢机状态": B_HG_Module_status_list,
+        'B_氢气压力(Psi)': B_H2_Pressure_list,
+        'B_鼓风机温度(℃)': B_Blower_temperature_list,
+        'B_提纯器温度(℃)': B_Purifier_temperature_list,
+        'B_重整室温度(℃)': B_Reformer_Temperature_list,
+
         'A_电堆状态': A_Stack_Module_status_list,
         'A_电堆电压(V)': A_Stack_voltage_list,
         'A_电堆电流(A)': A_Stack_current_list,
@@ -574,6 +741,15 @@ def excelfile_save(file_path):
         'A2_电堆堆心温度(℃)': A2_Stack_temperature_list,
         'A1_电堆顶部温度(℃)': A1_Stack_top_temperature_list,
         'A2_电堆顶部温度(℃)': A2_Stack_top_temperature_list,
+
+        'B_电堆状态': B_Stack_Module_status_list,
+        'B_电堆电压(V)': B_Stack_voltage_list,
+        'B_电堆电流(A)': B_Stack_current_list,
+        'B_电堆功率(W)': B_Stack_power_list,
+        'B_电堆堆心温度(℃)': B_Stack_temperature_list,
+        'B1_电堆顶部温度(℃)': B1_Stack_top_temperature_list,
+        'B2_电堆顶部温度(℃)': B2_Stack_top_temperature_list,
+
         '备注': remark_set
 
     })
