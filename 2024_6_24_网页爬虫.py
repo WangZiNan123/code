@@ -12,6 +12,7 @@ import os
 
 '''
 ================================================= 
+
 版本更新：2024_6_18   更新时间2024.6.18
 网页爬虫 COWIN 数据，目前测试抓取’5G汇聚机房1‘ 的数据 ’记录时间，设备编号（Serial_No），设备名称（Remark），氢气压力（H2_Pressure）
 提纯器温度（Purifier_temperature），重整室温度（Reformer_Temperature），鼓风机温度（Blower_temperature），电堆电压（Stack_voltage）
@@ -25,6 +26,10 @@ import os
 更新内容：新增 优化代码格式  ，新增跳转到第二页 ，处理第二页的数据  。
         新增 A2电堆堆心温度（电堆温度2(℃):）
         新增 文件保存，将读取的数据保存为excel格式
+        
+版本更新：2024_6_24   更新时间2024.6.24
+更新内容：新增 内置燃料值（Remaining Fuel(LIn)：），‘备注’可以将有异常的故障展示出来 ，设备网络状态（Off-line/On-line）  。
+       
 ================================================= 
 '''
 
@@ -53,6 +58,10 @@ System_status_list = []  # 系统状态
 Current_Voltage_list = []  # 母线电压
 
 remark = []  # 备注
+remark_set = []  # 备注
+
+network_state_list = []  # 设备网络状态
+Remaining_Fuel_list = []  # 内置水箱液位（L）
 
 
 def Program_Init():
@@ -101,10 +110,10 @@ def click_Equipment_List(wait, driver):
 
     # 使用更具体的CSS选择器，确保选中的是可点击的元素
     submenu_title = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.ant-menu-submenu-title')))
-
+    time.sleep(1)
     # 点击下拉菜单标题以展开菜单
     submenu_title.click()
-    time.sleep(0.5)
+
     # 定位并点击“Equipment List”列表项
     # 如果菜单项是一个<a>标签包裹<span>，确保XPath正确地定位到这个<a>标签
     equipment_list_item = wait.until(EC.element_to_be_clickable((By.XPATH, '//a/span[text()="Equipment List"]')))
@@ -160,6 +169,11 @@ def click_find_target_Details(driver, row_key):
     # 正确使用 find_element 在 <tbody> 的上下文中查找 <tr>
     target_row_element = tbody_element.find_element(By.CSS_SELECTOR, target_row_css_selector)
 
+    # 使用类名'.ant-badge-status-text'寻找具有相同类名的元素。提取网络状态
+    Css_network_state = '.ant-badge-status-text'
+    network_state = target_row_element.find_element(By.CSS_SELECTOR, Css_network_state).text
+    network_state_list.append(network_state)
+
     # 在找到的 <tr> 元素中定位到 "Details" 链接
     # 假设 "Details" 链接具有 data-v-11b2bf7e 属性
     details_link_selector = "a[data-v-11b2bf7e]"
@@ -169,30 +183,10 @@ def click_find_target_Details(driver, row_key):
     time.sleep(0.5)
     details_link.click()
     # 使用 JavaScript 滚动到页面顶部
+    time.sleep(0.5)
     driver.execute_script("window.scrollTo(0, 0);")
 
     time.sleep(4)
-
-
-#   跳转函数
-def JMP(driver, wait, row_key):
-    """
-    跳转页面函数，找到对应设备的参数页面
-
-    :param wait: 从外部传入
-    :param row_key: 从外部传入，指定要跳转到哪行
-    :param driver: 从外部传入
-    :return:
-    """
-    # 等待下拉菜单标题加载完成
-    # 点击 ‘ Equipment_List ’，跳转页面到设备选项页面
-    click_Equipment_List(wait, driver)
-
-    # 找到目标行，并点击"Details"
-    click_find_target_Details(driver, row_key)
-
-    # # 这里添加10秒的等待时间
-    # time.sleep(5)
 
 
 def split_text_by_colon(wait, Xpath, split_located):
@@ -219,6 +213,27 @@ def split_text_by_colon(wait, Xpath, split_located):
     if len(parts) == 0:
         parts = 0
     return parts
+
+
+#   跳转函数
+def JMP(driver, wait, row_key):
+    """
+    跳转页面函数，找到对应设备的参数页面
+
+    :param wait: 从外部传入
+    :param row_key: 从外部传入，指定要跳转到哪行
+    :param driver: 从外部传入
+    :return:
+    """
+    # 等待下拉菜单标题加载完成
+    # 点击 ‘ Equipment_List ’，跳转页面到设备选项页面
+    click_Equipment_List(wait, driver)
+
+    # 找到目标行，并点击"Details"
+    click_find_target_Details(driver, row_key)
+
+    # # 这里添加10秒的等待时间
+    # time.sleep(5)
 
 
 def jum_page_2(driver, wait):
@@ -288,8 +303,10 @@ def data_processing(driver, wait):
     System_status_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[9]/div[3]'
     #   母线电压 绝对地址
     Current_Voltage_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[8]/div[2]'
-
+   #    内置燃料剩余液位
+    Remaining_Fuel_XPath = '/html/body/div/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[4]/div[3]'
     try:
+
         #   日期时间
         time_localtime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
         #   设备编号
@@ -333,6 +350,9 @@ def data_processing(driver, wait):
         System_status = split_text_by_colon(wait, System_status_XPath, -1)
 
         Current_Voltage = split_text_by_colon(wait, Current_Voltage_XPath, -1)
+
+        Remaining_Fuel = split_text_by_colon(wait,Remaining_Fuel_XPath, -1)
+
         # print(f'Current_Voltage字符串长度：{len(Current_Voltage)}')
 
         # print(type(Current_Voltage))
@@ -361,6 +381,7 @@ def data_processing(driver, wait):
         A_Stack_Module_status_list.append(A_Stack_Module_status)
         System_status_list.append(System_status)
         Current_Voltage_list.append(round(float(Current_Voltage), 2))
+        Remaining_Fuel_list.append(round(float(Remaining_Fuel), 2))
 
         print("日期时间：", time_localtime_list[-1])
 
@@ -368,31 +389,60 @@ def data_processing(driver, wait):
 
         print("设备名称：", machine_name_list[-1])
 
-        print("设备状态：", System_status_list[-1])
+        if network_state_list[-1] == 'On-line':
+            print("设备网络状态：", network_state_list[-1])
+        else:
+            print("设备网络状态：", network_state_list[-1], '           设备网络离线      ！！！')
+            remark.append(' 设备网络离线 ！')
 
-        print("设备母线电压(V)：", Current_Voltage_list[-1], end='\n\n')
+        print("设备运行状态：", System_status_list[-1])
+
+        if float(Current_Voltage_list[-1]) >= 49.8 or Serial_No_list[-1] in ('CW-MFC6000-0001', 'CW-MFC6000-0002', 'CW-MFC6000-0008', 'CW-MFC6000-0010'):
+            print("设备母线电压(V)：", Current_Voltage_list[-1])
+        else:
+            print("设备母线电压(V)：", Current_Voltage_list[-1], "      设备母线电压太低异常     ！！！")
+            remark.append(' 设备母线电压太低异常 ！')
+
+        if float(Remaining_Fuel_list[-1]) >= 15 or Serial_No_list[-1] in ('CW-MFC6000-0001', 'CW-MFC6000-0002', 'CW-MFC6000-0008', 'CW-MFC6000-0010'):
+            print("内置燃料(L)：", Remaining_Fuel_list[-1], end='\n\n')
+        else:
+            print("内置燃料(L)：", Remaining_Fuel_list[-1], "      内置燃料太低异常     ！！！", end='\n\n')
+            remark.append(' 内置燃料太低异常 ！')
 
         print("A制氢机状态：", A_HG_Module_status_list[-1])
 
         if 15 <= float(A_H2_Pressure_list[-1]) <= 25:
             print("A氢气压力(Psi)：", A_H2_Pressure_list[-1])
+        elif 15 > float(A_H2_Pressure_list[-1]):
+            print("A氢气压力(Psi)：", A_H2_Pressure_list[-1], "        氢气压力太低异常      !!!")
+            remark.append(' A_氢气压力太低异常 ！')
         else:
-            print("A氢气压力(Psi)：", A_H2_Pressure_list[-1], "        氢气压力异常      !!!")
+            print("A氢气压力(Psi)：", A_H2_Pressure_list[-1], "        氢气压力太高异常      !!!")
+            remark.append(' A_氢气压力太高异常 ！')
 
         if 350 <= float(A_Purifier_temperature_list[-1]) <= 403:
             print("A提纯器温度(℃)：", A_Purifier_temperature_list[-1])
+        elif 350 > float(A_Purifier_temperature_list[-1]):
+            print("A提纯器温度(℃)：", A_Purifier_temperature_list[-1], "        提纯器温度太低异常      !!!")
+            remark.append(' A_提纯器温度太低异常 ！')
         else:
-            print("A提纯器温度(℃)：", A_Purifier_temperature_list[-1], "        提纯器温度异常      !!!")
+            print("A提纯器温度(℃)：", A_Purifier_temperature_list[-1], "        提纯器温度太高异常      !!!")
+            remark.append(' A_提纯器温度太高异常 ！')
 
         if 350 <= float(A_Reformer_Temperature_list[-1]) <= 403:
             print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1])
+        elif 350 > float(A_Reformer_Temperature_list[-1]):
+            print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1], "        提纯器温度太低异常      !!!")
+            remark.append(' A_重整室温度太低异常 ！')
         else:
-            print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1], "         重整室温度异常      !!!")
+            print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1], "         重整室温度太高异常      !!!")
+            remark.append(' A_重整室温度太高异常 ！')
 
         if 0 <= float(A_Blower_temperature_list[-1]) <= 60:
             print("A鼓风机温度(℃)：", A_Blower_temperature_list[-1], end='\n\n')
         else:
-            print("A鼓风机温度(℃)：", A_Blower_temperature_list[-1], "        鼓风机温度异常      !!!", end='\n\n')
+            print("A鼓风机温度(℃)：", A_Blower_temperature_list[-1], "        鼓风机温度太高异常      !!!", end='\n\n')
+            remark.append(' A_鼓风机温度太高异常 ！')
 
         print("A电堆状态：", A_Stack_Module_status_list[-1])
 
@@ -400,36 +450,53 @@ def data_processing(driver, wait):
             print("A电堆电压(V)：", A_Stack_voltage_list[-1])
         else:
             print("A电堆电压(V)：", A_Stack_voltage_list[-1], "        电堆电压异常      !!!")
+            remark.append(' A_电堆电压异常 ！')
 
         if 0 <= float(A_Stack_current_list[-1]) <= 3:
             print("A电堆电流(A)：", A_Stack_current_list[-1])
         else:
             print("A电堆电流(A)：", A_Stack_current_list[-1], "         电堆电流异常      !!!")
+            remark.append(' A_电堆电流异常 ！')
 
         if 0 <= float(A_Stack_power_list[-1]) <= 300:
             print("A电堆功率(W)：", A_Stack_power_list[-1])
         else:
             print("A电堆功率(W)：", A_Stack_power_list[-1], "         电堆功率异常      !!!")
+            remark.append(' A_电堆功率异常 ！')
 
         if float(A1_Stack_temperature_list[-1]) <= 50:
             print("A1电堆堆心温度(℃)：", A1_Stack_temperature_list[-1])
         else:
-            print(f"A1电堆堆心温度(℃)：{A1_Stack_temperature_list[-1]}         A电堆堆心温度异常      !!!")
+            print(f"A1电堆堆心温度(℃)：{A1_Stack_temperature_list[-1]}         A1电堆堆心温度太高异常      !!!")
+            remark.append(' A1_电堆堆心温度太高异常 ！')
 
         if float(A2_Stack_temperature_list[-1]) <= 50:
             print("A2电堆堆心温度(℃)：", A2_Stack_temperature_list[-1])
         else:
-            print(f"A2电堆堆心温度(℃)：{A2_Stack_temperature_list[-1]}         A电堆堆心温度异常      !!!")
+            print(f"A2电堆堆心温度(℃)：{A2_Stack_temperature_list[-1]}         A2电堆堆心温度太高异常      !!!")
+            remark.append(' A2_电堆堆心温度太高异常 ！')
 
         if float(A1_Stack_top_temperature_list[-1]) <= 50:
             print("A1电堆顶部温度(℃)：", A1_Stack_top_temperature_list[-1])
         else:
-            print(f"A1电堆顶部温度(℃)：{A1_Stack_top_temperature_list[-1]}         A1电堆顶部温度异常      !!!")
+            print(f"A1电堆顶部温度(℃)：{A1_Stack_top_temperature_list[-1]}         A1电堆顶部温度太高异常      !!!")
+            remark.append(' A1_电堆顶部温度太高异常 ！')
 
         if float(A2_Stack_top_temperature_list[-1]) <= 50:
             print(f"A2电堆顶部温度(℃)：{A2_Stack_top_temperature_list[-1]}")
         else:
-            print(f"A2电堆顶部温度(℃)：{A2_Stack_top_temperature_list[-1]}         A2电堆顶部温度异常      !!!")
+            print(f"A2电堆顶部温度(℃)：{A2_Stack_top_temperature_list[-1]}         A2电堆顶部温度太高异常      !!!")
+            remark.append(' A2_电堆顶部温度太高异常 ！')
+
+        #  将所有故障加入remark_set，最后生成excel表格的时候提取出来
+        #   ' , '.join(remark)会取出remark列表中的每个元素，并将它们用一个逗号连接起来，形成一个单独的字符串。
+        remark_set.append(' , '.join(remark))
+        if len(remark) > 0:
+            print(f'\n设备所有故障 ：{remark_set[-1]}')
+        else:
+            print('\n设备没有出现异常故障     ... ... ...')
+
+        remark.clear()
 
         '''
         if float(B1_Stack_top_temperature_list[-1]) <= 50:
@@ -488,8 +555,10 @@ def excelfile_save(file_path):
         "日期时间": time_localtime_list,
         "设备编号": Serial_No_list,
         "设备名称": machine_name_list,
-        "设备状态": System_status_list,
+        "设备网络状态": network_state_list,
+        "设备运行状态": System_status_list,
         "设备母线电压(V)": Current_Voltage_list,
+        "内置燃料(L)": Remaining_Fuel_list,
 
         "A_制氢机状态": A_HG_Module_status_list,
         'A_氢气压力(Psi)': A_H2_Pressure_list,
@@ -504,10 +573,11 @@ def excelfile_save(file_path):
         'A1_电堆堆心温度(℃)': A1_Stack_temperature_list,
         'A2_电堆堆心温度(℃)': A2_Stack_temperature_list,
         'A1_电堆顶部温度(℃)': A1_Stack_top_temperature_list,
-        'A2_电堆顶部温度(℃)': A2_Stack_top_temperature_list
+        'A2_电堆顶部温度(℃)': A2_Stack_top_temperature_list,
+        '备注': remark_set
 
     })
-
+    # 判断是否有相同的文件存在，有的话改名
     if os.path.exists(file_path):
         # 文件存在，生成新的文件名
         base_name, extension = os.path.splitext(file_path)
@@ -548,10 +618,10 @@ def excelfile_save(file_path):
 def main():
     # 初始化网页登录
     file_path = 'D:/爬虫数据/网页采集数据.xlsx'
-    sleeptime = 5      # 程序暂停运行,时间单位：min
+    sleeptime = 0  # 程序暂停运行,时间单位：min
     driver, wait = Program_Init()
     print('\n~~~~~~~~~    开始爬虫     ~~~~~~~~~~\n')
-    for i in range(1, 5):
+    for i in range(0, 1):
         page1_data_processing(driver, wait, 3)  # 管委会                   row_key=3
         page1_data_processing(driver, wait, 14)  # 楼下机房1号机             row_key=14
         page1_data_processing(driver, wait, 15)  # 楼下机房2号机             row_key=15
@@ -573,6 +643,7 @@ def main():
         page2_data_processing(driver, wait, 19)  # 四川江油太平唐僧           row_key=19
 
         excelfile_save(file_path)
+
         print(f'第 {i} 次系统进入休眠 ， 休眠时长：{sleeptime} min')
         time.sleep(60 * sleeptime)
 
