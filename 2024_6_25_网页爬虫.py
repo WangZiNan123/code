@@ -21,22 +21,48 @@ import os
 版本更新：2024_6_22   更新时间2024.6.22
 更新内容：新增 A1电堆顶部温度（发电仓温度(℃):），A2电堆顶部温度（环境温度(℃):），B1电堆顶部温度（环境湿度(%):），B2电堆顶部温度（电堆风机馈速(%): ）
         系统状态（System: ），母线电压（Current Voltage(V)：）
-        
+
 版本更新：2024_6_23   更新时间2024.6.23
 更新内容：新增 优化代码格式  ，新增跳转到第二页 ，处理第二页的数据  。
         新增 A2电堆堆心温度（电堆温度2(℃):）
         新增 文件保存，将读取的数据保存为excel格式
-        
+
 版本更新：2024_6_24   更新时间2024.6.24
 更新内容：新增 内置燃料值（Remaining Fuel(LIn)：），‘备注’可以将有异常的故障展示出来 ，设备网络状态（Off-line/On-line）  。
         新增 B制氢机参数（Hydrogen production module B）：
             氢气压力（H2_Pressure），鼓风机温度（Blower_temperature），提纯器温度（Purifier_temperature），重整室温度（Reformer_Temperature），制氢机运行状态（Module status: ）
         新增 B电堆参数（Power generation module B）：    
             电堆电压（Stack_voltage），电堆电流（Stack_current），电堆功率（Stack_power），B电堆堆心温度（Stack_temperature），电堆运行状态（Module status: ）
-            
-       
+
+
 版本更新：2024_6_25   更新时间2024.6.25
 更新内容：新增 外置燃料值（Remaining Fuel(LOut)：）  ，内置燃料值（液位小水箱(L):）
+        优化故障处理逻辑
+
+
+================================================= 
+
+设备编号 ： 设备名称 
+
+CW-10KW-0007 : 管委会10KW
+CW-MFC6000-0001 : 5G汇聚机房1
+CW-MFC6000-0002 : 5G汇聚机房2
+CW-MFC6000-0008 : 江门电信白石机房1
+CW-MFC6000-0010 : 江门电信白石机房2
+MFC6kD480012 : 江门新会洋美接入网机房
+MFC6kD480013 : 江门新会红关接入网机房
+MFC6kD480014 : 江门台山墩寨综合机房
+MFC6kD480015 : 江门开平潭溪综合机房
+MFC6kD480016 : 江门台山华安接入网机房
+MFC6kD480017 : 江门开平新美接入网机房
+MFC6kD480018 : 江门鹤山升平接入网机房
+MFC6kD480019 : 江门恩平平石接入网机房
+MFC6kD480020 : 江门恩平三联接入网机房
+MFC6kD480021 : 江门鹤山三堡接入网机房
+MFC6kD480022 : 台山川岛长堤
+MFC6kD480023 : 江油太平唐僧
+
+
 ================================================= 
 '''
 
@@ -86,18 +112,20 @@ Out_Remaining_Fuel_list = []  # 外置液位（L）
 In_Remaining_Fuel_mm_list = []  # 内置液位（mm）
 
 
-def Program_Init():
-    # 设置WebDriver路径
-    driver_path = 'C:/Users/11016/AppData/Local/Google/Chrome/Application/chromedriver.exe'  # 例如 ChromeDriver 的路径
+def Program_Init(driver_path, url, loginName, passWord):
+    """
 
+    :param driver_path: 谷歌驱动路径
+    :param url: 网页链接
+    :param loginName: 网页登录账号名称
+    :param passWord: 网页登录账号密码
+    :return:
+    """
     # 创建Service对象，指定ChromeDriver路径
     service = Service(executable_path=driver_path)
 
     # 使用Service对象作为服务启动Chrome
     driver = webdriver.Chrome(service=service)
-
-    # 目标网页URL
-    url = 'http://47.113.86.137:880/#/device/detail?serialNo=CW-0002'
 
     # 使用Selenium打开网页
     driver.get(url)
@@ -111,11 +139,15 @@ def Program_Init():
     # 使用CSS选择器定位登录按钮
     login_button = driver.find_element(By.CSS_SELECTOR, 'button.login-button.ant-btn.ant-btn-primary.ant-btn-lg')
 
-    username_input.send_keys('admin')
-    password_input.send_keys('GJM456789')
+    username_input.send_keys(loginName)
+    password_input.send_keys(passWord)
 
+    time.sleep(0.5)
     # 提交登录信息
     login_button.click()
+
+    time.sleep(0.5)
+
     return driver, wait
 
 
@@ -129,18 +161,19 @@ def click_Equipment_List(wait, driver):
 
     :return:
     """
-
+    time.sleep(1)
     # 使用更具体的CSS选择器，确保选中的是可点击的元素
     submenu_title = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.ant-menu-submenu-title')))
-    time.sleep(1)
+
     # 点击下拉菜单标题以展开菜单
     submenu_title.click()
 
+    time.sleep(1)
     # 定位并点击“Equipment List”列表项
     # 如果菜单项是一个<a>标签包裹<span>，确保XPath正确地定位到这个<a>标签
     equipment_list_item = wait.until(EC.element_to_be_clickable((By.XPATH, '//a/span[text()="Equipment List"]')))
     # 使用 JavaScript 执行点击操作
-    time.sleep(0.5)
+
     driver.execute_script("arguments[0].click();", equipment_list_item)
 
 
@@ -198,11 +231,12 @@ def click_find_target_Details(driver, row_key):
 
     # 在找到的 <tr> 元素中定位到 "Details" 链接
     # 假设 "Details" 链接具有 data-v-11b2bf7e 属性
+    time.sleep(0.5)
     details_link_selector = "a[data-v-11b2bf7e]"
     details_link = target_row_element.find_element(By.CSS_SELECTOR, details_link_selector)
     # print(type(details_link))
     # 点击 "Details"
-    time.sleep(0.5)
+
     details_link.click()
     # 使用 JavaScript 滚动到页面顶部
     time.sleep(0.5)
@@ -476,229 +510,398 @@ def data_processing(driver, wait):
             print("设备网络状态：", network_state_list[-1], '           设备网络离线      ！！！')
             remark.append(' 设备网络离线 ！')
 
-        print("设备运行状态：", System_status_list[-1])
+        # 如果设备处于‘关机’状态，执行以下代码
+        if System_status_list[-1] == 'Off':
 
-        if float(Current_Voltage_list[-1]) >= 49.8 or Serial_No_list[-1] in (
-        'CW-MFC6000-0001', 'CW-MFC6000-0002', 'CW-MFC6000-0008', 'CW-MFC6000-0010'):
-            print("设备母线电压(V)：", Current_Voltage_list[-1])
-        else:
-            print("设备母线电压(V)：", Current_Voltage_list[-1], "      设备母线电压太低异常     ！！！")
-            remark.append(' 设备母线电压太低异常 ！')
+            print("设备运行状态：", System_status_list[-1])
 
-        if Serial_No_list[-1] in (
-                'MFC6kD480012', 'MFC6kD480013', 'MFC6kD480014', 'MFC6kD480019', 'MFC6kD480020', 'MFC6kD480022',
-                'MFC6kD480023'):
-            if float(Out_Remaining_Fuel_list[-1]) >= 50:
+            if float(Current_Voltage_list[-1]) >= 49.8 or Serial_No_list[-1] in (
+                    'CW-MFC6000-0001', 'CW-MFC6000-0002', 'CW-MFC6000-0008', 'CW-MFC6000-0010'):
+                print("设备母线电压(V)：", Current_Voltage_list[-1])
+            else:
+                print("设备母线电压(V)：", Current_Voltage_list[-1], "      设备母线电压太低异常     ！！！")
+                remark.append(f' 设备母线电压太低异常（ {Current_Voltage_list[-1]}(V) ） ！')
+
+            if Serial_No_list[-1] in (
+                    'MFC6kD480012', 'MFC6kD480013', 'MFC6kD480014', 'MFC6kD480019', 'MFC6kD480020', 'MFC6kD480022',
+                    'MFC6kD480023'):
+                if float(Out_Remaining_Fuel_list[-1]) >= 50:
+                    print("外置燃料(L)：", Out_Remaining_Fuel_list[-1])
+                else:
+                    print("外置燃料(L)：", Out_Remaining_Fuel_list[-1], "      外置燃料太低异常     ！！！")
+                    remark.append(f' 外置燃料太低异常( {Out_Remaining_Fuel_list[-1]}(L) ) ！')
+            else:
                 print("外置燃料(L)：", Out_Remaining_Fuel_list[-1])
+
+            if float(Remaining_Fuel_list[-1]) >= 15 or Serial_No_list[-1] in (
+                    'CW-MFC6000-0001', 'CW-MFC6000-0002', 'CW-MFC6000-0008', 'CW-MFC6000-0010'):
+                print("内置燃料(L)：", Remaining_Fuel_list[-1])
             else:
-                print("外置燃料(L)：", Out_Remaining_Fuel_list[-1], "      外置燃料太低异常     ！！！")
-                remark.append(' 外置燃料太低异常 ！')
-        else:
-            print("外置燃料(L)：", Out_Remaining_Fuel_list[-1])
+                print("内置燃料(L)：", Remaining_Fuel_list[-1], "      内置燃料太低异常     ！！！")
+                remark.append(f' 内置燃料太低异常( {Remaining_Fuel_list[-1]}(L) ) ！')
 
+            print(f'内置燃料（mm）:{In_Remaining_Fuel_mm_list[-1]}\n')
 
-        if float(Remaining_Fuel_list[-1]) >= 15 or Serial_No_list[-1] in (
-        'CW-MFC6000-0001', 'CW-MFC6000-0002', 'CW-MFC6000-0008', 'CW-MFC6000-0010'):
-            print("内置燃料(L)：", Remaining_Fuel_list[-1])
-        else:
-            print("内置燃料(L)：", Remaining_Fuel_list[-1], "      内置燃料太低异常     ！！！")
-            remark.append(' 内置燃料太低异常 ！')
+            # 如果制氢机处于‘热待机’ 或者 ‘运行’
+            if A_HG_Module_status_list[-1] == 'Hot Standby' or A_HG_Module_status_list[-1] == 'Run':
 
+                print("A制氢机状态：", A_HG_Module_status_list[-1])
 
-        print(f'内置燃料（mm）:{In_Remaining_Fuel_mm_list[-1]}\n')
+                if 15 <= float(A_H2_Pressure_list[-1]) <= 25:
+                    print("A氢气压力(Psi)：", A_H2_Pressure_list[-1])
+                elif 15 > float(A_H2_Pressure_list[-1]):
+                    print("A氢气压力(Psi)：", A_H2_Pressure_list[-1], "        氢气压力太低异常      !!!")
+                    remark.append(f' A_氢气压力太低异常( {A_H2_Pressure_list[-1]}(Psi) ) ！')
+                else:
+                    print("A氢气压力(Psi)：", A_H2_Pressure_list[-1], "        氢气压力太高异常      !!!")
+                    remark.append(f' A_氢气压力太高异常( {A_H2_Pressure_list[-1]}(Psi) ) ！')
 
+                if 350 <= float(A_Purifier_temperature_list[-1]) <= 403:
+                    print("A提纯器温度(℃)：", A_Purifier_temperature_list[-1])
+                elif 350 > float(A_Purifier_temperature_list[-1]):
+                    print("A提纯器温度(℃)：", A_Purifier_temperature_list[-1], "        提纯器温度太低异常      !!!")
+                    remark.append(f' A_提纯器温度太低异常( {A_Purifier_temperature_list[-1]}(℃) ) ！')
+                else:
+                    print("A提纯器温度(℃)：", A_Purifier_temperature_list[-1], "        提纯器温度太高异常      !!!")
+                    remark.append(f' A_提纯器温度太高异常( {A_Purifier_temperature_list[-1]}(℃) ) ！')
 
-        print("A制氢机状态：", A_HG_Module_status_list[-1])
+                if 350 <= float(A_Reformer_Temperature_list[-1]) <= 403:
+                    print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1])
+                elif 350 > float(A_Reformer_Temperature_list[-1]):
+                    print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1], "        提纯器温度太低异常      !!!")
+                    remark.append(f' A_重整室温度太低异常( {A_Reformer_Temperature_list[-1]}(℃) ) ！')
+                else:
+                    print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1], "         重整室温度太高异常      !!!")
+                    remark.append(f' A_重整室温度太高异常( {A_Reformer_Temperature_list[-1]}(℃) ) ！')
 
-        if 15 <= float(A_H2_Pressure_list[-1]) <= 25:
-            print("A氢气压力(Psi)：", A_H2_Pressure_list[-1])
-        elif 15 > float(A_H2_Pressure_list[-1]):
-            print("A氢气压力(Psi)：", A_H2_Pressure_list[-1], "        氢气压力太低异常      !!!")
-            remark.append(' A_氢气压力太低异常 ！')
-        else:
-            print("A氢气压力(Psi)：", A_H2_Pressure_list[-1], "        氢气压力太高异常      !!!")
-            remark.append(' A_氢气压力太高异常 ！')
+                if 0 <= float(A_Blower_temperature_list[-1]) <= 60:
+                    print("A鼓风机温度(℃)：", A_Blower_temperature_list[-1], end='\n\n')
+                else:
+                    print("A鼓风机温度(℃)：", A_Blower_temperature_list[-1], "        鼓风机温度太高异常      !!!",
+                          end='\n\n')
+                    remark.append(f' A_鼓风机温度太高异常( {A_Blower_temperature_list[-1]}(℃) ) ！')
 
-        if 350 <= float(A_Purifier_temperature_list[-1]) <= 403:
-            print("A提纯器温度(℃)：", A_Purifier_temperature_list[-1])
-        elif 350 > float(A_Purifier_temperature_list[-1]):
-            print("A提纯器温度(℃)：", A_Purifier_temperature_list[-1], "        提纯器温度太低异常      !!!")
-            remark.append(' A_提纯器温度太低异常 ！')
-        else:
-            print("A提纯器温度(℃)：", A_Purifier_temperature_list[-1], "        提纯器温度太高异常      !!!")
-            remark.append(' A_提纯器温度太高异常 ！')
+            # 如果制氢机处于 ‘关机’
+            elif A_HG_Module_status_list[-1] == 'System Off':
 
-        if 350 <= float(A_Reformer_Temperature_list[-1]) <= 403:
-            print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1])
-        elif 350 > float(A_Reformer_Temperature_list[-1]):
-            print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1], "        提纯器温度太低异常      !!!")
-            remark.append(' A_重整室温度太低异常 ！')
-        else:
-            print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1], "         重整室温度太高异常      !!!")
-            remark.append(' A_重整室温度太高异常 ！')
+                print("A制氢机状态：", A_HG_Module_status_list[-1], '           A_制氢机关机  !!！')
+                remark.append(f' A_制氢机关机 ！')
+                print("A氢气压力(Psi)：", A_H2_Pressure_list[-1])
+                print("A提纯器温度(℃)：", A_Purifier_temperature_list[-1])
+                print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1])
+                print("A鼓风机温度(℃)：", A_Blower_temperature_list[-1], end='\n\n')
 
-        if 0 <= float(A_Blower_temperature_list[-1]) <= 60:
-            print("A鼓风机温度(℃)：", A_Blower_temperature_list[-1], end='\n\n')
-        else:
-            print("A鼓风机温度(℃)：", A_Blower_temperature_list[-1], "        鼓风机温度太高异常      !!!", end='\n\n')
-            remark.append(' A_鼓风机温度太高异常 ！')
+            # 如果制氢机处于其它状态
+            else:
+                print("A制氢机状态：", A_HG_Module_status_list[-1])
 
-        print("B制氢机状态：", B_HG_Module_status_list[-1])
+                print("A氢气压力(Psi)：", A_H2_Pressure_list[-1])
+                print("A提纯器温度(℃)：", A_Purifier_temperature_list[-1])
+                print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1])
+                print("A鼓风机温度(℃)：", A_Blower_temperature_list[-1], end='\n\n')
 
-        if Serial_No_list[-1] == 'CW-10KW-0007':
+            if Serial_No_list[-1] == 'CW-10KW-0007':
 
-            if 15 <= float(B_H2_Pressure_list[-1]) <= 25:
+                # 如果制氢机处于‘热待机’ 或者 ‘运行’
+                if B_HG_Module_status_list[-1] == 'Hot Standby' or B_HG_Module_status_list[-1] == 'Run':
+                    print("B制氢机状态：", B_HG_Module_status_list[-1])
+                    if 15 <= float(B_H2_Pressure_list[-1]) <= 25:
+                        print("B氢气压力(Psi)：", B_H2_Pressure_list[-1])
+                    elif 15 > float(B_H2_Pressure_list[-1]):
+                        print("B氢气压力(Psi)：", B_H2_Pressure_list[-1], "        氢气压力太低异常      !!!")
+                        remark.append(f' B_氢气压力太低异常( {B_H2_Pressure_list[-1]}(Psi) ) ！')
+                    else:
+                        print("B氢气压力(Psi)：", B_H2_Pressure_list[-1], "        氢气压力太高异常      !!!")
+                        remark.append(f' B_氢气压力太高异常( {B_H2_Pressure_list[-1]}(Psi) ) ！')
+
+                    if 350 <= float(B_Purifier_temperature_list[-1]) <= 403:
+                        print("B提纯器温度(℃)：", B_Purifier_temperature_list[-1])
+                    elif 350 > float(A_Purifier_temperature_list[-1]):
+                        print("B提纯器温度(℃)：", B_Purifier_temperature_list[-1], "        提纯器温度太低异常      !!!")
+                        remark.append(f' B_提纯器温度太低异常( {B_Purifier_temperature_list[-1]}(℃) ) ！')
+                    else:
+                        print("B提纯器温度(℃)：", B_Purifier_temperature_list[-1], "        提纯器温度太高异常      !!!")
+                        remark.append(f' B_提纯器温度太高异常( {B_Purifier_temperature_list[-1]}(℃) ) ！')
+
+                    if 350 <= float(B_Reformer_Temperature_list[-1]) <= 403:
+                        print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1])
+                    elif 350 > float(B_Reformer_Temperature_list[-1]):
+                        print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1], "        提纯器温度太低异常      !!!")
+                        remark.append(f' B_重整室温度太低异常( {B_Reformer_Temperature_list[-1]}(℃) ) ！')
+                    else:
+                        print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1],
+                              "         重整室温度太高异常      !!!")
+                        remark.append(f' B_重整室温度太高异常( {B_Reformer_Temperature_list[-1]}(℃) ) ！')
+
+                    if 0 <= float(B_Blower_temperature_list[-1]) <= 60:
+                        print("B鼓风机温度(℃)：", B_Blower_temperature_list[-1], end='\n\n')
+                    else:
+                        print("B鼓风机温度(℃)：", B_Blower_temperature_list[-1], "        鼓风机温度太高异常      !!!",
+                              end='\n\n')
+                        remark.append(f' B_鼓风机温度太高异常( {B_Blower_temperature_list[-1]}(℃) ) ！')
+
+                # 如果制氢机处于 ‘关机’
+                elif B_HG_Module_status_list[-1] == 'System Off':
+                    print("B制氢机状态：", B_HG_Module_status_list[-1], '          B_制氢机关机 !!')
+                    remark.append(f' B_制氢机关机 ！')
+                    print("B氢气压力(Psi)：", B_H2_Pressure_list[-1])
+                    print("B提纯器温度(℃)：", B_Purifier_temperature_list[-1])
+                    print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1])
+                    print("B鼓风机温度(℃)：", B_Blower_temperature_list[-1], end='\n\n')
+                # 如果制氢机处于其它状态
+                else:
+                    print("B制氢机状态：", A_HG_Module_status_list[-1])
+
+                    print("B氢气压力(Psi)：", B_H2_Pressure_list[-1])
+                    print("B提纯器温度(℃)：", B_Purifier_temperature_list[-1])
+                    print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1])
+                    print("B鼓风机温度(℃)：", B_Blower_temperature_list[-1], end='\n\n')
+
+            else:
                 print("B氢气压力(Psi)：", B_H2_Pressure_list[-1])
-            elif 15 > float(B_H2_Pressure_list[-1]):
-                print("B氢气压力(Psi)：", B_H2_Pressure_list[-1], "        氢气压力太低异常      !!!")
-                remark.append(' B_氢气压力太低异常 ！')
-            else:
-                print("B氢气压力(Psi)：", B_H2_Pressure_list[-1], "        氢气压力太高异常      !!!")
-                remark.append(' B_氢气压力太高异常 ！')
-
-            if 350 <= float(B_Purifier_temperature_list[-1]) <= 403:
                 print("B提纯器温度(℃)：", B_Purifier_temperature_list[-1])
-            elif 350 > float(A_Purifier_temperature_list[-1]):
-                print("B提纯器温度(℃)：", B_Purifier_temperature_list[-1], "        提纯器温度太低异常      !!!")
-                remark.append(' B_提纯器温度太低异常 ！')
-            else:
-                print("B提纯器温度(℃)：", B_Purifier_temperature_list[-1], "        提纯器温度太高异常      !!!")
-                remark.append(' B_提纯器温度太高异常 ！')
-
-            if 350 <= float(B_Reformer_Temperature_list[-1]) <= 403:
                 print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1])
-            elif 350 > float(B_Reformer_Temperature_list[-1]):
-                print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1], "        提纯器温度太低异常      !!!")
-                remark.append(' B_重整室温度太低异常 ！')
-            else:
-                print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1], "         重整室温度太高异常      !!!")
-                remark.append(' B_重整室温度太高异常 ！')
-
-            if 0 <= float(B_Blower_temperature_list[-1]) <= 60:
                 print("B鼓风机温度(℃)：", B_Blower_temperature_list[-1], end='\n\n')
+
+            print("A电堆状态：", A_Stack_Module_status_list[-1])
+
+            if 0 <= float(A_Stack_voltage_list[-1]) <= 10:
+                print("A电堆电压(V)：", A_Stack_voltage_list[-1])
             else:
-                print("B鼓风机温度(℃)：", B_Blower_temperature_list[-1], "        鼓风机温度太高异常      !!!",
-                      end='\n\n')
-                remark.append(' B_鼓风机温度太高异常 ！')
-        else:
-            print("B氢气压力(Psi)：", B_H2_Pressure_list[-1])
-            print("B提纯器温度(℃)：", B_Purifier_temperature_list[-1])
-            print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1])
-            print("B鼓风机温度(℃)：", B_Blower_temperature_list[-1], end='\n\n')
+                print("A电堆电压(V)：", A_Stack_voltage_list[-1], "        电堆电压异常      !!!")
+                remark.append(f' A_电堆电压异常( {A_Stack_voltage_list[-1]}(V) ) ！')
 
-        print("A电堆状态：", A_Stack_Module_status_list[-1])
+            if 0 <= float(A_Stack_current_list[-1]) <= 3:
+                print("A电堆电流(A)：", A_Stack_current_list[-1])
+            else:
+                print("A电堆电流(A)：", A_Stack_current_list[-1], "         电堆电流异常      !!!")
+                remark.append(f' A_电堆电流异常( {A_Stack_current_list[-1]}(A) ) ！')
 
-        if 0 <= float(A_Stack_voltage_list[-1]) <= 10:
-            print("A电堆电压(V)：", A_Stack_voltage_list[-1])
-        else:
-            print("A电堆电压(V)：", A_Stack_voltage_list[-1], "        电堆电压异常      !!!")
-            remark.append(' A_电堆电压异常 ！')
+            if 0 <= float(A_Stack_power_list[-1]) <= 300:
+                print("A电堆功率(W)：", A_Stack_power_list[-1])
+            else:
+                print("A电堆功率(W)：", A_Stack_power_list[-1], "         电堆功率异常      !!!")
+                remark.append(f' A_电堆功率异常( {A_Stack_power_list[-1]}(W) ) ！')
 
-        if 0 <= float(A_Stack_current_list[-1]) <= 3:
-            print("A电堆电流(A)：", A_Stack_current_list[-1])
-        else:
-            print("A电堆电流(A)：", A_Stack_current_list[-1], "         电堆电流异常      !!!")
-            remark.append(' A_电堆电流异常 ！')
+            if float(A1_Stack_temperature_list[-1]) <= 50:
+                print("A1电堆堆心温度(℃)：", A1_Stack_temperature_list[-1])
+            else:
+                print(f"A1电堆堆心温度(℃)：{A1_Stack_temperature_list[-1]}         A1电堆堆心温度太高异常      !!!")
+                remark.append(F' A1_电堆堆心温度太高异常( {A1_Stack_temperature_list[-1]}(℃) ) ！')
 
-        if 0 <= float(A_Stack_power_list[-1]) <= 300:
-            print("A电堆功率(W)：", A_Stack_power_list[-1])
-        else:
-            print("A电堆功率(W)：", A_Stack_power_list[-1], "         电堆功率异常      !!!")
-            remark.append(' A_电堆功率异常 ！')
+            if float(A2_Stack_temperature_list[-1]) <= 50:
+                print("A2电堆堆心温度(℃)：", A2_Stack_temperature_list[-1])
+            else:
+                print(f"A2电堆堆心温度(℃)：{A2_Stack_temperature_list[-1]}         A2电堆堆心温度太高异常      !!!")
+                remark.append(f' A2_电堆堆心温度太高异常( {A2_Stack_temperature_list[-1]}(℃) ) ！')
 
-        if float(A1_Stack_temperature_list[-1]) <= 50:
-            print("A1电堆堆心温度(℃)：", A1_Stack_temperature_list[-1])
-        else:
-            print(f"A1电堆堆心温度(℃)：{A1_Stack_temperature_list[-1]}         A1电堆堆心温度太高异常      !!!")
-            remark.append(' A1_电堆堆心温度太高异常 ！')
+            if float(A1_Stack_top_temperature_list[-1]) <= 50:
+                print("A1电堆顶部温度(℃)：", A1_Stack_top_temperature_list[-1])
+            else:
+                print(f"A1电堆顶部温度(℃)：{A1_Stack_top_temperature_list[-1]}         A1电堆顶部温度太高异常      !!!")
+                remark.append(f' A1_电堆顶部温度太高异常( {A1_Stack_top_temperature_list[-1]}(℃) ) ！')
 
-        if float(A2_Stack_temperature_list[-1]) <= 50:
-            print("A2电堆堆心温度(℃)：", A2_Stack_temperature_list[-1])
-        else:
-            print(f"A2电堆堆心温度(℃)：{A2_Stack_temperature_list[-1]}         A2电堆堆心温度太高异常      !!!")
-            remark.append(' A2_电堆堆心温度太高异常 ！')
+            if float(A2_Stack_top_temperature_list[-1]) <= 50:
+                print(f"A2电堆顶部温度(℃)：{A2_Stack_top_temperature_list[-1]}\n")
+            else:
+                print(f"A2电堆顶部温度(℃)：{A2_Stack_top_temperature_list[-1]}         A2电堆顶部温度太高异常      !!\n")
+                remark.append(f' A2_电堆顶部温度太高异常( {A2_Stack_top_temperature_list[-1]}(℃) ) ！')
 
-        if float(A1_Stack_top_temperature_list[-1]) <= 50:
-            print("A1电堆顶部温度(℃)：", A1_Stack_top_temperature_list[-1])
-        else:
-            print(f"A1电堆顶部温度(℃)：{A1_Stack_top_temperature_list[-1]}         A1电堆顶部温度太高异常      !!!")
-            remark.append(' A1_电堆顶部温度太高异常 ！')
+            print("B电堆状态：", B_Stack_Module_status_list[-1])
 
-        if float(A2_Stack_top_temperature_list[-1]) <= 50:
-            print(f"A2电堆顶部温度(℃)：{A2_Stack_top_temperature_list[-1]}\n")
-        else:
-            print(f"A2电堆顶部温度(℃)：{A2_Stack_top_temperature_list[-1]}         A2电堆顶部温度太高异常      !!\n")
-            remark.append(' A2_电堆顶部温度太高异常 ！')
+            if Serial_No_list[-1] == 'CW-10KW-0007':
 
-        print("B电堆状态：", B_Stack_Module_status_list[-1])
+                if 0 <= float(B_Stack_voltage_list[-1]) <= 10:
+                    print("B电堆电压(V)：", B_Stack_voltage_list[-1])
+                else:
+                    print("B电堆电压(V)：", B_Stack_voltage_list[-1], "        电堆电压异常      !!!")
+                    remark.append(f' B_电堆电压异常( {B_Stack_voltage_list[-1]}(V) ) ！')
 
-        if Serial_No_list[-1] == 'CW-10KW-0007':
+                if 0 <= float(B_Stack_current_list[-1]) <= 3:
+                    print("B电堆电流(A)：", B_Stack_current_list[-1])
+                else:
+                    print("B电堆电流(A)：", B_Stack_current_list[-1], "         电堆电流异常      !!!")
+                    remark.append(f' B_电堆电流异常( {B_Stack_current_list[-1]}(A) ) ！')
 
-            if 0 <= float(B_Stack_voltage_list[-1]) <= 10:
+                if 0 <= float(B_Stack_power_list[-1]) <= 300:
+                    print("B电堆功率(W)：", B_Stack_power_list[-1])
+                else:
+                    print("B电堆功率(W)：", B_Stack_power_list[-1], "         电堆功率异常      !!!")
+                    remark.append(f' B_电堆功率异常( {B_Stack_power_list[-1]}(W) ) ！')
+
+                if float(B_Stack_temperature_list[-1]) <= 50:
+                    print("B电堆堆心温度(℃)：", B_Stack_temperature_list[-1])
+                else:
+                    print(f"B电堆堆心温度(℃)：{B_Stack_temperature_list[-1]}         A1电堆堆心温度太高异常      !!!")
+                    remark.append(f' B_电堆堆心温度太高异常( {B_Stack_temperature_list[-1]}(℃) ) ！')
+
+                if float(B1_Stack_top_temperature_list[-1]) <= 50:
+                    print("B1电堆顶部温度(℃)：", B1_Stack_top_temperature_list[-1])
+                else:
+                    print(
+                        f"B1电堆顶部温度(℃)：{B1_Stack_top_temperature_list[-1]}         A1电堆顶部温度太高异常      !!!")
+                    remark.append(f' B1_电堆顶部温度太高异常( {B1_Stack_top_temperature_list[-1]}(℃) ) ！')
+
+                if float(B2_Stack_top_temperature_list[-1]) <= 50:
+                    print(f"B2电堆顶部温度(℃)：{B2_Stack_top_temperature_list[-1]}")
+                else:
+                    print(
+                        f"B2电堆顶部温度(℃)：{B2_Stack_top_temperature_list[-1]}         A2电堆顶部温度太高异常      !!!")
+                    remark.append(f' B2_电堆顶部温度太高异常( {B2_Stack_top_temperature_list[-1]}(℃) ) ！')
+
+            else:
                 print("B电堆电压(V)：", B_Stack_voltage_list[-1])
-            else:
-                print("B电堆电压(V)：", B_Stack_voltage_list[-1], "        电堆电压异常      !!!")
-                remark.append(' B_电堆电压异常 ！')
-
-            if 0 <= float(B_Stack_current_list[-1]) <= 3:
                 print("B电堆电流(A)：", B_Stack_current_list[-1])
-            else:
-                print("B电堆电流(A)：", B_Stack_current_list[-1], "         电堆电流异常      !!!")
-                remark.append(' B_电堆电流异常 ！')
-
-            if 0 <= float(B_Stack_power_list[-1]) <= 300:
                 print("B电堆功率(W)：", B_Stack_power_list[-1])
-            else:
-                print("B电堆功率(W)：", B_Stack_power_list[-1], "         电堆功率异常      !!!")
-                remark.append(' B_电堆功率异常 ！')
-
-            if float(B_Stack_temperature_list[-1]) <= 50:
                 print("B电堆堆心温度(℃)：", B_Stack_temperature_list[-1])
-            else:
-                print(f"B电堆堆心温度(℃)：{B_Stack_temperature_list[-1]}         A1电堆堆心温度太高异常      !!!")
-                remark.append(' B_电堆堆心温度太高异常 ！')
-
-            if float(B1_Stack_top_temperature_list[-1]) <= 50:
                 print("B1电堆顶部温度(℃)：", B1_Stack_top_temperature_list[-1])
-            else:
-                print(f"B1电堆顶部温度(℃)：{B1_Stack_top_temperature_list[-1]}         A1电堆顶部温度太高异常      !!!")
-                remark.append(' B1_电堆顶部温度太高异常 ！')
-
-            if float(B2_Stack_top_temperature_list[-1]) <= 50:
                 print(f"B2电堆顶部温度(℃)：{B2_Stack_top_temperature_list[-1]}")
-            else:
-                print(f"B2电堆顶部温度(℃)：{B2_Stack_top_temperature_list[-1]}         A2电堆顶部温度太高异常      !!!")
-                remark.append(' B2_电堆顶部温度太高异常 ！')
 
+
+        # 如果设备处于‘开机’状态，执行以下代码
         else:
+
+            print("设备运行状态：", System_status_list[-1], '          设备发电中 ！！ ！')
+            remark.append(f' 设备发电中 ！！ ！')
+
+            if float(Current_Voltage_list[-1]) >= 49.8 or Serial_No_list[-1] in (
+                    'CW-MFC6000-0001', 'CW-MFC6000-0002', 'CW-MFC6000-0008', 'CW-MFC6000-0010'):
+                print("设备母线电压(V)：", Current_Voltage_list[-1])
+            else:
+                print("设备母线电压(V)：", Current_Voltage_list[-1], "      设备母线电压太低异常     ！！！")
+                remark.append(f' 设备母线电压太低异常（ {Current_Voltage_list[-1]}(V) ） ！')
+
+            if Serial_No_list[-1] in (
+                    'MFC6kD480012', 'MFC6kD480013', 'MFC6kD480014', 'MFC6kD480019', 'MFC6kD480020', 'MFC6kD480022',
+                    'MFC6kD480023'):
+                if float(Out_Remaining_Fuel_list[-1]) >= 50:
+                    print("外置燃料(L)：", Out_Remaining_Fuel_list[-1])
+                else:
+                    print("外置燃料(L)：", Out_Remaining_Fuel_list[-1], "      外置燃料太低异常     ！！！")
+                    remark.append(f' 外置燃料太低异常( {Out_Remaining_Fuel_list[-1]}(L) ) ！')
+            else:
+                print("外置燃料(L)：", Out_Remaining_Fuel_list[-1])
+
+            if float(Remaining_Fuel_list[-1]) >= 15 or Serial_No_list[-1] in (
+                    'CW-MFC6000-0001', 'CW-MFC6000-0002', 'CW-MFC6000-0008', 'CW-MFC6000-0010'):
+                print("内置燃料(L)：", Remaining_Fuel_list[-1])
+            else:
+                print("内置燃料(L)：", Remaining_Fuel_list[-1], "      内置燃料太低异常     ！！！")
+                remark.append(f' 内置燃料太低异常( {Remaining_Fuel_list[-1]}(L) ) ！')
+
+            print(f'内置燃料（mm）:{In_Remaining_Fuel_mm_list[-1]}\n')
+
+            print("A制氢机状态：", A_HG_Module_status_list[-1])
+
+            if 15 <= float(A_H2_Pressure_list[-1]) <= 25:
+                print("A氢气压力(Psi)：", A_H2_Pressure_list[-1])
+            elif 15 > float(A_H2_Pressure_list[-1]):
+                print("A氢气压力(Psi)：", A_H2_Pressure_list[-1], "        氢气压力太低异常      !!!")
+                remark.append(f' A_氢气压力太低异常( {A_H2_Pressure_list[-1]}(Psi) ) ！')
+            else:
+                print("A氢气压力(Psi)：", A_H2_Pressure_list[-1], "        氢气压力太高异常      !!!")
+                remark.append(f' A_氢气压力太高异常( {A_H2_Pressure_list[-1]}(Psi) ) ！')
+
+            if 350 <= float(A_Purifier_temperature_list[-1]) <= 403:
+                print("A提纯器温度(℃)：", A_Purifier_temperature_list[-1])
+            elif 350 > float(A_Purifier_temperature_list[-1]):
+                print("A提纯器温度(℃)：", A_Purifier_temperature_list[-1], "        提纯器温度太低异常      !!!")
+                remark.append(f' A_提纯器温度太低异常( {A_Purifier_temperature_list[-1]}(℃) ) ！')
+            else:
+                print("A提纯器温度(℃)：", A_Purifier_temperature_list[-1], "        提纯器温度太高异常      !!!")
+                remark.append(f' A_提纯器温度太高异常( {A_Purifier_temperature_list[-1]}(℃) ) ！')
+
+            if 350 <= float(A_Reformer_Temperature_list[-1]) <= 403:
+                print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1])
+            elif 350 > float(A_Reformer_Temperature_list[-1]):
+                print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1], "        提纯器温度太低异常      !!!")
+                remark.append(f' A_重整室温度太低异常( {A_Reformer_Temperature_list[-1]}(℃) ) ！')
+            else:
+                print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1], "         重整室温度太高异常      !!!")
+                remark.append(f' A_重整室温度太高异常( {A_Reformer_Temperature_list[-1]}(℃) ) ！')
+
+            if 0 <= float(A_Blower_temperature_list[-1]) <= 60:
+                print("A鼓风机温度(℃)：", A_Blower_temperature_list[-1], end='\n\n')
+            else:
+                print("A鼓风机温度(℃)：", A_Blower_temperature_list[-1], "        鼓风机温度太高异常      !!!",
+                      end='\n\n')
+                remark.append(f' A_鼓风机温度太高异常( {A_Blower_temperature_list[-1]}(℃) ) ！')
+
+            print("B制氢机状态：", B_HG_Module_status_list[-1])
+
+            if Serial_No_list[-1] == 'CW-10KW-0007':
+
+                if 15 <= float(B_H2_Pressure_list[-1]) <= 25:
+                    print("B氢气压力(Psi)：", B_H2_Pressure_list[-1])
+                elif 15 > float(B_H2_Pressure_list[-1]):
+                    print("B氢气压力(Psi)：", B_H2_Pressure_list[-1], "        氢气压力太低异常      !!!")
+                    remark.append(f' B_氢气压力太低异常( {B_H2_Pressure_list[-1]}(Psi) ) ！')
+                else:
+                    print("B氢气压力(Psi)：", B_H2_Pressure_list[-1], "        氢气压力太高异常      !!!")
+                    remark.append(f' B_氢气压力太高异常( {B_H2_Pressure_list[-1]}(Psi) ) ！')
+
+                if 350 <= float(B_Purifier_temperature_list[-1]) <= 403:
+                    print("B提纯器温度(℃)：", B_Purifier_temperature_list[-1])
+                elif 350 > float(A_Purifier_temperature_list[-1]):
+                    print("B提纯器温度(℃)：", B_Purifier_temperature_list[-1], "        提纯器温度太低异常      !!!")
+                    remark.append(f' B_提纯器温度太低异常( {B_Purifier_temperature_list[-1]}(℃) ) ！')
+                else:
+                    print("B提纯器温度(℃)：", B_Purifier_temperature_list[-1], "        提纯器温度太高异常      !!!")
+                    remark.append(f' B_提纯器温度太高异常( {B_Purifier_temperature_list[-1]}(℃) ) ！')
+
+                if 350 <= float(B_Reformer_Temperature_list[-1]) <= 403:
+                    print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1])
+                elif 350 > float(B_Reformer_Temperature_list[-1]):
+                    print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1], "        提纯器温度太低异常      !!!")
+                    remark.append(f' B_重整室温度太低异常( {B_Reformer_Temperature_list[-1]}(℃) ) ！')
+                else:
+                    print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1], "         重整室温度太高异常      !!!")
+                    remark.append(f' B_重整室温度太高异常( {B_Reformer_Temperature_list[-1]}(℃) ) ！')
+
+                if 0 <= float(B_Blower_temperature_list[-1]) <= 60:
+                    print("B鼓风机温度(℃)：", B_Blower_temperature_list[-1], end='\n\n')
+                else:
+                    print("B鼓风机温度(℃)：", B_Blower_temperature_list[-1], "        鼓风机温度太高异常      !!!",
+                          end='\n\n')
+                    remark.append(f' B_鼓风机温度太高异常( {B_Blower_temperature_list[-1]}(℃) ) ！')
+            else:
+                print("B氢气压力(Psi)：", B_H2_Pressure_list[-1])
+                print("B提纯器温度(℃)：", B_Purifier_temperature_list[-1])
+                print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1])
+                print("B鼓风机温度(℃)：", B_Blower_temperature_list[-1], end='\n\n')
+
+            print("A电堆状态：", A_Stack_Module_status_list[-1])
+            print("A电堆电压(V)：", A_Stack_voltage_list[-1])
+            remark.append(f' A_电堆电压：{A_Stack_voltage_list[-1]}(V)')
+
+            print("A电堆电流(A)：", A_Stack_current_list[-1])
+            print("A电堆功率(W)：", A_Stack_power_list[-1])
+            remark.append(f' A_电堆功率：{A_Stack_power_list[-1]}(W) ')
+
+            print("A1电堆堆心温度(℃)：", A1_Stack_temperature_list[-1])
+            print("A2电堆堆心温度(℃)：", A2_Stack_temperature_list[-1])
+            print("A1电堆顶部温度(℃)：", A1_Stack_top_temperature_list[-1])
+            print(f"A2电堆顶部温度(℃)：{A2_Stack_top_temperature_list[-1]}\n")
+
+            print("B电堆状态：", B_Stack_Module_status_list[-1])
             print("B电堆电压(V)：", B_Stack_voltage_list[-1])
             print("B电堆电流(A)：", B_Stack_current_list[-1])
             print("B电堆功率(W)：", B_Stack_power_list[-1])
             print("B电堆堆心温度(℃)：", B_Stack_temperature_list[-1])
             print("B1电堆顶部温度(℃)：", B1_Stack_top_temperature_list[-1])
-            print(f"B2电堆顶部温度(℃)：{B2_Stack_top_temperature_list[-1]}")
+            print(f"B2电堆顶部温度(℃)：{B2_Stack_top_temperature_list[-1]}\n")
 
-        #  将所有故障加入remark_set，最后生成excel表格的时候提取出来
-        #   ' , '.join(remark)会取出remark列表中的每个元素，并将它们用一个逗号连接起来，形成一个单独的字符串。
-        remark_set.append(' , '.join(remark))
         if len(remark) > 0:
-            print(f'\n设备所有故障 ：{remark_set[-1]}')
+            #  将所有故障加入remark_set，最后生成excel表格的时候提取出来
+            #   ' , '.join(remark)会取出remark列表中的每个元素，并将它们用一个逗号连接起来，形成一个单独的字符串。
+            remark_set.append(f'"{machine_name_list[-1]}"设备状态:' + ' , '.join(remark))
+            print(f'\n{remark_set[-1]}')
+
         else:
             print('\n设备没有出现异常故障     ... ... ...')
+            remark_set.append(''.join(remark))
 
         remark.clear()
-
-        '''
-        if float(B1_Stack_top_temperature_list[-1]) <= 50:
-            print("B1电堆顶部温度(℃)：", B1_Stack_top_temperature_list[-1])
-        else:
-            print(f"B1电堆顶部温度(℃)：{B1_Stack_top_temperature_list[-1]}         B1电堆顶部温度异常      !!!")
-
-        if float(B2_Stack_top_temperature_list[-1]) <= 50:
-            print("B2电堆顶部温度(℃)：", B2_Stack_top_temperature_list[-1])
-        else:
-            print(f"B2电堆顶部温度(℃)：{B2_Stack_top_temperature_list[-1]}         B2电堆顶部温度异常      !!!")
-        '''
 
         print(f'\n=================        =================\n')
 
@@ -737,6 +940,44 @@ def page2_data_processing(driver, wait, row_key):
     click_find_target_Details(driver, row_key)
     # 读取设备页面指定数据
     data_processing(driver, wait)
+
+
+def print_array_length():
+    print(f'日期时间 长度: {len(time_localtime_list)}')
+    print(f'设备编号 长度: {len(Serial_No_list)}')
+    print(f'设备名称 长度: {len(machine_name_list)}')
+    print(f'设备网络状态 长度: {len(network_state_list)}')
+    print(f'设备运行状态 长度: {len(System_status_list)}')
+    print(f'设备母线电压(V) 长度: {len(Current_Voltage_list)}')
+    print(f'外置燃料(L) 长度: {len(Out_Remaining_Fuel_list)}')
+    print(f'内置燃料(L) 长度: {len(Remaining_Fuel_list)}')
+    print(f'内置燃料(mm) 长度: {len(In_Remaining_Fuel_mm_list)}')
+    print(f'A_制氢机状态 长度: {len(A_HG_Module_status_list)}')
+    print(f'A_氢气压力(Psi) 长度: {len(A_H2_Pressure_list)}')
+    print(f'A_鼓风机温度(℃) 长度: {len(A_Blower_temperature_list)}')
+    print(f'A_提纯器温度(℃) 长度: {len(A_Purifier_temperature_list)}')
+    print(f'A_重整室温度(℃) 长度: {len(A_Reformer_Temperature_list)}')
+    print(f'B_制氢机状态 长度: {len(B_HG_Module_status_list)}')
+    print(f'B_氢气压力(Psi) 长度: {len(B_H2_Pressure_list)}')
+    print(f'B_鼓风机温度(℃) 长度: {len(B_Blower_temperature_list)}')
+    print(f'B_提纯器温度(℃) 长度: {len(B_Purifier_temperature_list)}')
+    print(f'B_重整室温度(℃) 长度: {len(B_Reformer_Temperature_list)}')
+    print(f'A_电堆状态 长度: {len(A_Stack_Module_status_list)}')
+    print(f'A_电堆电压(V) 长度: {len(A_Stack_voltage_list)}')
+    print(f'A_电堆电流(A) 长度: {len(A_Stack_current_list)}')
+    print(f'A_电堆功率(W) 长度: {len(A_Stack_power_list)}')
+    print(f'A1_电堆堆心温度(℃) 长度: {len(A1_Stack_temperature_list)}')
+    print(f'A2_电堆堆心温度(℃) 长度: {len(A2_Stack_temperature_list)}')
+    print(f'A1_电堆顶部温度(℃) 长度: {len(A1_Stack_top_temperature_list)}')
+    print(f'A2_电堆顶部温度(℃) 长度: {len(A2_Stack_top_temperature_list)}')
+    print(f'B_电堆状态 长度: {len(B_Stack_Module_status_list)}')
+    print(f'B_电堆电压(V) 长度: {len(B_Stack_voltage_list)}')
+    print(f'B_电堆电流(A) 长度: {len(B_Stack_current_list)}')
+    print(f'B_电堆功率(W) 长度: {len(B_Stack_power_list)}')
+    print(f'B_电堆堆心温度(℃) 长度: {len(B_Stack_temperature_list)}')
+    print(f'B1_电堆顶部温度(℃) 长度: {len(B1_Stack_top_temperature_list)}')
+    print(f'B2_电堆顶部温度(℃) 长度: {len(B2_Stack_top_temperature_list)}')
+    print(f'备注 长度: {len(remark_set)}\n\n')
 
 
 def excelfile_save(file_path):
@@ -821,12 +1062,24 @@ def excelfile_save(file_path):
     print(f'文件保存成功  ！ 保存路径：{file_path}')
 
 
-# 主函数入口
+# 主函数入口 ，调用这个函数程序从这里开始执行
 def main():
-    # 初始化网页登录
-    file_path = 'D:/爬虫数据/网页采集数据.xlsx'
+    # 目标网页URL
+    url = 'http://47.113.86.137:880/#/device/detail?serialNo=CW-0002'
+    # 设置WebDriver路径
+    driver_path = 'C:/Users/FCK/AppData/Local/Google/Chrome/Application/chromedriver.exe'  # 例如 ChromeDriver 的路径
+    # 设备文件保存路径和保存文件名称
+    file_path = 'E:/网页爬虫数据/网页采集数据.xlsx'
+    # 网页登录账号
+    loginName = 'admin'
+    # 网页登录密码
+    passWord = 'GJM456789'
+    # 循环体里面程序暂停的时间
     sleeptime = 0  # 程序暂停运行,时间单位：min
-    driver, wait = Program_Init()
+
+    # 初始化函数 ，打开谷歌浏览器，输入账号密码，登录网页首页
+    driver, wait = Program_Init(driver_path, url, loginName, passWord)
+
     print('\n~~~~~~~~~    开始爬虫     ~~~~~~~~~~\n')
     for i in range(0, 1):
         page1_data_processing(driver, wait, 3)  # 管委会                   row_key=3
