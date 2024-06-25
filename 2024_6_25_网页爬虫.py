@@ -33,6 +33,10 @@ import os
             氢气压力（H2_Pressure），鼓风机温度（Blower_temperature），提纯器温度（Purifier_temperature），重整室温度（Reformer_Temperature），制氢机运行状态（Module status: ）
         新增 B电堆参数（Power generation module B）：    
             电堆电压（Stack_voltage），电堆电流（Stack_current），电堆功率（Stack_power），B电堆堆心温度（Stack_temperature），电堆运行状态（Module status: ）
+            
+       
+版本更新：2024_6_25   更新时间2024.6.25
+更新内容：新增 外置燃料值（Remaining Fuel(LOut)：）  ，内置燃料值（液位小水箱(L):）
 ================================================= 
 '''
 
@@ -78,6 +82,9 @@ B_Stack_power_list = []
 B_Stack_Module_status_list = []
 B_Stack_temperature_list = []
 
+Out_Remaining_Fuel_list = []  # 外置液位（L）
+In_Remaining_Fuel_mm_list = []  # 内置液位（mm）
+
 
 def Program_Init():
     # 设置WebDriver路径
@@ -96,7 +103,7 @@ def Program_Init():
     driver.get(url)
 
     # 等待登录页面加载完成
-    wait = WebDriverWait(driver, 30)
+    wait = WebDriverWait(driver, 60)
 
     # 定位账号和密码输入框，以及登录按钮，并输入账号密码
     username_input = wait.until(EC.presence_of_element_located((By.ID, 'loginName')))
@@ -284,9 +291,12 @@ def data_processing(driver, wait):
     System_status_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[9]/div[3]'
     #   母线电压 绝对地址
     Current_Voltage_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[8]/div[2]'
-    #   内置燃料剩余液位
+    #   内置燃料剩余液位(L)
     Remaining_Fuel_XPath = '/html/body/div/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[4]/div[3]'
-
+    #  外置燃烧剩余液位（L）
+    Out_Remaining_Fuel_XPath = '/html/body/div/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[5]/div[1]'
+    #   内置燃料剩余液位(mm)
+    In_Remaining_Fuel_mm_XPath = '/html/body/div/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[8]/div[2]'
 
     #   A制氢机状态 绝对地址
     HG_Module_status_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[4]/div[2]'
@@ -298,7 +308,6 @@ def data_processing(driver, wait):
     Purifier_temperature_XPath = "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[1]"
     # A缓冲罐氢气压力。使用提供的XPath定位元素
     H2_Pressure_XPath = "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[1]"
-
 
     #   A电堆状态 绝对地址
     Stack_Module_status_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[4]/div[2]'
@@ -317,8 +326,6 @@ def data_processing(driver, wait):
     #   A2电堆顶部温度 绝对地址
     A2_Stack_top_temperature_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[7]/div[2]'
 
-
-
     #   B制氢机运行状态
     B_HG_Module_status_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[2]/div[2]/div[4]/div[2]'
     # B制氢机氢气压力
@@ -329,7 +336,6 @@ def data_processing(driver, wait):
     B_Purifier_temperature_XPath = '/html/body/div/div/div[2]/div[2]/div/div/div/div/div[2]/div[2]/div[2]/div[3]/div[1]'
     #   B制氢机重整室温度
     B_Reformer_Temperature_XPath = '/html/body/div/div/div[2]/div[2]/div/div/div/div/div[2]/div[2]/div[2]/div[3]/div[2]'
-
 
     #  B电堆电压 绝对地址
     B_Stack_voltage_XPath = '/html/body/div/div/div[2]/div[2]/div/div/div/div/div[3]/div[2]/div[2]/div[1]/div[1]'
@@ -392,7 +398,7 @@ def data_processing(driver, wait):
 
         Current_Voltage = split_text_by_colon(wait, Current_Voltage_XPath, -1)
 
-        Remaining_Fuel = split_text_by_colon(wait,Remaining_Fuel_XPath, -1)
+        Remaining_Fuel = split_text_by_colon(wait, Remaining_Fuel_XPath, -1)
 
         B_HG_Module_status = split_text_by_colon(wait, B_HG_Module_status_XPath, -1)
 
@@ -414,6 +420,9 @@ def data_processing(driver, wait):
 
         B_Stack_current = split_text_by_colon(wait, B_Stack_current_XPath, -1)
 
+        Out_Remaining_Fuel = split_text_by_colon(wait, Out_Remaining_Fuel_XPath, -1)
+
+        In_Remaining_Fuel_mm = split_text_by_colon(wait, In_Remaining_Fuel_mm_XPath, -1)
 
         time_localtime_list.append(time_localtime)
         Serial_No_list.append(Serial_No)
@@ -452,6 +461,8 @@ def data_processing(driver, wait):
         B_Stack_temperature_list.append(round(float(B_Stack_temperature), 2))
         B_Stack_current_list.append(round(float(B_Stack_current), 2))
 
+        Out_Remaining_Fuel_list.append(round(float(Out_Remaining_Fuel), 2))
+        In_Remaining_Fuel_mm_list.append(round(float(In_Remaining_Fuel_mm), 2))
 
         print("日期时间：", time_localtime_list[-1])
 
@@ -467,17 +478,35 @@ def data_processing(driver, wait):
 
         print("设备运行状态：", System_status_list[-1])
 
-        if float(Current_Voltage_list[-1]) >= 49.8 or Serial_No_list[-1] in ('CW-MFC6000-0001', 'CW-MFC6000-0002', 'CW-MFC6000-0008', 'CW-MFC6000-0010'):
+        if float(Current_Voltage_list[-1]) >= 49.8 or Serial_No_list[-1] in (
+        'CW-MFC6000-0001', 'CW-MFC6000-0002', 'CW-MFC6000-0008', 'CW-MFC6000-0010'):
             print("设备母线电压(V)：", Current_Voltage_list[-1])
         else:
             print("设备母线电压(V)：", Current_Voltage_list[-1], "      设备母线电压太低异常     ！！！")
             remark.append(' 设备母线电压太低异常 ！')
 
-        if float(Remaining_Fuel_list[-1]) >= 15 or Serial_No_list[-1] in ('CW-MFC6000-0001', 'CW-MFC6000-0002', 'CW-MFC6000-0008', 'CW-MFC6000-0010'):
-            print("内置燃料(L)：", Remaining_Fuel_list[-1], end='\n\n')
+        if Serial_No_list[-1] in (
+                'MFC6kD480012', 'MFC6kD480013', 'MFC6kD480014', 'MFC6kD480019', 'MFC6kD480020', 'MFC6kD480022',
+                'MFC6kD480023'):
+            if float(Out_Remaining_Fuel_list[-1]) >= 50:
+                print("外置燃料(L)：", Out_Remaining_Fuel_list[-1])
+            else:
+                print("外置燃料(L)：", Out_Remaining_Fuel_list[-1], "      外置燃料太低异常     ！！！")
+                remark.append(' 外置燃料太低异常 ！')
         else:
-            print("内置燃料(L)：", Remaining_Fuel_list[-1], "      内置燃料太低异常     ！！！", end='\n\n')
+            print("外置燃料(L)：", Out_Remaining_Fuel_list[-1])
+
+
+        if float(Remaining_Fuel_list[-1]) >= 15 or Serial_No_list[-1] in (
+        'CW-MFC6000-0001', 'CW-MFC6000-0002', 'CW-MFC6000-0008', 'CW-MFC6000-0010'):
+            print("内置燃料(L)：", Remaining_Fuel_list[-1])
+        else:
+            print("内置燃料(L)：", Remaining_Fuel_list[-1], "      内置燃料太低异常     ！！！")
             remark.append(' 内置燃料太低异常 ！')
+
+
+        print(f'内置燃料（mm）:{In_Remaining_Fuel_mm_list[-1]}\n')
+
 
         print("A制氢机状态：", A_HG_Module_status_list[-1])
 
@@ -514,7 +543,6 @@ def data_processing(driver, wait):
             print("A鼓风机温度(℃)：", A_Blower_temperature_list[-1], "        鼓风机温度太高异常      !!!", end='\n\n')
             remark.append(' A_鼓风机温度太高异常 ！')
 
-
         print("B制氢机状态：", B_HG_Module_status_list[-1])
 
         if Serial_No_list[-1] == 'CW-10KW-0007':
@@ -549,7 +577,8 @@ def data_processing(driver, wait):
             if 0 <= float(B_Blower_temperature_list[-1]) <= 60:
                 print("B鼓风机温度(℃)：", B_Blower_temperature_list[-1], end='\n\n')
             else:
-                print("B鼓风机温度(℃)：", B_Blower_temperature_list[-1], "        鼓风机温度太高异常      !!!", end='\n\n')
+                print("B鼓风机温度(℃)：", B_Blower_temperature_list[-1], "        鼓风机温度太高异常      !!!",
+                      end='\n\n')
                 remark.append(' B_鼓风机温度太高异常 ！')
         else:
             print("B氢气压力(Psi)：", B_H2_Pressure_list[-1])
@@ -719,7 +748,9 @@ def excelfile_save(file_path):
         "设备网络状态": network_state_list,
         "设备运行状态": System_status_list,
         "设备母线电压(V)": Current_Voltage_list,
+        "外置燃料(L)": Out_Remaining_Fuel_list,
         "内置燃料(L)": Remaining_Fuel_list,
+        "内置燃料(mm)": In_Remaining_Fuel_mm_list,
 
         "A_制氢机状态": A_HG_Module_status_list,
         'A_氢气压力(Psi)': A_H2_Pressure_list,
