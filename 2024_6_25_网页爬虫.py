@@ -40,6 +40,9 @@ import os
         优化故障处理逻辑
 
 
+版本更新：2024_6_26   更新时间2024.6.26
+更新内容：优化制氢机“关机”状态下，故障处理逻辑
+        
 ================================================= 
 
 设备编号 ： 设备名称 
@@ -586,9 +589,30 @@ def data_processing(driver, wait):
 
                 print("A制氢机状态：", A_HG_Module_status_list[-1], '           A_制氢机关机  !!！')
                 remark.append(f' A_制氢机关机 ！')
-                print("A氢气压力(Psi)：", A_H2_Pressure_list[-1])
-                print("A提纯器温度(℃)：", A_Purifier_temperature_list[-1])
-                print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1])
+
+                #  制氢机处于 ‘关机’ ，提纯器温度超过温度250度就报警
+                if 250 <= float(A_Purifier_temperature_list[-1]):
+
+                    if 15 <= float(A_H2_Pressure_list[-1]):
+                        print("A氢气压力(Psi)：", A_H2_Pressure_list[-1])
+                    else:
+                        print("A氢气压力(Psi)：", A_H2_Pressure_list[-1], "        氢气压力太低异常      !!!")
+                        remark.append(f' A_氢气压力太低异常( {A_H2_Pressure_list[-1]}(Psi) ) ！')
+
+                    print("A提纯器温度(℃)：", A_Purifier_temperature_list[-1], "        提纯器温度太高异常      !!!")
+                    remark.append(f' A_提纯器温度太高异常( {A_Purifier_temperature_list[-1]}(℃) ) ！')
+
+                    if 250 <= float(A_Reformer_Temperature_list[-1]):
+                        print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1], "         重整室温度太高异常      !!!")
+                        remark.append(f' A_重整室温度太高异常( {A_Reformer_Temperature_list[-1]}(℃) ) ！')
+                    else:
+                        print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1])
+
+                else:
+                    print("A氢气压力(Psi)：", A_H2_Pressure_list[-1])
+                    print("A提纯器温度(℃)：", A_Purifier_temperature_list[-1])
+                    print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1])
+
                 print("A鼓风机温度(℃)：", A_Blower_temperature_list[-1], end='\n\n')
 
             # 如果制氢机处于其它状态
@@ -644,9 +668,31 @@ def data_processing(driver, wait):
                 elif B_HG_Module_status_list[-1] == 'System Off':
                     print("B制氢机状态：", B_HG_Module_status_list[-1], '          B_制氢机关机 !!')
                     remark.append(f' B_制氢机关机 ！')
-                    print("B氢气压力(Psi)：", B_H2_Pressure_list[-1])
-                    print("B提纯器温度(℃)：", B_Purifier_temperature_list[-1])
-                    print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1])
+
+                    #  制氢机处于 ‘关机’ ，提纯器温度超过温度250度就报警
+                    if 250 <= float(B_Purifier_temperature_list[-1]):
+
+                        if 15 <= float(B_H2_Pressure_list[-1]):
+                            print("B氢气压力(Psi)：", B_H2_Pressure_list[-1])
+                        else:
+                            print("B氢气压力(Psi)：", B_H2_Pressure_list[-1], "        氢气压力太低异常      !!!")
+                            remark.append(f' B_氢气压力太低异常( {B_H2_Pressure_list[-1]}(Psi) ) ！')
+
+                        print("B提纯器温度(℃)：", B_Purifier_temperature_list[-1], "        提纯器温度太高异常      !!!")
+                        remark.append(f' B_提纯器温度太高异常( {B_Purifier_temperature_list[-1]}(℃) ) ！')
+
+                        if 250 <= float(B_Reformer_Temperature_list[-1]):
+                            print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1],
+                                  "         重整室温度太高异常      !!!")
+                            remark.append(f' B_重整室温度太高异常( {B_Reformer_Temperature_list[-1]}(℃) ) ！')
+                        else:
+                            print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1])
+
+                    else:
+                        print("B氢气压力(Psi)：", B_H2_Pressure_list[-1])
+                        print("B提纯器温度(℃)：", B_Purifier_temperature_list[-1])
+                        print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1])
+
                     print("B鼓风机温度(℃)：", B_Blower_temperature_list[-1], end='\n\n')
                 # 如果制氢机处于其它状态
                 else:
@@ -1067,9 +1113,9 @@ def main():
     # 目标网页URL
     url = 'http://47.113.86.137:880/#/device/detail?serialNo=CW-0002'
     # 设置WebDriver路径
-    driver_path = 'C:/Users/FCK/AppData/Local/Google/Chrome/Application/chromedriver.exe'  # 例如 ChromeDriver 的路径
+    driver_path = 'C:/Users/11016/AppData/Local/Google/Chrome/Application/chromedriver.exe'  # 例如 ChromeDriver 的路径
     # 设备文件保存路径和保存文件名称
-    file_path = 'E:/网页爬虫数据/网页采集数据.xlsx'
+    file_path = 'D:/爬虫数据/网页采集数据.xlsx'
     # 网页登录账号
     loginName = 'admin'
     # 网页登录密码
