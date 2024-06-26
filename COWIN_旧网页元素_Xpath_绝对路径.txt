@@ -42,6 +42,31 @@
 
 
 
+=================        =================
+
+日期时间： 2024-06-23 15:07:58
+设备编号： MFC6kD480012
+设备名称： 江门新会洋美接入网机房
+设备状态： Run
+设备母线电压(V)： 51.9
+
+A制氢机状态： Run
+A氢气压力(Psi)： 12.8         氢气压力异常      !!!
+A提纯器温度(℃)： 390.7
+A重整室温度(℃)： 368.2
+A鼓风机温度(℃)： 47.5
+
+A电堆状态： System Run
+A电堆电压(V)： 103.3         电堆电压异常      !!!
+A电堆电流(A)： 30.2          电堆电流异常      !!!
+A电堆功率(W)： 3122.0          电堆功率异常      !!!
+A1电堆堆心温度(℃)：67.3         A电堆堆心温度异常      !!!
+A2电堆堆心温度(℃)：67.3         A电堆堆心温度异常      !!!
+A1电堆顶部温度(℃)：64.4         A1电堆顶部温度异常      !!!
+A2电堆顶部温度(℃)：61.7         A2电堆顶部温度异常      !!!
+
+=================        =================
+
 
 ======================================			5G汇聚机房1			==================================================
 
@@ -49,7 +74,9 @@
 /html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/span[1]/span			Equipment Name	（设备编号）
 /html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[2]/div[1]				Remark（设备名称）
 /html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[8]/div[2]				Current Voltage(V)：（设备母线电压）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div/div[9]/div[3]				System: 	（系统状态）
 制氢机A:
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[4]/div[2]			Module status:	（制氢机状态）		
 /html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[1]			A_H2 Pressure(psi): 	（A_氢气压力）
 /html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[1]/div[3]			A_Blower temperature(℃): （A_鼓风机温度）
 /html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[2]/div[1]/div[2]/div[3]/div[1]			A_Purifier temperature(℃):（A_提纯器温度）
@@ -58,7 +85,13 @@
 /html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[1]			A_Stack voltage(V):	(A_电堆电压)
 /html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[2]			A_Stack current(A):	(A_电堆电流)
 /html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[1]/div[3]			A_Stack power(W):	(A_电堆功率)
-/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[2]/div[1]			A_Stack temperature(℃):	(A_电堆温度)
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[3]/div[1]/div[2]/div[2]/div[1]			A_Stack temperature(℃):	(A1_电堆堆心温度)
+/html/body/div/div/div[2]/div[2]/div/div/div/div/div[7]/div[2]/div[2]/div[2]/div[3]			电堆温度2(℃):		（A2_电堆堆心温度）
+
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[7]/div[1]			发电仓温度(℃):	（A1_电堆顶部温度）
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[7]/div[2]			环境温度(℃):		（A2_电堆顶部温度）			*
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[7]/div[3]			环境湿度(%):		（B1_电堆顶部温度）			*
+/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[2]/div[2]/div[6]/div[3]			电堆风机馈速(%): 	(B2_电堆顶部温度)				*
 仓内温度：
 /html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[7]/div[1]			发电仓温度(℃): 
 液位高度：
