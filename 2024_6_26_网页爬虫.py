@@ -42,6 +42,7 @@ import os
 
 版本更新：2024_6_26   更新时间2024.6.26
 更新内容：优化制氢机“关机”状态下，故障处理逻辑
+        新增 电池1Soc（安培秒累加值:） ，电池2Soc（电堆排气次数:）
         
 ================================================= 
 
@@ -114,6 +115,9 @@ B_Stack_temperature_list = []
 Out_Remaining_Fuel_list = []  # 外置液位（L）
 In_Remaining_Fuel_mm_list = []  # 内置液位（mm）
 
+battery_1_Soc_list = []  # 电池 1 容量
+battery_2_Soc_list = []  # 电池 2 容量
+
 
 def Program_Init(driver_path, url, loginName, passWord):
     """
@@ -145,11 +149,11 @@ def Program_Init(driver_path, url, loginName, passWord):
     username_input.send_keys(loginName)
     password_input.send_keys(passWord)
 
-    time.sleep(0.5)
+    time.sleep(1)
     # 提交登录信息
     login_button.click()
 
-    time.sleep(0.5)
+    time.sleep(1)
 
     return driver, wait
 
@@ -164,14 +168,14 @@ def click_Equipment_List(wait, driver):
 
     :return:
     """
-    time.sleep(1)
+    time.sleep(1.5)
     # 使用更具体的CSS选择器，确保选中的是可点击的元素
     submenu_title = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.ant-menu-submenu-title')))
 
     # 点击下拉菜单标题以展开菜单
     submenu_title.click()
 
-    time.sleep(1)
+    time.sleep(1.5)
     # 定位并点击“Equipment List”列表项
     # 如果菜单项是一个<a>标签包裹<span>，确保XPath正确地定位到这个<a>标签
     equipment_list_item = wait.until(EC.element_to_be_clickable((By.XPATH, '//a/span[text()="Equipment List"]')))
@@ -234,7 +238,7 @@ def click_find_target_Details(driver, row_key):
 
     # 在找到的 <tr> 元素中定位到 "Details" 链接
     # 假设 "Details" 链接具有 data-v-11b2bf7e 属性
-    time.sleep(0.5)
+    time.sleep(1)
     details_link_selector = "a[data-v-11b2bf7e]"
     details_link = target_row_element.find_element(By.CSS_SELECTOR, details_link_selector)
     # print(type(details_link))
@@ -242,7 +246,7 @@ def click_find_target_Details(driver, row_key):
 
     details_link.click()
     # 使用 JavaScript 滚动到页面顶部
-    time.sleep(0.5)
+    time.sleep(1)
     driver.execute_script("window.scrollTo(0, 0);")
 
     time.sleep(5)
@@ -388,6 +392,10 @@ def data_processing(driver, wait):
     B1_Stack_top_temperature_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[1]/div[2]/div[7]/div[3]'
     #   B2电堆顶部温度 绝对地址
     B2_Stack_top_temperature_XPath = '/html/body/div[1]/div/div[2]/div[2]/div/div/div/div/div[6]/div[2]/div[2]/div[6]/div[3]'
+    #   电池1 SOC 绝对地址
+    battery_1_Soc_XPath = '/html/body/div/div/div[2]/div[2]/div/div/div/div/div[6]/div[2]/div[2]/div[1]/div[3]'
+    #   电池2 SOC 绝对地址
+    battery_2_Soc_XPath = '/html/body/div/div/div[2]/div[2]/div/div/div/div/div[6]/div[2]/div[2]/div[2]/div[3]'
 
     try:
 
@@ -461,6 +469,10 @@ def data_processing(driver, wait):
 
         In_Remaining_Fuel_mm = split_text_by_colon(wait, In_Remaining_Fuel_mm_XPath, -1)
 
+        battery_1_Soc = split_text_by_colon(wait, battery_1_Soc_XPath, -1)
+
+        battery_2_Soc = split_text_by_colon(wait, battery_2_Soc_XPath, -1)
+
         time_localtime_list.append(time_localtime)
         Serial_No_list.append(Serial_No)
         machine_name_list.append(Remark)
@@ -501,6 +513,9 @@ def data_processing(driver, wait):
         Out_Remaining_Fuel_list.append(round(float(Out_Remaining_Fuel), 2))
         In_Remaining_Fuel_mm_list.append(round(float(In_Remaining_Fuel_mm), 2))
 
+        battery_1_Soc_list.append(round(float(battery_1_Soc), 2))
+        battery_2_Soc_list.append(round(float(battery_2_Soc), 2))
+
         print("日期时间：", time_localtime_list[-1])
 
         print("设备编号：", Serial_No_list[-1])
@@ -524,6 +539,39 @@ def data_processing(driver, wait):
             else:
                 print("设备母线电压(V)：", Current_Voltage_list[-1], "      设备母线电压太低异常     ！！！")
                 remark.append(f' 设备母线电压太低异常（ {Current_Voltage_list[-1]}(V) ） ！')
+
+            # 针对管委会，川岛，四川 有两块电池情况
+            if Serial_No_list[-1] in ('CW-10KW-0007', 'MFC6kD480022', 'MFC6kD480023'):
+
+                if float(battery_1_Soc_list[-1]) >= 60:
+                    print(f'设备电池1_Soc: {battery_1_Soc_list[-1]}')
+                else:
+
+                    print(f'设备电池1_Soc: {battery_1_Soc_list[-1]}         电池1_Soc太低异常     ！！！')
+                    remark.append(f' 电池1_Soc太低异常（ {battery_1_Soc_list[-1]} ） ！')
+
+                if float(battery_2_Soc_list[-1]) >= 60:
+                    print(f'设备电池2_Soc: {battery_2_Soc_list[-1]}')
+                else:
+
+                    print(f'设备电池2_Soc: {battery_2_Soc_list[-1]}         电池2_Soc太低异常     ！！！')
+                    remark.append(f' 电池2_Soc太低异常（ {battery_2_Soc_list[-1]} ） ！')
+
+            # 针对白石，楼下 没有电池信息，不报故障
+            elif Serial_No_list[-1] in ('CW-MFC6000-0001', 'CW-MFC6000-0002', 'CW-MFC6000-0008', 'CW-MFC6000-0010'):
+
+                print(f'设备电池1_Soc: {battery_1_Soc_list[-1]}')
+                print(f'设备电池2_Soc: {battery_2_Soc_list[-1]}')
+
+            # 其它站点只有电池2的电池，SOC低于60报故障
+            else:
+                print(f'设备电池1_Soc: {battery_1_Soc_list[-1]}')
+                if float(battery_2_Soc_list[-1]) >= 60:
+                    print(f'设备电池2_Soc: {battery_2_Soc_list[-1]}')
+                else:
+
+                    print(f'设备电池2_Soc: {battery_2_Soc_list[-1]}         电池2_Soc太低异常     ！！！')
+                    remark.append(f' 电池2_Soc太低异常（ {battery_2_Soc_list[-1]} ） ！')
 
             if Serial_No_list[-1] in (
                     'MFC6kD480012', 'MFC6kD480013', 'MFC6kD480014', 'MFC6kD480019', 'MFC6kD480020', 'MFC6kD480022',
@@ -603,7 +651,8 @@ def data_processing(driver, wait):
                     remark.append(f' A_提纯器温度太高异常( {A_Purifier_temperature_list[-1]}(℃) ) ！')
 
                     if 250 <= float(A_Reformer_Temperature_list[-1]):
-                        print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1], "         重整室温度太高异常      !!!")
+                        print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1],
+                              "         重整室温度太高异常      !!!")
                         remark.append(f' A_重整室温度太高异常( {A_Reformer_Temperature_list[-1]}(℃) ) ！')
                     else:
                         print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1])
@@ -817,6 +866,39 @@ def data_processing(driver, wait):
                 print("设备母线电压(V)：", Current_Voltage_list[-1], "      设备母线电压太低异常     ！！！")
                 remark.append(f' 设备母线电压太低异常（ {Current_Voltage_list[-1]}(V) ） ！')
 
+            # 针对管委会，川岛，四川 有两块电池情况
+            if Serial_No_list[-1] in ('CW-10KW-0007', 'MFC6kD480022', 'MFC6kD480023'):
+
+                if float(battery_1_Soc_list[-1]) >= 60:
+                    print(f'设备电池1_Soc: {battery_1_Soc_list[-1]}')
+                else:
+
+                    print(f'设备电池1_Soc: {battery_1_Soc_list[-1]}         电池1_Soc太低异常     ！！！')
+                    remark.append(f' 电池1_Soc太低异常（ {battery_1_Soc_list[-1]} ） ！')
+
+                if float(battery_2_Soc_list[-1]) >= 60:
+                    print(f'设备电池2_Soc: {battery_2_Soc_list[-1]}')
+                else:
+
+                    print(f'设备电池2_Soc: {battery_2_Soc_list[-1]}         电池2_Soc太低异常     ！！！')
+                    remark.append(f' 电池2_Soc太低异常（ {battery_2_Soc_list[-1]} ） ！')
+
+            # 针对白石，楼下 没有电池信息，不报故障
+            elif Serial_No_list[-1] in ('CW-MFC6000-0001', 'CW-MFC6000-0002', 'CW-MFC6000-0008', 'CW-MFC6000-0010'):
+
+                print(f'设备电池1_Soc: {battery_1_Soc_list[-1]}')
+                print(f'设备电池2_Soc: {battery_2_Soc_list[-1]}')
+
+            # 其它站点只有电池2的电池，SOC低于60报故障
+            else:
+                print(f'设备电池1_Soc: {battery_1_Soc_list[-1]}')
+                if float(battery_2_Soc_list[-1]) >= 60:
+                    print(f'设备电池2_Soc: {battery_2_Soc_list[-1]}')
+                else:
+
+                    print(f'设备电池2_Soc: {battery_2_Soc_list[-1]}         电池2_Soc太低异常     ！！！')
+                    remark.append(f' 电池2_Soc太低异常（ {battery_2_Soc_list[-1]} ） ！')
+
             if Serial_No_list[-1] in (
                     'MFC6kD480012', 'MFC6kD480013', 'MFC6kD480014', 'MFC6kD480019', 'MFC6kD480020', 'MFC6kD480022',
                     'MFC6kD480023'):
@@ -995,6 +1077,8 @@ def print_array_length():
     print(f'设备网络状态 长度: {len(network_state_list)}')
     print(f'设备运行状态 长度: {len(System_status_list)}')
     print(f'设备母线电压(V) 长度: {len(Current_Voltage_list)}')
+    print(f'电池1_Soc 长度: {len(battery_1_Soc_list)}')
+    print(f'电池2_Soc 长度: {len(battery_2_Soc_list)}')
     print(f'外置燃料(L) 长度: {len(Out_Remaining_Fuel_list)}')
     print(f'内置燃料(L) 长度: {len(Remaining_Fuel_list)}')
     print(f'内置燃料(mm) 长度: {len(In_Remaining_Fuel_mm_list)}')
@@ -1035,6 +1119,8 @@ def excelfile_save(file_path):
         "设备网络状态": network_state_list,
         "设备运行状态": System_status_list,
         "设备母线电压(V)": Current_Voltage_list,
+        '电池1_Soc': battery_1_Soc_list,
+        '电池2_Soc': battery_2_Soc_list,
         "外置燃料(L)": Out_Remaining_Fuel_list,
         "内置燃料(L)": Remaining_Fuel_list,
         "内置燃料(mm)": In_Remaining_Fuel_mm_list,
