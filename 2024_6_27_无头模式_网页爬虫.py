@@ -47,7 +47,8 @@ from selenium.webdriver.common.action_chains import ActionChains
 版本更新：2024_6_26A   更新时间2024.6.26   
         新增无头模式（不使用浏览器界面，可以直接运行在服务器上）
 
-        
+版本更新：2024_6_27   更新时间2024.6.27   
+        优化制氢机“关机”状态下，故障处理逻辑
 ================================================= 
 
 设备编号 ： 设备名称 
@@ -688,18 +689,20 @@ def data_processing(driver, wait):
 
                     print("A提纯器温度(℃)：", A_Purifier_temperature_list[-1], "        提纯器温度太高异常      !!!")
                     remark.append(f' A_提纯器温度太高异常( {A_Purifier_temperature_list[-1]}(℃) ) ！')
-
-                    if 250 <= float(A_Reformer_Temperature_list[-1]):
-                        print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1],
-                              "         重整室温度太高异常      !!!")
-                        remark.append(f' A_重整室温度太高异常( {A_Reformer_Temperature_list[-1]}(℃) ) ！')
-                    else:
-                        print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1])
-
                 else:
                     print("A氢气压力(Psi)：", A_H2_Pressure_list[-1])
                     print("A提纯器温度(℃)：", A_Purifier_temperature_list[-1])
+                    # print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1])
+
+
+                if 250 <= float(A_Reformer_Temperature_list[-1]):
+                    print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1],
+                          "         重整室温度太高异常      !!!")
+                    remark.append(f' A_重整室温度太高异常( {A_Reformer_Temperature_list[-1]}(℃) ) ！')
+                else:
                     print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1])
+
+
 
                 print("A鼓风机温度(℃)：", A_Blower_temperature_list[-1], end='\n\n')
 
@@ -768,18 +771,19 @@ def data_processing(driver, wait):
 
                         print("B提纯器温度(℃)：", B_Purifier_temperature_list[-1], "        提纯器温度太高异常      !!!")
                         remark.append(f' B_提纯器温度太高异常( {B_Purifier_temperature_list[-1]}(℃) ) ！')
-
-                        if 250 <= float(B_Reformer_Temperature_list[-1]):
-                            print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1],
-                                  "         重整室温度太高异常      !!!")
-                            remark.append(f' B_重整室温度太高异常( {B_Reformer_Temperature_list[-1]}(℃) ) ！')
-                        else:
-                            print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1])
-
                     else:
                         print("B氢气压力(Psi)：", B_H2_Pressure_list[-1])
                         print("B提纯器温度(℃)：", B_Purifier_temperature_list[-1])
+                        # print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1])
+
+                    if 250 <= float(B_Reformer_Temperature_list[-1]):
+                        print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1],
+                              "         重整室温度太高异常      !!!")
+                        remark.append(f' B_重整室温度太高异常( {B_Reformer_Temperature_list[-1]}(℃) ) ！')
+                    else:
                         print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1])
+
+
 
                     print("B鼓风机温度(℃)：", B_Blower_temperature_list[-1], end='\n\n')
                 # 如果制氢机处于其它状态
