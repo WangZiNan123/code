@@ -10,9 +10,11 @@ import pandas as pd
 import openpyxl
 import os
 from selenium.webdriver.common.action_chains import ActionChains
+import mysql.connector
+from mysql.connector import Error
 
 '''
-================================================= 
+========================================    此版本只供Linux服务器使用         ========================================
 
 版本更新：2024_6_18   更新时间2024.6.18
 网页爬虫 COWIN 数据，目前测试抓取’5G汇聚机房1‘ 的数据 ’记录时间，设备编号（Serial_No），设备名称（Remark），氢气压力（H2_Pressure）
@@ -51,7 +53,12 @@ from selenium.webdriver.common.action_chains import ActionChains
 版本更新：2024_6_27   更新时间2024.6.27   
         优化制氢机“关机”状态下，故障处理逻辑
         
-================================================= 
+ 版本更新：2024_6_27A   更新时间2024.6.27   
+        新增数据保存到数据库里面
+
+  
+
+========================================    此版本只供Linux服务器使用         ========================================
 
 设备编号 ： 设备名称 
 
@@ -151,7 +158,6 @@ def Program_Init(driver_path, url, loginName, passWord):
     # 使用options对象作为服务启动Chrome
     driver = webdriver.Chrome(options=options)
 
-
     # 使用Selenium打开网页
     driver.get(url)
 
@@ -187,7 +193,6 @@ def click_Equipment_List(wait, driver):
     :return:
     """
 
-
     time.sleep(1.5)
     # 使用更具体的CSS选择器，确保选中的是可点击的元素
     equipment_management_xpath = "//span[normalize-space(.)='Equipment Management']"
@@ -195,7 +200,6 @@ def click_Equipment_List(wait, driver):
     print(f'submenu_title :  {equipment_management.is_displayed()}')
     equipment_management.click()  # 点击元素
     print('点击左侧菜单栏')
-
 
     time.sleep(1.5)
     # 定位并点击“Equipment List”列表项
@@ -207,6 +211,7 @@ def click_Equipment_List(wait, driver):
     driver.execute_script("arguments[0].click();", equipment_list_item)
 
     print('点击左侧‘equipment_list’')
+
 
 def click_find_target_Details(driver, row_key):
     """
@@ -708,8 +713,6 @@ def data_processing(driver, wait):
                 else:
                     print("A重整室温度(℃)：", A_Reformer_Temperature_list[-1])
 
-
-
                 print("A鼓风机温度(℃)：", A_Blower_temperature_list[-1], end='\n\n')
 
             # 如果制氢机处于其它状态
@@ -788,8 +791,6 @@ def data_processing(driver, wait):
                         remark.append(f' B_重整室温度太高异常( {B_Reformer_Temperature_list[-1]}(℃) ) ！')
                     else:
                         print("B重整室温度(℃)：", B_Reformer_Temperature_list[-1])
-
-
 
                     print("B鼓风机温度(℃)：", B_Blower_temperature_list[-1], end='\n\n')
                 # 如果制氢机处于其它状态
@@ -1080,8 +1081,6 @@ def data_processing(driver, wait):
 
         remark.clear()
 
-
-
         print(f'\n=================        =================\n')
 
     except Exception as e:
@@ -1161,6 +1160,248 @@ def print_array_length():
     print(f'备注 长度: {len(remark_set)}\n\n')
 
 
+# 存储到服务器数据库中
+def databases_save():
+
+    table_name = 'COWIN_爬虫数据库'
+    column_name = '备注'
+    primary_key = 'id'
+    value17_34 = 'id'
+    results_list17_34 = []
+    results_list = []
+    databases_list = []
+    # 取出列表里面的每一行的值存储到元组里面
+    for i in range(len(time_localtime_list)):
+        list_tuple = [time_localtime_list[i],
+                      Serial_No_list[i],
+                      machine_name_list[i],
+                      network_state_list[i],
+                      System_status_list[i],
+                      Current_Voltage_list[i],
+                      battery_1_Soc_list[i],
+                      battery_2_Soc_list[i],
+                      Out_Remaining_Fuel_list[i],
+                      Remaining_Fuel_list[i],
+                      In_Remaining_Fuel_mm_list[i],
+
+                      A_HG_Module_status_list[i],
+                      A_H2_Pressure_list[i],
+                      A_Blower_temperature_list[i],
+                      A_Purifier_temperature_list[i],
+                      A_Reformer_Temperature_list[i],
+
+                      B_HG_Module_status_list[i],
+                      B_H2_Pressure_list[i],
+                      B_Blower_temperature_list[i],
+                      B_Purifier_temperature_list[i],
+                      B_Reformer_Temperature_list[i],
+
+                      A_Stack_Module_status_list[i],
+                      A_Stack_voltage_list[i],
+                      A_Stack_current_list[i],
+                      A_Stack_power_list[i],
+                      A1_Stack_temperature_list[i],
+                      A2_Stack_temperature_list[i],
+                      A1_Stack_top_temperature_list[i],
+                      A2_Stack_top_temperature_list[i],
+
+                      B_Stack_Module_status_list[i],
+                      B_Stack_voltage_list[i],
+                      B_Stack_current_list[i],
+                      B_Stack_power_list[i],
+                      B_Stack_temperature_list[i],
+                      B1_Stack_top_temperature_list[i],
+                      B2_Stack_top_temperature_list[i],
+
+                      remark_set[i]]
+
+        databases_list.append(tuple(list_tuple))
+        list_tuple.clear()
+
+    # 配置数据库连接参数
+    db_config = {
+        'host': '8.138.136.163',
+        'user': 'root',
+        'password': '123456wang',
+        'database': '网页爬虫',
+        'raise_on_warnings': True
+    }
+
+    # 连接到MySQL数据库
+    try:
+        conn = mysql.connector.connect(**db_config)
+
+        if conn.is_connected():
+            print("数据库连接成功。")
+
+            # 接下来的代码（数据库连接、创建表、插入数据等）保持不变
+            cursor = conn.cursor()
+            cursor.execute("SHOW TABLES LIKE %s", (f'{table_name}',))
+            table_exists = cursor.fetchone()
+            if table_exists:
+                print(f"表 'COWIN_爬虫数据库' 已存在。")
+            else:
+                print(f"创建一个新表 'COWIN_爬虫数据库'")
+            # 创建数据库表格
+                cursor.execute("""     CREATE TABLE `COWIN_爬虫数据库`  (
+                                      `id` INT NOT NULL AUTO_INCREMENT,
+                                      `日期时间` VARCHAR(100),
+                                      `设备编号` VARCHAR(100),
+                                      `设备名称` VARCHAR(100),
+                                      `设备网络状态` VARCHAR(100) ,
+                                      `设备运行状态` VARCHAR(100) ,
+                                      `设备母线电压(V)` DOUBLE,
+                                      `电池1_Soc` DOUBLE,
+                                      `电池2_Soc` DOUBLE,
+                                      `外置燃料(L)` DOUBLE,
+                                      `内置燃料(L)` DOUBLE,
+                                      `内置燃料(mm)` DOUBLE,
+
+                                      `A_制氢机状态` VARCHAR(100),
+                                      `A_氢气压力(Psi)` DOUBLE,
+                                      `A_鼓风机温度(℃)` DOUBLE,
+                                      `A_提纯器温度(℃)` DOUBLE,
+                                      `A_重整室温度(℃)` DOUBLE,
+
+                                      `B_制氢机状态` VARCHAR(100),
+                                      `B_氢气压力(Psi)` DOUBLE,
+                                      `B_鼓风机温度(℃)` DOUBLE,
+                                      `B_提纯器温度(℃)` DOUBLE,
+                                      `B_重整室温度(℃)` DOUBLE,
+
+                                      `A_电堆状态` VARCHAR(100),
+                                      `A_电堆电压(V)` DOUBLE,
+                                      `A_电堆电流(A)` DOUBLE,
+                                      `A_电堆功率(W)` DOUBLE,
+                                      `A1_电堆堆心温度(℃)` DOUBLE,
+                                      `A2_电堆堆心温度(℃)` DOUBLE,
+                                      `A1_电堆顶部温度(℃)` DOUBLE,
+                                      `A2_电堆顶部温度(℃)` DOUBLE,
+
+                                      `B_电堆状态` VARCHAR(100),
+                                      `B_电堆电压(V)` DOUBLE,
+                                      `B_电堆电流(A)` DOUBLE,
+                                      `B_电堆功率(W)` DOUBLE,
+                                      `B_电堆堆心温度(℃)` DOUBLE,
+                                      `B1_电堆顶部温度(℃)` DOUBLE,
+                                      `B2_电堆顶部温度(℃)` DOUBLE,
+
+                                      `备注` TEXT,
+
+                                      PRIMARY KEY (`id`)
+                                    )   """)
+            # 数据库插入模板
+            sql = ("INSERT INTO COWIN_爬虫数据库 ("
+                   "`日期时间`, "
+                   "`设备编号`, "
+                   "`设备名称`, "
+                   "`设备网络状态`, "
+                   "`设备运行状态`,"
+                   "`设备母线电压(V)`,"
+                   "`电池1_Soc`,"
+                   "`电池2_Soc`,"
+                   "`外置燃料(L)`,"
+                   "`内置燃料(L)`,"
+                   "`内置燃料(mm)`,"
+
+                   "`A_制氢机状态`,"
+                   "`A_氢气压力(Psi)`,"
+                   "`A_鼓风机温度(℃)`,"
+                   "`A_提纯器温度(℃)`,"
+                   "`A_重整室温度(℃)`,"
+
+                   "`B_制氢机状态`,"
+                   "`B_氢气压力(Psi)`,"
+                   "`B_鼓风机温度(℃)`,"
+                   "`B_提纯器温度(℃)`,"
+                   "`B_重整室温度(℃)`,"
+
+                   "`A_电堆状态`,"
+                   "`A_电堆电压(V)`,"
+                   "`A_电堆电流(A)`,"
+                   "`A_电堆功率(W)`,"
+                   "`A1_电堆堆心温度(℃)`,"
+                   "`A2_电堆堆心温度(℃)`,"
+                   "`A1_电堆顶部温度(℃)`,"
+                   "`A2_电堆顶部温度(℃)`,"
+
+                   "`B_电堆状态`,"
+                   "`B_电堆电压(V)`,"
+                   "`B_电堆电流(A)`,"
+                   "`B_电堆功率(W)`,"
+                   "`B_电堆堆心温度(℃)`,"
+                   "`B1_电堆顶部温度(℃)`,"
+                   "`B2_电堆顶部温度(℃)`,"
+
+                   "`备注`"
+
+                   ")"
+                   "VALUES (%s, %s, %s, %s, %s,%s,%s,%s,%s,"
+                   "%s, %s, %s, %s, %s,%s, %s, %s, %s, %s,"
+                   "%s, %s, %s, %s, %s,%s, %s, %s,"
+                   "%s, %s, %s, %s, %s,%s, %s, %s, %s, %s)")
+
+
+
+            # print(len(tuples_list[0]))  # 打印第一个元组，检查值的数量和类型
+            cursor.executemany(sql, databases_list)
+
+            # 提交事务
+            conn.commit()
+            databases_list.clear()
+            print(f"数据存储到->{table_name} 成功 !!!")
+
+            # 编写SQL查询语句
+            query17_34 = f"SELECT {column_name} FROM {table_name} ORDER BY {value17_34} DESC LIMIT 17 OFFSET 17;"
+            query = f"SELECT {column_name} FROM {table_name} ORDER BY {primary_key} DESC LIMIT 17;"
+            # 执行查询
+            cursor.execute(query)
+            # 获取查询结果
+            results = cursor.fetchall()
+            # 执行查询
+            cursor.execute(query17_34)
+            # 获取查询结果
+            results17_34 = cursor.fetchall()
+
+            # 打印结果
+            for result in results:
+                if result[0] != '0':
+                    results_list.append(result[0])
+            # print(f'最后插入的17个数故障表：{results_list}')
+
+            # 打印结果
+            for result in results17_34:
+                if result[0] != '0':
+                    results_list17_34.append(result[0])
+
+            # 初始化一个标志变量，用于跟踪是否所有元素都相等
+            all_equal = True  # 假设所有元素都是相等的
+
+            if len(results_list) == len(results_list17_34):
+                for i in range(len(results_list)):
+                    if results_list[i] != results_list17_34[i]:
+                        all_equal = False
+                if all_equal:
+                    print(f'最后17个值 和 17-34的值是相等的：{results_list}')
+                else:
+                    print(f'最后17个值 和 17-34的值是不相等的：{results_list}')
+            else:
+                print(f'最后17个值 和 17-34的值是不相等的：{results_list}')
+
+            results_list17_34.clear()
+            results_list.clear()
+
+    except Error as e:
+        print("数据库操作出错：", e)
+
+    finally:
+        # 关闭游标和连接
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+            print("MySQL连接已关闭。")
+
+# 保存为excel表格
 def excelfile_save(file_path):
     new_pd = pd.DataFrame({
 
@@ -1252,7 +1493,7 @@ def main():
     # 设置WebDriver路径
     driver_path = '/usr/bin/chromedriver'  # 例如 ChromeDriver 的路径
     # 设备文件保存路径和保存文件名称
-    file_path = '/test/excel/网页采集数据.xlsx'
+    # file_path = '/test/excel/网页采集数据.xlsx'
     # 网页登录账号
     loginName = 'admin'
     # 网页登录密码
@@ -1287,7 +1528,10 @@ def main():
 
         print('  '.join(remark_set))
 
-        excelfile_save(file_path)
+        # excelfile_save(file_path)
+
+        # 将数据保存到数据库中
+        databases_save()
 
         print(f'第 {i} 次系统进入休眠 ， 休眠时长：{sleeptime} min')
         time.sleep(60 * sleeptime)
