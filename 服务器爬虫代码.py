@@ -441,7 +441,7 @@ def data_processing(driver, wait):
     battery_1_Soc_XPath = '/html/body/div/div/div[2]/div[2]/div/div/div/div/div[6]/div[2]/div[2]/div[1]/div[3]'
     #   电池2 SOC 绝对地址
     battery_2_Soc_XPath = '/html/body/div/div/div[2]/div[2]/div/div/div/div/div[6]/div[2]/div[2]/div[2]/div[3]'
-
+    print("设备信息页面")
     try:
 
         #   日期时间
@@ -560,6 +560,8 @@ def data_processing(driver, wait):
 
         battery_1_Soc_list.append(round(float(battery_1_Soc), 2))
         battery_2_Soc_list.append(round(float(battery_2_Soc), 2))
+
+        print(f'网页数据处理中........\n')
 
         print("日期时间：", time_localtime_list[-1])
 
