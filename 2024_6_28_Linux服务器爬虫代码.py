@@ -46,17 +46,19 @@ from mysql.connector import Error
 版本更新：2024_6_26   更新时间2024.6.26
 更新内容：优化制氢机“关机”状态下，故障处理逻辑
         新增 电池1Soc（安培秒累加值:） ，电池2Soc（电堆排气次数:）
-        
+
 版本更新：2024_6_26A   更新时间2024.6.26   
         新增无头模式（不使用浏览器界面，可以直接运行在服务器上）
 
 版本更新：2024_6_27   更新时间2024.6.27   
         优化制氢机“关机”状态下，故障处理逻辑
-        
+
  版本更新：2024_6_27A   更新时间2024.6.27   
         新增数据保存到数据库里面
 
-  
+版本：2024_6_28            更新时间：2024.6.28   
+更新内容：优化最后输出的逻辑 ，分新旧故障输出，对比最后17-34个的值与最后17个的值，如果相同，则输出旧故障，不同输出新故障
+
 
 ========================================    此版本只供Linux服务器使用         ========================================
 
@@ -131,6 +133,9 @@ In_Remaining_Fuel_mm_list = []  # 内置液位（mm）
 
 battery_1_Soc_list = []  # 电池 1 容量
 battery_2_Soc_list = []  # 电池 2 容量
+
+new_alarm = []  # 新的故障告警
+old_alarm = []  # 旧的故障告警
 
 
 def Program_Init(driver_path, url, loginName, passWord):
@@ -1162,7 +1167,6 @@ def print_array_length():
 
 # 存储到服务器数据库中
 def databases_save():
-
     table_name = 'COWIN_爬虫数据库'
     column_name = '备注'
     primary_key = 'id'
@@ -1242,7 +1246,7 @@ def databases_save():
                 print(f"表 'COWIN_爬虫数据库' 已存在。")
             else:
                 print(f"创建一个新表 'COWIN_爬虫数据库'")
-            # 创建数据库表格
+                # 创建数据库表格
                 cursor.execute("""     CREATE TABLE `COWIN_爬虫数据库`  (
                                       `id` INT NOT NULL AUTO_INCREMENT,
                                       `日期时间` VARCHAR(100),
@@ -1341,8 +1345,6 @@ def databases_save():
                    "%s, %s, %s, %s, %s,%s, %s, %s,"
                    "%s, %s, %s, %s, %s,%s, %s, %s, %s, %s)")
 
-
-
             # print(len(tuples_list[0]))  # 打印第一个元组，检查值的数量和类型
             cursor.executemany(sql, databases_list)
 
@@ -1363,30 +1365,51 @@ def databases_save():
             # 获取查询结果
             results17_34 = cursor.fetchall()
 
-            # 打印结果
+            # 取出值‘备注’里面最后17个值
             for result in results:
                 if result[0] != '0':
                     results_list.append(result[0])
             # print(f'最后插入的17个数故障表：{results_list}')
 
-            # 打印结果
+            # 取出值‘备注’里面最后17-34个值
             for result in results17_34:
                 if result[0] != '0':
                     results_list17_34.append(result[0])
 
-            # 初始化一个标志变量，用于跟踪是否所有元素都相等
-            all_equal = True  # 假设所有元素都是相等的
+            new_alarm.clear()
+            old_alarm.clear()
 
-            if len(results_list) == len(results_list17_34):
-                for i in range(len(results_list)):
-                    if results_list[i] != results_list17_34[i]:
-                        all_equal = False
-                if all_equal:
-                    print(f'最后17个值 和 17-34的值是相等的：{results_list}')
+            # print(f'results_list元素：:{results_list}')
+            # print(f'results_list17_34元素：{results_list17_34}')
+
+            # 检查 '备注' 里面是否有故障
+            if len(results_list) > 0:
+                # 检查是否有非 '0.0' 的元素
+                if any(element != '0.0' for element in results_list):
+                    # 将 results_list17_34 中的所有元素添加到一个集合中，以提高查找效率
+                    set_results_list17_34 = set(results_list17_34)
+
+                    # 遍历 results_list 中的每个元素
+                    for fault in results_list:
+                        # 如果该元素不在 results_list17_34 中，说明是新故障
+                        if fault not in set_results_list17_34:
+                            new_alarm.append(fault)
+                        else:
+                            # 如果该元素在 results_list17_34 中，说明是旧故障
+                            old_alarm.append(fault)
+
+                    # 去除 old_alarm 中的重复项 。将列表转换成集合（set），自动去除重复元素，然后再将结果转换回列表。
+                    # 集合是一个无序的数据结构，它不允许有重复的元素。
+                    # old_alarm = list(set(old_alarm))
+                    # 打印结果
+                    print(f'旧故障：{old_alarm}')
+                    print(f'新故障：{new_alarm}')
                 else:
-                    print(f'最后17个值 和 17-34的值是不相等的：{results_list}')
+                    # 所有元素都是 '0.0'，没有故障，所以不执行任何操作
+                    print("没有故障信息，无需计算。")
             else:
-                print(f'最后17个值 和 17-34的值是不相等的：{results_list}')
+
+                print(f'没有故障发生 ......')
 
             results_list17_34.clear()
             results_list.clear()
@@ -1400,6 +1423,7 @@ def databases_save():
             cursor.close()
             conn.close()
             print("MySQL连接已关闭。")
+
 
 # 保存为excel表格
 def excelfile_save(file_path):
