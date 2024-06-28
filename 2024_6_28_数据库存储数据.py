@@ -1,3 +1,5 @@
+import re
+
 import mysql.connector
 from mysql.connector import Error
 import pandas as pd
@@ -27,6 +29,9 @@ new_alarm = []  # 新的故障告警
 old_alarm = []  # 旧的故障告警
 same_alarm = []  # 相同的故障
 
+alarm_name = []
+
+device_names =[]
 # 配置数据库连接参数
 db_config = {
     'host': '8.138.136.163',
@@ -155,7 +160,7 @@ try:
                "%s, %s, %s, %s, %s,%s, %s, %s,"
                "%s, %s, %s, %s, %s,%s, %s, %s, %s, %s)")
 
-        temp = pd.read_excel('D:/爬虫数据/网页采集数据_7.xlsx')
+        temp = pd.read_excel('D:/爬虫数据/网页采集数据_5.xlsx')
 
         # for i in range(len(temp.columns)):
         #     print(temp.columns[i],end=',')
@@ -249,7 +254,7 @@ try:
         # 检查 '备注' 里面是否有故障
         if len(results_list) > 0:
             # 检查是否有非 '0.0' 的元素
-            if any(element != '0.0' for element in results_list):
+            if any(element != '0.0' or element != 0 for element in results_list):
                 # 将 results_list17_34 中的所有元素添加到一个集合中，以提高查找效率
                 set_results_list17_34 = set(results_list17_34)
 
@@ -268,6 +273,19 @@ try:
                 # 打印结果
                 print(f'旧故障：{old_alarm}')
                 print(f'新故障：{new_alarm}')
+
+                # 正则表达式匹配双引号内的设备名称
+                device_name_pattern = re.compile(r'"([^"]+)"')
+
+                # 遍历 results_list 并使用正则表达式提取设备名称
+                for item in new_alarm:
+                    match = device_name_pattern.search(item)
+                    if match:
+                        device_names.append(match.group(1))  # 添加匹配到的设备名称
+
+                # 打印设备名称列表
+                print(f'设备名称列表: {device_names}')
+
             else:
                 # 所有元素都是 '0.0'，没有故障，所以不执行任何操作
                 print("没有故障信息，无需计算。")
