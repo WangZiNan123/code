@@ -1,52 +1,44 @@
-# -*- coding: utf-8 -*-
-import os
-import sys
-from typing import List
-
-from alibabacloud_dysmsapi20170525.client import Client as Dysmsapi20170525Client
-from alibabacloud_tea_openapi import models as open_api_models
-from alibabacloud_dysmsapi20170525 import models as dysmsapi_20170525_models
-from alibabacloud_tea_util import models as util_models
-from alibabacloud_tea_util.client import Client as UtilClient
+from aliyunsdkcore.client import AcsClient
+from aliyunsdkcore.request import CommonRequest
 
 
-class Sample:
-    def __init__(self):
-        pass
+"""
+安装阿里云SDK:
+pip3 install aliyun-python-sdk-core
+pip3 install aliyun-python-sdk-dysmsapi
 
-    @staticmethod
-    def create_client() -> Dysmsapi20170525Client:
-        config = open_api_models.Config(
-            access_key_id=os.environ.get('ALIBABA_CLOUD_ACCESS_KEY_ID'),
-            access_key_secret=os.environ.get('ALIBABA_CLOUD_ACCESS_KEY_SECRET')
-        )
-        config.endpoint = 'dysmsapi.aliyuncs.com'
-        return Dysmsapi20170525Client(config)
+版本：2024_7_1     版本时间：2024.7.1
 
-    @staticmethod
-    def send_sms_to_device(device_names: str) -> None:
-        client = Sample.create_client()
-        send_sms_request = dysmsapi_20170525_models.SendSmsRequest(
-            sign_name='老王出品',  # 替换为您的签名名称
-            template_code='SMS_468770144',  # 替换为您的模板代码
-            phone_numbers='13242281907',  # 替换为接收短信的手机号码
-            template_param=f'{{"name":"{device_names}"}}'  # 设备名称作为模板参数
-        )
-        runtime = util_models.RuntimeOptions()
-        try:
-            # 尝试发送短信的代码
-            client.send_sms_with_options(send_sms_request, runtime)
-        except Exception as error:
-            # 打印错误的描述信息
-            print(str(error))
-
-    @staticmethod
-    def main(device_names: List[str]) -> None:
-        for device_name in device_names:
-            Sample.send_sms_to_device(device_name)
+使用阿里云发送短信服务
 
 
-if __name__ == '__main__':
-   
-    device_names = ['台山川岛长堤']
-    Sample.main(device_names)
+"""
+
+# 创建AcsClient实例，需替换为您自己的AccessKey信息
+ACCESS_KEY_ID = '*******************'  #在阿里云控制台创建AccessKey时自动生成的一对访问密钥，上面保存的AccessKey
+ACCESS_KEY_SECRET = '*******************'  #在阿里云控制台创建AccessKey时自动生成的一对访问密钥AccessKey
+SIGN_NAME = '老王出品'  # 短信签名
+template_code = 'SMS_468770144' #短信模板CODE
+PhoneNumber = '13242281907'  # 绑定的测试手机号
+acs_client = AcsClient(ACCESS_KEY_ID, ACCESS_KEY_SECRET, template_code)
+
+# 创建CommonRequest实例
+request = CommonRequest()
+
+# 设置请求参数,下面这5行其实不用动
+request.set_accept_format('json')  # 设置API响应格式的方法
+request.set_domain('dysmsapi.aliyuncs.com')  # 设置API的域名的方法
+request.set_method('POST')  # 设置API请求方法
+request.set_version('2017-05-25')  # 设置API版本号
+request.set_action_name('SendSms')  # 设置API操作名
+
+# 设置短信模板参数
+request.add_query_param('PhoneNumbers', PhoneNumber)
+request.add_query_param('SignName', SIGN_NAME)
+request.add_query_param('TemplateCode', template_code)
+request.add_query_param('TemplateParam', '{"name":"江门电信白石机房1"}')
+
+# 发送短信请求并获取返回结果
+response = acs_client.do_action_with_exception(request)
+
+print(response)
