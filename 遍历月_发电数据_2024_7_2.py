@@ -4,9 +4,7 @@ import openpyxl
 from datetime import datetime
 import numpy as np
 import os
-
 """
-
 2024_3_29 版本更新：2024.3.29
 # 更新内容：
 # 1.读取excel表格里面所有页数据，如白石，楼下机房
@@ -220,8 +218,8 @@ for machine in file_name:
     everytime_A2_Stack_Temp.clear()
     everytime_B_Stack_Temp.clear()
 
-    modified_A_StackV.clear()
-    modified_B_StackV.clear()
+    everytime_A_StackV.clear()
+    everytime_B_StackV.clear()
     everytime_max_HGretem.clear()
     everytime_min_HGretem.clear()
     everytime_max_Hfetem.clear()
@@ -327,8 +325,8 @@ for machine in file_name:
                         # #  !!!  如果计算对象是 “攀业电堆” 筛选范围选择：  ７５ ＜＝ Ｘ ＜ １２０
                         # 对电堆电压算平均值 。
                         def calculate_filtered_average(data):
-                            filtered_data = [x for x in data if 75 <= x < 125]  # 设置筛选范围
-                            average = sum(filtered_data) / len(filtered_data) if len(filtered_data) > 0 else 0  # 计算平均值
+                            filtered_data = [x for x in data if 90 <= x < 125]  # 设置筛选范围
+                            average = (sum(filtered_data) / len(filtered_data) )if len(filtered_data) > 0 else 0  # 计算平均值
                             return average
 
 
@@ -640,27 +638,30 @@ for machine in file_name:
                                         # 计算发电过程中，A电堆电压平均值（过滤小于90和大于130的值）
                                         average_A_StackV = round(calculate_filtered_average(A_StackV_value), 1)
                                         everytime_A_StackV.append(average_A_StackV)
+                                        print(f'A电压列表：{everytime_A_StackV}')
                                         #### 2023.1.16新增
-                                        copy_everytime_A_StackV = copy.deepcopy(everytime_A_StackV)
-                                        copys_everytime_A_StackV.append(copy_everytime_A_StackV)
-                                        ONCE_modified_A_StackV = [item[0] for item in copys_everytime_A_StackV]
-                                        modified_A_StackV.append(ONCE_modified_A_StackV)
+                                        # copy_everytime_A_StackV = copy.deepcopy(everytime_A_StackV)
+                                        # copys_everytime_A_StackV.append(copy_everytime_A_StackV)
+                                        # modified_A_StackV = [item[0] for item in copys_everytime_A_StackV]
+                                        # modified_A_StackV.append(ONCE_modified_A_StackV)
 
                                         ######
                                         print(f'A电堆平均电压(V):{average_A_StackV}', end="        ")
                                         # print(f'A电堆平均电压  -------- (V):{A_StackV_value}')
                                         A_StackV_value.clear()  # 用完A_StackV_value列表后，要把列表清空，不然会叠加列表
-                                        everytime_A_StackV.clear()  # everytime_A_StackV 用于计算平均值。每次算完后列表清零
+                                        # everytime_A_StackV.clear()  # everytime_A_StackV 用于计算平均值。每次算完后列表清零
 
                                         # 计算发电过程中，B电堆电压平均值（过滤小于90和大于130的值）
                                         # everytime_B_StackV 用于计算平均值。每次算完后列表清零
                                         average_B_StackV = round(calculate_filtered_average(B_StackV_value), 1)
                                         everytime_B_StackV.append(average_B_StackV)
-                                        #### 2023.1.16新增
-                                        copy_everytime_B_StackV = copy.deepcopy(everytime_B_StackV)
-                                        copys_everytime_B_StackV.append(copy_everytime_B_StackV)
-                                        ONCE_modified_B_StackV = [item[0] for item in copys_everytime_B_StackV]
-                                        modified_B_StackV.append(ONCE_modified_B_StackV)
+                                        print(f'B电压列表：{everytime_B_StackV}')
+
+                                        # #### 2023.1.16新增
+                                        # copy_everytime_B_StackV = copy.deepcopy(everytime_B_StackV)
+                                        # copys_everytime_B_StackV.append(copy_everytime_B_StackV)
+                                        # modified_B_StackV = [item[0] for item in copys_everytime_B_StackV]
+                                        # # modified_B_StackV.append(ONCE_modified_B_StackV)
 
                                         ######
                                         print(f'B电堆平均电压(V):{average_B_StackV}')
@@ -668,7 +669,7 @@ for machine in file_name:
                                         # print(f'B电堆平均电压  -------- (V):{B_StackV_value}')
 
                                         B_StackV_value.clear()  # 用完B_StackV_value列表后，要把列表清空，不然会叠加列表
-                                        everytime_B_StackV.clear()  # everytime_B_StackV 用于计算平均值。每次算完后列表清零
+                                        # everytime_B_StackV.clear()  # everytime_B_StackV 用于计算平均值。每次算完后列表清零
 
                                         if all(item == 0 for item in HGretem_value) and all(
                                                 item == 0 for item in Hfetem_value):
@@ -854,26 +855,29 @@ for machine in file_name:
                                         # 计算发电过程中，A电堆电压平均值（过滤小于90和大于130的值）
                                         average_A_StackV = round(calculate_filtered_average(A_List_value), 1)
                                         everytime_A_StackV.append(average_A_StackV)
+                                        print(f'电压列表：{everytime_A_StackV}')
                                         #### 2023.1.16新增
-                                        copy_everytime_A_StackV = copy.deepcopy(everytime_A_StackV)
-                                        copys_everytime_A_StackV.append(copy_everytime_A_StackV)
-                                        ONCE_modified_A_StackV = [item[0] for item in copys_everytime_A_StackV]
-                                        modified_A_StackV.append(ONCE_modified_A_StackV)
+                                        # copy_everytime_A_StackV = copy.deepcopy(everytime_A_StackV)
+                                        # copys_everytime_A_StackV.append(copy_everytime_A_StackV)
+                                        # modified_A_StackV = [item[0] for item in copys_everytime_A_StackV]
+                                        # # modified_A_StackV.append(ONCE_modified_A_StackV)
 
-                                        everytime_A_StackV.clear()
+                                        A_List_value.clear()
                                         ######
                                         print(f'A电堆平均电压(V):{average_A_StackV}', end="        ")
 
                                         # 计算发电过程中，B电堆电压平均值（过滤小于90和大于130的值）
                                         average_B_StackV = round(calculate_filtered_average(B_List_value), 1)
                                         everytime_B_StackV.append(average_B_StackV)
-                                        #### 2023.1.16新增
-                                        copy_everytime_B_StackV = copy.deepcopy(everytime_B_StackV)
-                                        copys_everytime_B_StackV.append(copy_everytime_B_StackV)
-                                        ONCE_modified_B_StackV = [item[0] for item in copys_everytime_B_StackV]
-                                        modified_B_StackV.append(ONCE_modified_B_StackV)
+                                        print(f'B电压列表：{everytime_B_StackV}')
 
-                                        everytime_B_StackV.clear()
+                                        #### 2023.1.16新增
+                                        # copy_everytime_B_StackV = copy.deepcopy(everytime_B_StackV)
+                                        # copys_everytime_B_StackV.append(copy_everytime_B_StackV)
+                                        # modified_B_StackV = [item[0] for item in copys_everytime_B_StackV]
+                                        # # modified_B_StackV.append(ONCE_modified_B_StackV)
+
+                                        B_List_value.clear()
                                         ######
                                         print(f'B电堆平均电压(V):{average_B_StackV}')
 
@@ -1144,25 +1148,28 @@ for machine in file_name:
                                         # 计算发电过程中，A电堆电压平均值（过滤小于90和大于130的值）
                                         average_A_StackV = round(calculate_filtered_average(A_List_value), 1)
                                         everytime_A_StackV.append(average_A_StackV)
+                                        print(f'电压列表：{everytime_A_StackV}')
                                         #### 2023.1.16新增
-                                        copy_everytime_A_StackV = copy.deepcopy(everytime_A_StackV)
-                                        copys_everytime_A_StackV.append(copy_everytime_A_StackV)
-                                        ONCE_modified_A_StackV = [item[0] for item in copys_everytime_A_StackV]
-                                        modified_A_StackV.append(ONCE_modified_A_StackV)
+                                        # copy_everytime_A_StackV = copy.deepcopy(everytime_A_StackV)
+                                        # copys_everytime_A_StackV.append(copy_everytime_A_StackV)
+                                        # modified_A_StackV = [item[0] for item in copys_everytime_A_StackV]
+                                        # # modified_A_StackV.append(ONCE_modified_A_StackV)
 
-                                        everytime_A_StackV.clear()
+                                        A_List_value.clear()
                                         ######
                                         print(f'A电堆平均电压(V):{average_A_StackV}', end="        ")
 
                                         # 计算发电过程中，B电堆电压平均值（过滤小于90和大于130的值）
                                         average_B_StackV = round(calculate_filtered_average(B_List_value), 1)
                                         everytime_B_StackV.append(average_B_StackV)
-                                        #### 2023.1.16新增
-                                        copy_everytime_B_StackV = copy.deepcopy(everytime_B_StackV)
-                                        copys_everytime_B_StackV.append(copy_everytime_B_StackV)
-                                        ONCE_modified_B_StackV = [item[0] for item in copys_everytime_B_StackV]
-                                        modified_B_StackV.append(ONCE_modified_B_StackV)
-                                        everytime_B_StackV.clear()
+                                        print(f'B电压列表：{everytime_B_StackV}')
+
+                                        # #### 2023.1.16新增
+                                        # copy_everytime_B_StackV = copy.deepcopy(everytime_B_StackV)
+                                        # copys_everytime_B_StackV.append(copy_everytime_B_StackV)
+                                        # modified_B_StackV = [item[0] for item in copys_everytime_B_StackV]
+                                        # # modified_B_StackV.append(ONCE_modified_B_StackV)
+                                        B_List_value.clear()
                                         ######
                                         print(f'B电堆平均电压(V):{average_B_StackV}')
 
@@ -1428,24 +1435,27 @@ for machine in file_name:
                                         # 计算发电过程中，A电堆电压平均值（过滤小于90和大于130的值）
                                         average_A_StackV = round(calculate_filtered_average(A_List_value), 1)
                                         everytime_A_StackV.append(average_A_StackV)
+                                        print(f'电压列表：{everytime_A_StackV}')
                                         #### 2023.1.16新增
-                                        copy_everytime_A_StackV = copy.deepcopy(everytime_A_StackV)
-                                        copys_everytime_A_StackV.append(copy_everytime_A_StackV)
-                                        ONCE_modified_A_StackV = [item[0] for item in copys_everytime_A_StackV]
-                                        modified_A_StackV.append(ONCE_modified_A_StackV)
-                                        everytime_A_StackV.clear()
+                                        # copy_everytime_A_StackV = copy.deepcopy(everytime_A_StackV)
+                                        # copys_everytime_A_StackV.append(copy_everytime_A_StackV)
+                                        # modified_A_StackV = [item[0] for item in copys_everytime_A_StackV]
+                                        # # modified_A_StackV.append(ONCE_modified_A_StackV[-1])
+                                        A_List_value.clear()
                                         ######
                                         print(f'A电堆平均电压(V):{average_A_StackV}', end="        ")
 
                                         # 计算发电过程中，B电堆电压平均值（过滤小于90和大于130的值）
                                         average_B_StackV = round(calculate_filtered_average(B_List_value), 1)
                                         everytime_B_StackV.append(average_B_StackV)
+                                        print(f'B电压列表：{everytime_B_StackV}')
+
                                         #### 2023.1.16新增
-                                        copy_everytime_B_StackV = copy.deepcopy(everytime_B_StackV)
-                                        copys_everytime_B_StackV.append(copy_everytime_B_StackV)
-                                        ONCE_modified_B_StackV = [item[0] for item in copys_everytime_B_StackV]
-                                        modified_B_StackV.append(ONCE_modified_B_StackV)
-                                        everytime_B_StackV.clear()
+                                        # copy_everytime_B_StackV = copy.deepcopy(everytime_B_StackV)
+                                        # copys_everytime_B_StackV.append(copy_everytime_B_StackV)
+                                        # modified_B_StackV = [item[0] for item in copys_everytime_B_StackV]
+                                        # # modified_B_StackV.append(ONCE_modified_B_StackV)
+                                        B_List_value.clear()
                                         ######
                                         print(f'B电堆平均电压(V):{average_B_StackV}')
 
@@ -1598,8 +1608,8 @@ for machine in file_name:
                         print(f"结束总发电量 长度：{len(end_Topgen)}")
                         print(f"发电功率 长度：{len(everytime_power)}")
                         print(f"芯片温度 长度：{len(everytime_IC)}")
-                        print(f"A电堆电压 长度：{len(modified_A_StackV)}")
-                        print(f"B电堆电压 长度：{len(modified_B_StackV)}")
+                        print(f"A电堆电压 长度：{len(everytime_A_StackV)}")
+                        print(f"B电堆电压 长度：{len(everytime_B_StackV)}")
                         print(f"重整室最高温度 长度：{len(everytime_max_HGretem)}")
                         print(f"重整室最低温度 长度：{len(everytime_min_HGretem)}")
                         print(f"提纯器最高温度 长度：{len(everytime_max_Hfetem)}")
@@ -1653,8 +1663,8 @@ for machine in file_name:
         print(f"最高A电堆功率 长度：{len(everytime_A_power)}")
         print(f"最高B电堆功率 长度：{len(everytime_B_power)}")
         print(f"芯片温度 长度：{len(everytime_IC)}")
-        print(f"A电堆电压 长度：{len(modified_A_StackV)}")
-        print(f"B电堆电压 长度：{len(modified_B_StackV)}")
+        print(f"A电堆电压 长度：{len(everytime_A_StackV)}")
+        print(f"B电堆电压 长度：{len(everytime_B_StackV)}")
         print(f"重整室最高温度 长度：{len(everytime_max_HGretem)}")
         print(f"重整室最低温度 长度：{len(everytime_min_HGretem)}")
         print(f"提纯器最高温度 长度：{len(everytime_max_Hfetem)}")
@@ -1716,8 +1726,8 @@ for machine in file_name:
                 '平均电堆A2温度(℃)': everytime_A2_Stack_Temp,
                 '平均电堆B温度(℃)': everytime_B_Stack_Temp,
 
-                '平均A电堆电压(V)': modified_A_StackV,
-                '平均B电堆电压(V)': modified_B_StackV,
+                '平均A电堆电压(V)': everytime_A_StackV,
+                '平均B电堆电压(V)': everytime_B_StackV,
                 '重整室最高温度(℃)': everytime_max_HGretem,
                 '重整室最低温度(℃)': everytime_min_HGretem,
                 '提纯器最高温度(℃)': everytime_max_Hfetem,
@@ -1767,8 +1777,8 @@ for machine in file_name:
                 '平均电堆A2温度(℃)': everytime_A2_Stack_Temp,
                 '平均电堆B温度(℃)': everytime_B_Stack_Temp,
 
-                '平均A电堆电压(V)': modified_A_StackV,
-                '平均B电堆电压(V)': modified_B_StackV,
+                '平均A电堆电压(V)': everytime_A_StackV,
+                '平均B电堆电压(V)': everytime_B_StackV,
                 '重整室最高温度(℃)': everytime_max_HGretem,
                 '重整室最低温度(℃)': everytime_min_HGretem,
                 '提纯器最高温度(℃)': everytime_max_Hfetem,
