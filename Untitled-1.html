@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>老王的第一个网页</title>
+</head>
+<body>
+   
+    
+    <div class="todo">
+
+        <div class="titel">老王  你好  世界</div>
+
+        <div class="todo-select"     >
+        
+            <input class="todo-input" type="text"   placeholder="在这里输入">
+            <div class="todo-select_button">点击</div>
+        </div>
+        <div class="item    template">
+            <div class="items_1">
+                <input class="check_input"  type="checkbox">
+                <span class="name">吃饭</span>
+            </div>
+            
+            <div class="del">del</div>
+        </div>
+        <div class="item">
+            <div class="items_1">
+                <input class="check_input"  type="checkbox">
+                <span class="name">睡觉</span>
+            </div>
+            
+            <div class="del">del</div>
+        </div>
+        <div class="item">
+            <div class="items_1">
+                <input class="check_input"  type="checkbox">
+                <span class="name">吃饭</span>
+            </div>
+            
+            <div class="del">del</div>
+        </div>
+
+    </div>
+
+
+        
+    
+
+    <style>
+        .todo-select{
+        margin: auto;
+        }
+        .template{
+            opacity: 0.3;
+            text-decoration: line-through;
+
+        }
+        body{
+            background-image: linear-gradient(to right,#556270, #4ecdc4);
+        }
+        .todo{
+            width: 98%;
+            height: 500px;
+            background-color: white ;
+            margin-top: 50px;
+            /* margin: 20px; */
+            border-radius: 10px;
+            margin-left: 1%;
+
+        }
+        .titel{
+            /* size: 10px; */
+            font-size: 40px;
+            font-weight: 500;
+            /* vertical-align: auto; */
+            text-align: center;
+            padding-top: 10px;
+            box-sizing: border-box;
+            
+        }
+        .todo-select{
+            display: flex;
+            /* align-content: center; */
+            margin:30px auto;
+        }
+        .todo-input{
+            /* border-color: rgb(206, 200, 200); */
+            border-radius: 20px 0 0 20px;
+            border: 1px  solid #96afae ;
+            outline: none;
+            width: 600px;
+            height: 40px;
+            margin-left: 40px;
+            padding-left:20px ;
+            box-sizing: border-box;
+        }
+        .todo-select_button{
+            width: 60px;
+            height: 40px;
+            border-radius:0 20px 20px 0 ;
+            background-image: linear-gradient(to right,#556270, #4ecdc4);
+            text-align: center;
+            /* padding-top: 8px;
+            box-sizing: border-box; */
+            line-height: 40px;
+            color: #ffff;
+            cursor: pointer;
+            user-select: none;
+            /* margin: auto; */
+        }
+        .item{
+            
+            width: 600px;
+            height: 30px;
+            border-radius: 15px;
+            margin: 30px auto;
+            
+            box-shadow: #b0d4d2  0px 8px 15px;
+            display: flex;
+            line-height: 30px;
+            justify-content:space-between;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+        .todo-select{
+            justify-content:center;
+
+        }
+        .items_1{
+            display: flex;
+            align-items: center;
+            
+        }
+        .del{
+            color: red;
+            
+        }
+    </style>
+
+
+
+    <script>
+
+
+    </script>
+
+    
+</body>
+</html>
