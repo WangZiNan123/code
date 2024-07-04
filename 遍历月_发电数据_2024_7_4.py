@@ -193,10 +193,11 @@ MFC6kD480023 : 江油太平唐僧
 """
 
 file_name = [
-    '管委会', '5G汇聚机房01', '5G汇聚机房02', '白石08',
-    '白石10', '新美', '红关', '墩寨', '谭溪', '华安',
-    '新美', '升平', '平石', '三联',
-    '三堡', '川岛', '四川']
+    # '管委会', '5G汇聚机房01', '5G汇聚机房02', '白石08',
+    # '白石10', '新美', '红关', '墩寨', '谭溪', '华安',
+    # '新美', '升平', '平石', '三联',
+    # '三堡',
+    '川岛', '四川']
 
 # month = 1
 
@@ -343,7 +344,7 @@ for machine in file_name:
                     # print('==========电堆电压', df['StaV'])
 
                     #   如果电压小于85，则跳过当天计算
-                    if any(df['StaV'] >= 60):
+                    if any(df['StaV'] >= 60) and any(df['MSw'] == True):
                         second_row = df.iloc[1]  # 这行代码将DataFrame中的第二行数据存储在变量second_row中，以便后续对第二行数据进行操作和分析
                         last_row = df.iloc[-1]  # 这行代码将DataFrame中的最后一行数据存储在变量last_row中，以便后续对最后一行数据进行操作和分析
 
@@ -1668,9 +1669,9 @@ for machine in file_name:
                         Sum_Time_min_m, Sum_Time_min_s = str(sum(Time_diff_1_list)).split('.')
                         Sum_Time_min_s = int(float(Sum_Time_min_s) * 0.6)
                         Sum_Time_min = f'{Sum_Time_min_m}.{Sum_Time_min_s}'
+                        print(f"总发电时间(min.s)：{Sum_Time_min}")
 
                         print(f"总发电量(kw/h)：{Sum_Topgen}")
-                        print(f"总发电时间(min.s)：{Sum_Time_min}")
 
                         if any(value > 0 for value in start_S_RemFuelIn):
                             print(f"总燃料消耗(L)：{Sum_S_RemFuelIn}")
@@ -1716,9 +1717,9 @@ for machine in file_name:
                         A2_Stack_top_Temp_Value.clear()
                         B1_Stack_top_Temp_Value.clear()
                         B2_Stack_top_Temp_Value.clear()
-                        
+
                         Time_diff_1_list.clear()
-                        
+
                         print(f"\n开始发电时间 长度：{len(start_datatime)}")
                         print(f"结束发电时间 长度：{len(end_datatime)}")
                         print(f"开始外置水箱剩余燃料 长度：{len(start_S_RemFuelOut)}")
