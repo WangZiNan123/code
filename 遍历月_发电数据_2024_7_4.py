@@ -4,6 +4,7 @@ import openpyxl
 from datetime import datetime
 import numpy as np
 import os
+
 """
 2024_3_29 版本更新：2024.3.29
 # 更新内容：
@@ -32,9 +33,11 @@ import os
 # 2024_7_2  版本更新：2024.7.2
 # 更新  创建一个列表，存储所有设备到里面，使用FOR循环遍历所有站点
 
-
+2024_7_4 版本更新：2024.7.4
+新增  A1电堆顶部温度（发电仓温度(℃):Powttem），A2电堆顶部温度（环境温度(℃):AmTem），
+     B1电堆顶部温度（环境湿度(%):EnHum），B2电堆顶部温度（电堆风机馈速(%):StaFrat ）
+    修改时间秒的计算方法
 """
-
 
 new_df = []
 # 打印行号和列的数据
@@ -149,6 +152,18 @@ everytime_power_average = []  # 平均总功率
 
 adress3 = None
 
+A1_Stack_top_Temp_Value = []  # 电堆A1顶部温度
+A2_Stack_top_Temp_Value = []  # 电堆A2顶部温度
+B1_Stack_top_Temp_Value = []  # 电堆B1顶部温度
+B2_Stack_top_Temp_Value = []  # 电堆B2顶部温度
+
+everytime_A1_Stack_top_Temp = []  # 储存电堆A1顶部温度的列表
+everytime_A2_Stack_top_Temp = []  # 储存电堆A2顶部温度的列表
+everytime_B1_Stack_top_Temp = []  # 储存电堆B1顶部温度的列表
+everytime_B2_Stack_top_Temp = []  # 储存电堆B2顶部温度的列表
+
+Time_diff_1_list = []  # 每次发电时间列表，用于计算总发电时间
+
 """
 ================================================= 
 
@@ -179,8 +194,8 @@ MFC6kD480023 : 江油太平唐僧
 
 file_name = [
     '管委会', '5G汇聚机房01', '5G汇聚机房02', '白石08',
-             '白石10', '新美', '红关', '墩寨', '谭溪', '华安',
-             '新美', '升平', '平石', '三联',
+    '白石10', '新美', '红关', '墩寨', '谭溪', '华安',
+    '新美', '升平', '平石', '三联',
     '三堡', '川岛', '四川']
 
 # month = 1
@@ -231,6 +246,13 @@ for machine in file_name:
     everytime_Fuel_consumption.clear()
 
     path1 = machine
+
+    everytime_A1_Stack_top_Temp.clear()  # 储存电堆A1顶部温度的列表
+    everytime_A2_Stack_top_Temp.clear()  # 储存电堆A2顶部温度的列表
+    everytime_B1_Stack_top_Temp.clear()  # 储存电堆B1顶部温度的列表
+    everytime_B2_Stack_top_Temp.clear()  # 储存电堆B2顶部温度的列表
+
+    Time_diff_1_list.clear()
 
     for month in range(6, 7):
 
@@ -308,9 +330,14 @@ for machine in file_name:
                     LiqlelL = 'LiqlelL'  # 外置液位（mm）
                     LiqlelM = 'LiqlelM'  # 内置液位（mm）
 
-                    A1_Stack_Temp = 'Statem1'  # 电堆A1温度
-                    A2_Stack_Temp = 'Statem2'  # 电堆A2温度
-                    B_Stack_Temp = 'FcB_StackT'  # 电堆B温度
+                    A1_Stack_Temp = 'Statem1'  # 电堆A1堆心温度
+                    A2_Stack_Temp = 'Statem2'  # 电堆A2堆心温度
+                    B_Stack_Temp = 'FcB_StackT'  # 电堆B堆心温度
+
+                    A1_Stack_top_Temp = 'Powttem'  # 电堆A1顶部温度
+                    A2_Stack_top_Temp = 'AmTem'  # 电堆A2顶部温度
+                    B1_Stack_top_Temp = 'EnHum'  # 电堆B1顶部温度
+                    B2_Stack_top_Temp = 'StaFrat'  # 电堆B2顶部温度
 
                     #   打印有多少行
                     # print('==========电堆电压', df['StaV'])
@@ -326,7 +353,8 @@ for machine in file_name:
                         # 对电堆电压算平均值 。
                         def calculate_filtered_average(data):
                             filtered_data = [x for x in data if 90 <= x < 125]  # 设置筛选范围
-                            average = (sum(filtered_data) / len(filtered_data) )if len(filtered_data) > 0 else 0  # 计算平均值
+                            average = (sum(filtered_data) / len(filtered_data)) if len(
+                                filtered_data) > 0 else 0  # 计算平均值
                             return average
 
 
@@ -415,6 +443,11 @@ for machine in file_name:
                                     A1_Stack_Temp_Value.append(round(row[A1_Stack_Temp], 1))  # 储存电堆A1的温度
                                     A2_Stack_Temp_Value.append(round(row[A2_Stack_Temp], 1))  # 储存电堆A2的温度
                                     B_Stack_Temp_Value.append(round(row[B_Stack_Temp], 1))  # 储存电堆B的温度
+
+                                    A1_Stack_top_Temp_Value.append(round(row[A1_Stack_top_Temp], 1))  # 储存电堆A1顶部的温度
+                                    A2_Stack_top_Temp_Value.append(round(row[A2_Stack_top_Temp], 1))  # 储存电堆A2顶部的温度
+                                    B1_Stack_top_Temp_Value.append(round(row[B1_Stack_top_Temp], 1))  # 储存电堆B1顶部的温度
+                                    B2_Stack_top_Temp_Value.append(round(row[B2_Stack_top_Temp], 1))  # 储存电堆B2顶部的温度
 
                                 if prev_row[MSw] == False and row[MSw] == True:  # 开始发电时间 。 如果MSW的上一个值=false,并且当前的值=true
                                     print(f"\n第一有开始 ###############\n")
@@ -520,11 +553,17 @@ for machine in file_name:
                                     Stwtims.append(row[Stwtim])
                                     print(f"发电次数：{row[Stwtim]}")
 
-                                    Time_diff = round(
+                                    Time_diff_1 = round(
                                         (pd.to_datetime(Time_value[-1]) - pd.to_datetime(
                                             Time_value[-2])).total_seconds() / 60,
                                         2)
-                                    Time_diffs.append(Time_diff)
+
+                                    Time_diff_1_list.append(Time_diff_1)
+
+                                    Min, Second = str(Time_diff_1).split('.')
+                                    Second = int(float(Second) * 0.6)
+                                    Time_diff = f'{Min}.{Second}'
+                                    Time_diffs.append(float(Time_diff))
                                     print(f"每次发电时长(min)：{Time_diff}")
 
                                     mean_IC = round(sum(IC_value) / len(IC_value), 2)
@@ -533,15 +572,35 @@ for machine in file_name:
 
                                     mean_A1_Stack_Temp = round(sum(A1_Stack_Temp_Value) / len(A1_Stack_Temp_Value), 2)
                                     everytime_A1_Stack_Temp.append(mean_A1_Stack_Temp)
-                                    print(f'电堆A1平均温度(℃):{mean_A1_Stack_Temp}')
+                                    print(f'电堆A1堆心平均温度(℃):{mean_A1_Stack_Temp}')
 
                                     mean_A2_Stack_Temp = round(sum(A2_Stack_Temp_Value) / len(A2_Stack_Temp_Value), 2)
                                     everytime_A2_Stack_Temp.append(mean_A2_Stack_Temp)
-                                    print(f'电堆A2平均温度(℃):{mean_A2_Stack_Temp}')
+                                    print(f'电堆A2堆心平均温度(℃):{mean_A2_Stack_Temp}')
 
                                     mean_B_Stack_Temp = round(sum(B_Stack_Temp_Value) / len(B_Stack_Temp_Value), 2)
                                     everytime_B_Stack_Temp.append(mean_B_Stack_Temp)
-                                    print(f'电堆B平均温度(℃):{mean_B_Stack_Temp}')
+                                    print(f'电堆B堆心平均温度(℃):{mean_B_Stack_Temp}')
+
+                                    mean_A1_Stack_top_Temp = round(
+                                        sum(A1_Stack_top_Temp_Value) / len(A1_Stack_top_Temp_Value), 2)
+                                    everytime_A1_Stack_top_Temp.append(mean_A1_Stack_top_Temp)
+                                    print(f'电堆A1顶部平均温度(℃):{mean_A1_Stack_top_Temp}')
+
+                                    mean_A2_Stack_top_Temp = round(
+                                        sum(A2_Stack_top_Temp_Value) / len(A2_Stack_top_Temp_Value), 2)
+                                    everytime_A2_Stack_top_Temp.append(mean_A2_Stack_top_Temp)
+                                    print(f'电堆A2顶部平均温度(℃):{mean_A2_Stack_top_Temp}')
+
+                                    mean_B1_Stack_top_Temp = round(
+                                        sum(B1_Stack_top_Temp_Value) / len(B1_Stack_top_Temp_Value), 2)
+                                    everytime_B1_Stack_top_Temp.append(mean_B1_Stack_top_Temp)
+                                    print(f'电堆B1顶部平均温度(℃):{mean_B1_Stack_top_Temp}')
+
+                                    mean_B2_Stack_top_Temp = round(
+                                        sum(B2_Stack_top_Temp_Value) / len(B2_Stack_top_Temp_Value), 2)
+                                    everytime_B2_Stack_top_Temp.append(mean_B2_Stack_top_Temp)
+                                    print(f'电堆B2顶部平均温度(℃):{mean_B2_Stack_top_Temp}')
 
                                     # print(f"内置液位(mm):\n{true_LiqlelM}\n")
                                     # true_LiqlelL.clear()
@@ -977,7 +1036,7 @@ for machine in file_name:
                                     Once_RemFuelIn = 0
                                     if start_time is None and (index == len(df) - 1) == True and last_row[
                                         MSw] == True and len(
-                                            count_end_datatime) == 1:  # 有开始发电时间并且到列的最后一行，把最后一行的数值添加进去
+                                        count_end_datatime) == 1:  # 有开始发电时间并且到列的最后一行，把最后一行的数值添加进去
                                         print(
                                             f"结束发电时间：{row[DateTime]}      "
                                             f"内置水箱剩余燃料: {round(row[S_RemFuelIn], 2)}    "
@@ -1010,11 +1069,17 @@ for machine in file_name:
                                         Stwtims.append(row[Stwtim])
                                         print(f"发电次数：{row[Stwtim]}")
 
-                                        Time_diff = round(
+                                        Time_diff_1 = round(
                                             (pd.to_datetime(Time_value[-1]) - pd.to_datetime(
                                                 Time_value[-2])).total_seconds() / 60,
                                             2)
-                                        Time_diffs.append(Time_diff)
+
+                                        Time_diff_1_list.append(Time_diff_1)
+
+                                        Min, Second = str(Time_diff_1).split('.')
+                                        Second = int(float(Second) * 0.6)
+                                        Time_diff = f'{Min}.{Second}'
+                                        Time_diffs.append(float(Time_diff))
                                         print(f"每次发电时长(min)：{Time_diff}")
 
                                         mean_IC = round(sum(IC_value) / len(IC_value), 2)
@@ -1024,16 +1089,36 @@ for machine in file_name:
                                         mean_A1_Stack_Temp = round(sum(A1_Stack_Temp_Value) / len(A1_Stack_Temp_Value),
                                                                    2)
                                         everytime_A1_Stack_Temp.append(mean_A1_Stack_Temp)
-                                        print(f'电堆A1平均温度(℃):{mean_A1_Stack_Temp}')
+                                        print(f'电堆A1堆心平均温度(℃):{mean_A1_Stack_Temp}')
 
                                         mean_A2_Stack_Temp = round(sum(A2_Stack_Temp_Value) / len(A2_Stack_Temp_Value),
                                                                    2)
                                         everytime_A2_Stack_Temp.append(mean_A2_Stack_Temp)
-                                        print(f'电堆A2平均温度(℃):{mean_A2_Stack_Temp}')
+                                        print(f'电堆A2堆心平均温度(℃):{mean_A2_Stack_Temp}')
 
                                         mean_B_Stack_Temp = round(sum(B_Stack_Temp_Value) / len(B_Stack_Temp_Value), 2)
                                         everytime_B_Stack_Temp.append(mean_B_Stack_Temp)
-                                        print(f'电堆B平均温度(℃):{mean_B_Stack_Temp}')
+                                        print(f'电堆B堆心平均温度(℃):{mean_B_Stack_Temp}')
+
+                                        mean_A1_Stack_top_Temp = round(
+                                            sum(A1_Stack_top_Temp_Value) / len(A1_Stack_top_Temp_Value), 2)
+                                        everytime_A1_Stack_top_Temp.append(mean_A1_Stack_top_Temp)
+                                        print(f'电堆A1顶部平均温度(℃):{mean_A1_Stack_top_Temp}')
+
+                                        mean_A2_Stack_top_Temp = round(
+                                            sum(A2_Stack_top_Temp_Value) / len(A2_Stack_top_Temp_Value), 2)
+                                        everytime_A2_Stack_top_Temp.append(mean_A2_Stack_top_Temp)
+                                        print(f'电堆A2顶部平均温度(℃):{mean_A2_Stack_top_Temp}')
+
+                                        mean_B1_Stack_top_Temp = round(
+                                            sum(B1_Stack_top_Temp_Value) / len(B1_Stack_top_Temp_Value), 2)
+                                        everytime_B1_Stack_top_Temp.append(mean_B1_Stack_top_Temp)
+                                        print(f'电堆B1顶部平均温度(℃):{mean_B1_Stack_top_Temp}')
+
+                                        mean_B2_Stack_top_Temp = round(
+                                            sum(B2_Stack_top_Temp_Value) / len(B2_Stack_top_Temp_Value), 2)
+                                        everytime_B2_Stack_top_Temp.append(mean_B2_Stack_top_Temp)
+                                        print(f'电堆B2顶部平均温度(℃):{mean_B2_Stack_top_Temp}')
 
                                         fuel_List_mm = true_LiqlelM[len(last_fuel_mm):]
 
@@ -1264,7 +1349,7 @@ for machine in file_name:
 
                                     if start_time is None and (index == len(df) - 1) == True and last_row[
                                         MSw] == True and len(
-                                            count_end_datatime) > 1:
+                                        count_end_datatime) > 1:
                                         print(
                                             f"结束发电时间：{last_row[DateTime]}      "
                                             f"内置水箱剩余燃料: {round(last_row[S_RemFuelIn], 2)}     "
@@ -1297,11 +1382,17 @@ for machine in file_name:
                                         Stwtims.append(last_row[Stwtim])
                                         print(f"发电次数：{row[Stwtim]}")
 
-                                        Time_diff = round(
+                                        Time_diff_1 = round(
                                             (pd.to_datetime(Time_value[-1]) - pd.to_datetime(
                                                 Time_value[-2])).total_seconds() / 60,
                                             2)
-                                        Time_diffs.append(Time_diff)
+
+                                        Time_diff_1_list.append(Time_diff_1)
+
+                                        Min, Second = str(Time_diff_1).split('.')
+                                        Second = int(float(Second) * 0.6)
+                                        Time_diff = f'{Min}.{Second}'
+                                        Time_diffs.append(float(Time_diff))
                                         print(f"每次发电时长(min)：{Time_diff}")
 
                                         mean_IC = round(sum(IC_value) / len(IC_value), 2)
@@ -1311,16 +1402,36 @@ for machine in file_name:
                                         mean_A1_Stack_Temp = round(sum(A1_Stack_Temp_Value) / len(A1_Stack_Temp_Value),
                                                                    2)
                                         everytime_A1_Stack_Temp.append(mean_A1_Stack_Temp)
-                                        print(f'电堆A1平均温度(℃):{mean_A1_Stack_Temp}')
+                                        print(f'电堆A1堆心平均温度(℃):{mean_A1_Stack_Temp}')
 
                                         mean_A2_Stack_Temp = round(sum(A2_Stack_Temp_Value) / len(A2_Stack_Temp_Value),
                                                                    2)
                                         everytime_A2_Stack_Temp.append(mean_A2_Stack_Temp)
-                                        print(f'电堆A2平均温度(℃):{mean_A2_Stack_Temp}')
+                                        print(f'电堆A2堆心平均温度(℃):{mean_A2_Stack_Temp}')
 
                                         mean_B_Stack_Temp = round(sum(B_Stack_Temp_Value) / len(B_Stack_Temp_Value), 2)
                                         everytime_B_Stack_Temp.append(mean_B_Stack_Temp)
-                                        print(f'电堆B平均温度(℃):{mean_B_Stack_Temp}')
+                                        print(f'电堆B堆心平均温度(℃):{mean_B_Stack_Temp}')
+
+                                        mean_A1_Stack_top_Temp = round(
+                                            sum(A1_Stack_top_Temp_Value) / len(A1_Stack_top_Temp_Value), 2)
+                                        everytime_A1_Stack_top_Temp.append(mean_A1_Stack_top_Temp)
+                                        print(f'电堆A1顶部平均温度(℃):{mean_A1_Stack_top_Temp}')
+
+                                        mean_A2_Stack_top_Temp = round(
+                                            sum(A2_Stack_top_Temp_Value) / len(A2_Stack_top_Temp_Value), 2)
+                                        everytime_A2_Stack_top_Temp.append(mean_A2_Stack_top_Temp)
+                                        print(f'电堆A2顶部平均温度(℃):{mean_A2_Stack_top_Temp}')
+
+                                        mean_B1_Stack_top_Temp = round(
+                                            sum(B1_Stack_top_Temp_Value) / len(B1_Stack_top_Temp_Value), 2)
+                                        everytime_B1_Stack_top_Temp.append(mean_B1_Stack_top_Temp)
+                                        print(f'电堆B1顶部平均温度(℃):{mean_B1_Stack_top_Temp}')
+
+                                        mean_B2_Stack_top_Temp = round(
+                                            sum(B2_Stack_top_Temp_Value) / len(B2_Stack_top_Temp_Value), 2)
+                                        everytime_B2_Stack_top_Temp.append(mean_B2_Stack_top_Temp)
+                                        print(f'电堆B2顶部平均温度(℃):{mean_B2_Stack_top_Temp}')
 
                                         fuel_List_mm = true_LiqlelM[len(last_fuel_mm):]
 
@@ -1553,7 +1664,10 @@ for machine in file_name:
 
                         Sum_Topgen = round(sum(Once_Topgen_value), 2)
                         Sum_S_RemFuelIn = sum(Once_S_RemFuelIn)
-                        Sum_Time_min = round(sum(Time_diffs), 2)
+
+                        Sum_Time_min_m, Sum_Time_min_s = str(sum(Time_diff_1_list)).split('.')
+                        Sum_Time_min_s = int(float(Sum_Time_min_s) * 0.6)
+                        Sum_Time_min = f'{Sum_Time_min_m}.{Sum_Time_min_s}'
 
                         print(f"总发电量(kw/h)：{Sum_Topgen}")
                         print(f"总发电时间(min.s)：{Sum_Time_min}")
@@ -1598,6 +1712,13 @@ for machine in file_name:
                         B_Stack_Temp_Value.clear()
                         IC_value.clear()
 
+                        A1_Stack_top_Temp_Value.clear()
+                        A2_Stack_top_Temp_Value.clear()
+                        B1_Stack_top_Temp_Value.clear()
+                        B2_Stack_top_Temp_Value.clear()
+                        
+                        Time_diff_1_list.clear()
+                        
                         print(f"\n开始发电时间 长度：{len(start_datatime)}")
                         print(f"结束发电时间 长度：{len(end_datatime)}")
                         print(f"开始外置水箱剩余燃料 长度：{len(start_S_RemFuelOut)}")
@@ -1626,9 +1747,14 @@ for machine in file_name:
                         print(f"开始内置水箱剩余燃料(mm) 长度：{len(start_LiqlelM)}")
                         print(f"结束内置水箱剩余燃料(mm) 长度：{len(end_LiqlelM)}")
 
-                        print(f"电堆A1温度 长度：{len(everytime_A1_Stack_Temp)}")
-                        print(f"电堆A2温度 长度：{len(everytime_A2_Stack_Temp)}")
-                        print(f"电堆B温度 长度：{len(everytime_B_Stack_Temp)}")
+                        print(f"电堆A1堆心温度 长度：{len(everytime_A1_Stack_Temp)}")
+                        print(f"电堆A2堆心温度 长度：{len(everytime_A2_Stack_Temp)}")
+                        print(f"电堆B堆心温度 长度：{len(everytime_B_Stack_Temp)}")
+
+                        print(f"电堆A1顶部温度 长度：{len(everytime_A1_Stack_top_Temp)}")
+                        print(f"电堆A2顶部温度 长度：{len(everytime_A2_Stack_top_Temp)}")
+                        print(f"电堆B1顶部温度 长度：{len(everytime_B1_Stack_top_Temp)}")
+                        print(f"电堆B2顶部温度 长度：{len(everytime_B2_Stack_top_Temp)}")
 
                         print(f"A堆功率平均值 长度：{len(everytime_A_power_average)}")
                         print(f"B堆功率平均值 长度：{len(everytime_B_power_average)}")
@@ -1681,9 +1807,14 @@ for machine in file_name:
         print(f"开始内置水箱剩余燃料(mm) 长度：{len(start_LiqlelM)}")
         print(f"结束内置水箱剩余燃料(mm) 长度：{len(end_LiqlelM)}")
 
-        print(f"电堆A1温度 长度：{len(everytime_A1_Stack_Temp)}")
-        print(f"电堆A2温度 长度：{len(everytime_A2_Stack_Temp)}")
-        print(f"电堆B温度 长度：{len(everytime_B_Stack_Temp)}")
+        print(f"电堆A1堆心温度 长度：{len(everytime_A1_Stack_Temp)}")
+        print(f"电堆A2堆心温度 长度：{len(everytime_A2_Stack_Temp)}")
+        print(f"电堆B堆心温度 长度：{len(everytime_B_Stack_Temp)}")
+
+        print(f"电堆A1顶部温度 长度：{len(everytime_A1_Stack_top_Temp)}")
+        print(f"电堆A2顶部温度 长度：{len(everytime_A2_Stack_top_Temp)}")
+        print(f"电堆B1顶部温度 长度：{len(everytime_B1_Stack_top_Temp)}")
+        print(f"电堆B2顶部温度 长度：{len(everytime_B2_Stack_top_Temp)}")
 
         print(f"A堆功率平均值 长度：{len(everytime_A_power_average)}")
         print(f"B堆功率平均值 长度：{len(everytime_B_power_average)}")
@@ -1722,9 +1853,16 @@ for machine in file_name:
 
                 '平均芯片温度(℃)': everytime_IC,
 
-                '平均电堆A1温度(℃)': everytime_A1_Stack_Temp,
-                '平均电堆A2温度(℃)': everytime_A2_Stack_Temp,
-                '平均电堆B温度(℃)': everytime_B_Stack_Temp,
+                '电堆A1堆心平均温度(℃)': everytime_A1_Stack_Temp,
+                '电堆A2堆心平均温度(℃)': everytime_A2_Stack_Temp,
+
+                '电堆A1堆顶平均温度(℃)': everytime_A1_Stack_top_Temp,
+                '电堆A2堆顶平均温度(℃)': everytime_A2_Stack_top_Temp,
+
+                '电堆B堆心平均温度(℃)': everytime_B_Stack_Temp,
+
+                '电堆B1堆顶平均温度(℃)': everytime_B1_Stack_top_Temp,
+                '电堆B2堆顶平均温度(℃)': everytime_B2_Stack_top_Temp,
 
                 '平均A电堆电压(V)': everytime_A_StackV,
                 '平均B电堆电压(V)': everytime_B_StackV,
@@ -1773,9 +1911,16 @@ for machine in file_name:
 
                 '平均芯片温度(℃)': everytime_IC,
 
-                '平均电堆A1温度(℃)': everytime_A1_Stack_Temp,
-                '平均电堆A2温度(℃)': everytime_A2_Stack_Temp,
-                '平均电堆B温度(℃)': everytime_B_Stack_Temp,
+                '电堆A1堆心平均温度(℃)': everytime_A1_Stack_Temp,
+                '电堆A2堆心平均温度(℃)': everytime_A2_Stack_Temp,
+
+                '电堆A1堆顶平均温度(℃)': everytime_A1_Stack_top_Temp,
+                '电堆A2堆顶平均温度(℃)': everytime_A2_Stack_top_Temp,
+
+                '电堆B堆心平均温度(℃)': everytime_B_Stack_Temp,
+
+                '电堆B1堆顶平均温度(℃)': everytime_B1_Stack_top_Temp,
+                '电堆B2堆顶平均温度(℃)': everytime_B2_Stack_top_Temp,
 
                 '平均A电堆电压(V)': everytime_A_StackV,
                 '平均B电堆电压(V)': everytime_B_StackV,
