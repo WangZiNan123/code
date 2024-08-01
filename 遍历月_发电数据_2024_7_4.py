@@ -37,6 +37,11 @@ import os
 新增  A1电堆顶部温度（发电仓温度(℃):Powttem），A2电堆顶部温度（环境温度(℃):AmTem），
      B1电堆顶部温度（环境湿度(%):EnHum），B2电堆顶部温度（电堆风机馈速(%):StaFrat ）
     修改时间秒的计算方法
+    
+    
+
+2024_8_1 版本更新：2024.8.1
+新增  A/B 制氢机平均氢气压力（'HGHpre' ：A制氢机氢气压力 ，'HgB_Hpre' ：B制氢机氢气压力 ）
 """
 
 new_df = []
@@ -164,6 +169,14 @@ everytime_B2_Stack_top_Temp = []  # 储存电堆B2顶部温度的列表
 
 Time_diff_1_list = []  # 每次发电时间列表，用于计算总发电时间
 
+# No_HGHpre = []  #A制氢机氢气压力
+# No_HgB_Hpre = []  # 管委会里面制氢机，氢气压力
+
+No_HGHpre_Value = []  #A制氢机氢气压力
+No_HgB_Hpre_Value = []  # 管委会里面制氢机，氢气压力
+
+everytime_No_HGHpre = []  # 储存电堆B2顶部温度的列表
+everytime_No_HgB_Hpre = []  # 储存电堆B2顶部温度的列表
 """
 ================================================= 
 
@@ -193,11 +206,16 @@ MFC6kD480023 : 江油太平唐僧
 """
 
 file_name = [
-    # '管委会', '5G汇聚机房01', '5G汇聚机房02', '白石08',
-    # '白石10', '新美', '红关', '墩寨', '谭溪', '华安',
-    # '新美', '升平', '平石', '三联',
-    # '三堡',
-    '川岛', '四川']
+    '管委会', '5G汇聚机房01', '5G汇聚机房02', '白石08',
+    '白石10',
+    '洋美',
+    '红关', '墩寨',
+    '谭溪',
+    '华安',
+    '新美', '升平', '平石', '三联',
+    '三堡',
+    '川岛', '四川'
+]
 
 # month = 1
 
@@ -252,6 +270,9 @@ for machine in file_name:
     everytime_A2_Stack_top_Temp.clear()  # 储存电堆A2顶部温度的列表
     everytime_B1_Stack_top_Temp.clear()  # 储存电堆B1顶部温度的列表
     everytime_B2_Stack_top_Temp.clear()  # 储存电堆B2顶部温度的列表
+
+    everytime_No_HGHpre.clear()  # 储存 A制氢机氢气压力 的列表
+    everytime_No_HgB_Hpre.clear()  # 储存 B制氢机氢气压力 的列表
 
     Time_diff_1_list.clear()
 
@@ -339,6 +360,10 @@ for machine in file_name:
                     A2_Stack_top_Temp = 'AmTem'  # 电堆A2顶部温度
                     B1_Stack_top_Temp = 'EnHum'  # 电堆B1顶部温度
                     B2_Stack_top_Temp = 'StaFrat'  # 电堆B2顶部温度
+
+                    HGHpre = 'HGHpre'  # 氢气压力
+                    HgB_Hpre = 'HgB_Hpre'  # 管委会里面制氢机氢气压力
+
 
                     #   打印有多少行
                     # print('==========电堆电压', df['StaV'])
@@ -449,6 +474,13 @@ for machine in file_name:
                                     A2_Stack_top_Temp_Value.append(round(row[A2_Stack_top_Temp], 1))  # 储存电堆A2顶部的温度
                                     B1_Stack_top_Temp_Value.append(round(row[B1_Stack_top_Temp], 1))  # 储存电堆B1顶部的温度
                                     B2_Stack_top_Temp_Value.append(round(row[B2_Stack_top_Temp], 1))  # 储存电堆B2顶部的温度
+
+                                    No_HGHpre_Value.append(round(row[HGHpre], 1))
+
+                                    if np.isnan(row[HgB_Hpre]):
+                                        No_HgB_Hpre_Value.append(0)
+                                    else:
+                                        No_HgB_Hpre_Value.append(round(row[HgB_Hpre], 1))
 
                                 if prev_row[MSw] == False and row[MSw] == True:  # 开始发电时间 。 如果MSW的上一个值=false,并且当前的值=true
                                     print(f"\n第一有开始 ###############\n")
@@ -603,8 +635,15 @@ for machine in file_name:
                                     everytime_B2_Stack_top_Temp.append(mean_B2_Stack_top_Temp)
                                     print(f'电堆B2顶部平均温度(℃):{mean_B2_Stack_top_Temp}')
 
-                                    # print(f"内置液位(mm):\n{true_LiqlelM}\n")
-                                    # true_LiqlelL.clear()
+                                    mean_No_HGHpre = round(
+                                        sum(No_HGHpre_Value) / len(No_HGHpre_Value), 2)
+                                    everytime_No_HGHpre.append(mean_No_HGHpre)
+                                    print(f'A制氢机平均氢气压力(Psi):{mean_No_HGHpre}')
+
+                                    mean_No_HGHpre_B = round(
+                                        sum(No_HgB_Hpre_Value) / len(No_HgB_Hpre_Value), 2)
+                                    everytime_No_HgB_Hpre.append(mean_No_HGHpre_B)
+                                    print(f'B制氢机平均氢气压力(Psi):{mean_No_HGHpre_B}')
 
                                     Once_RemFuelIn = 0
 
@@ -1121,6 +1160,16 @@ for machine in file_name:
                                         everytime_B2_Stack_top_Temp.append(mean_B2_Stack_top_Temp)
                                         print(f'电堆B2顶部平均温度(℃):{mean_B2_Stack_top_Temp}')
 
+                                        mean_No_HGHpre = round(
+                                            sum(No_HGHpre_Value) / len(No_HGHpre_Value), 2)
+                                        everytime_No_HGHpre.append(mean_No_HGHpre)
+                                        print(f'A制氢机平均氢气压力(Psi):{mean_No_HGHpre}')
+
+                                        mean_No_HGHpre_B = round(
+                                            sum(No_HgB_Hpre_Value) / len(No_HgB_Hpre_Value), 2)
+                                        everytime_No_HgB_Hpre.append(mean_No_HGHpre_B)
+                                        print(f'B制氢机平均氢气压力(Psi):{mean_No_HGHpre_B}')
+
                                         fuel_List_mm = true_LiqlelM[len(last_fuel_mm):]
 
                                         # 计算液位。 last_fuel_levels 多出来的部分元素。
@@ -1434,6 +1483,16 @@ for machine in file_name:
                                         everytime_B2_Stack_top_Temp.append(mean_B2_Stack_top_Temp)
                                         print(f'电堆B2顶部平均温度(℃):{mean_B2_Stack_top_Temp}')
 
+                                        mean_No_HGHpre = round(
+                                            sum(No_HGHpre_Value) / len(No_HGHpre_Value), 2)
+                                        everytime_No_HGHpre.append(mean_No_HGHpre)
+                                        print(f'A制氢机平均氢气压力(Psi):{mean_No_HGHpre}')
+
+                                        mean_No_HGHpre_B = round(
+                                            sum(No_HgB_Hpre_Value) / len(No_HgB_Hpre_Value), 2)
+                                        everytime_No_HgB_Hpre.append(mean_No_HGHpre_B)
+                                        print(f'B制氢机平均氢气压力(Psi):{mean_No_HGHpre_B}')
+
                                         fuel_List_mm = true_LiqlelM[len(last_fuel_mm):]
 
                                         # 计算液位。 last_fuel_levels 多出来的部分元素。
@@ -1718,6 +1777,9 @@ for machine in file_name:
                         B1_Stack_top_Temp_Value.clear()
                         B2_Stack_top_Temp_Value.clear()
 
+                        No_HGHpre_Value.clear()  # A制氢机氢气压力
+                        No_HgB_Hpre_Value.clear()  # 管委会里面制氢机，氢气压力
+
                         Time_diff_1_list.clear()
 
                         print(f"\n开始发电时间 长度：{len(start_datatime)}")
@@ -1760,6 +1822,11 @@ for machine in file_name:
                         print(f"A堆功率平均值 长度：{len(everytime_A_power_average)}")
                         print(f"B堆功率平均值 长度：{len(everytime_B_power_average)}")
                         print(f"总功率平均值 长度：{len(everytime_power_average)}")
+
+                        print(f"A制氢机平均氢气压力 长度：{len(everytime_No_HGHpre)}")
+                        print(f"B制氢机平均氢气压力 长度：{len(everytime_No_HgB_Hpre)}")
+
+
 
                         print(f'\n++++++++++++++   一天的计算结束   ++++++++++++++++++++++++\n')
 
@@ -1821,6 +1888,9 @@ for machine in file_name:
         print(f"B堆功率平均值 长度：{len(everytime_B_power_average)}")
         print(f"总功率平均值 长度：{len(everytime_power_average)}")
 
+        print(f"A制氢机平均氢气压力 长度：{len(everytime_No_HGHpre)}")
+        print(f"B制氢机平均氢气压力 长度：{len(everytime_No_HgB_Hpre)}")
+
     count = 0
     if any(value > 0 for value in start_S_RemFuelIn) and any(value > 0 for value in end_S_RemFuelIn):
         count = 1
@@ -1867,10 +1937,14 @@ for machine in file_name:
 
                 '平均A电堆电压(V)': everytime_A_StackV,
                 '平均B电堆电压(V)': everytime_B_StackV,
-                '重整室最高温度(℃)': everytime_max_HGretem,
-                '重整室最低温度(℃)': everytime_min_HGretem,
-                '提纯器最高温度(℃)': everytime_max_Hfetem,
-                '提纯器最低温度(℃)': everytime_min_Hfetem,
+
+                'A-平均氢气压力(Psi)':everytime_No_HGHpre,
+                'B-平均氢气压力(Psi)': everytime_No_HgB_Hpre,
+
+                'A-重整室最高温度(℃)': everytime_max_HGretem,
+                'A-重整室最低温度(℃)': everytime_min_HGretem,
+                'A-提纯器最高温度(℃)': everytime_max_Hfetem,
+                'A-提纯器最低温度(℃)': everytime_min_Hfetem,
                 '发电运行时间(min.s)': Time_diffs,
                 '消耗燃料(L)': Once_S_RemFuelIn,
                 '发电量(kw/h)': Once_Topgen_value,
@@ -1925,10 +1999,14 @@ for machine in file_name:
 
                 '平均A电堆电压(V)': everytime_A_StackV,
                 '平均B电堆电压(V)': everytime_B_StackV,
-                '重整室最高温度(℃)': everytime_max_HGretem,
-                '重整室最低温度(℃)': everytime_min_HGretem,
-                '提纯器最高温度(℃)': everytime_max_Hfetem,
-                '提纯器最低温度(℃)': everytime_min_Hfetem,
+
+                'A-平均氢气压力(Psi)': everytime_No_HGHpre,
+                'B-平均氢气压力(Psi)': everytime_No_HgB_Hpre,
+
+                'A-重整室最高温度(℃)': everytime_max_HGretem,
+                'A-重整室最低温度(℃)': everytime_min_HGretem,
+                'A-提纯器最高温度(℃)': everytime_max_Hfetem,
+                'A-提纯器最低温度(℃)': everytime_min_Hfetem,
                 '发电运行时间(min.s)': Time_diffs,
                 '消耗燃料(mm)': Once_S_RemFuelIn,
                 '发电量(kw/h)': Once_Topgen_value,
