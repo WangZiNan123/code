@@ -52,6 +52,15 @@ openpyxl: pip install openpyxl
 新增  A1电堆顶部温度（发电仓温度(℃):Powttem），A2电堆顶部温度（环境温度(℃):AmTem），
      B1电堆顶部温度（环境湿度(%):EnHum），B2电堆顶部温度（电堆风机馈速(%):StaFrat ）
 
+2024_10_9 版本更新：2024.10.9
+修改  管委会格式判断条件   
+旧：if (No_S_RemFuelIn_value[0] > 0 and No_S_RemFuelOut_value[0] == 0  and No_LiqlelL[0] > 0 and No_HgB_Hpre[0] > 1 ):
+
+新：if ((No_S_RemFuelIn_value[0] > 0 or No_S_RemFuelIn_value[-1] > 0)
+                                    and No_S_RemFuelOut_value[0] == 0
+                                    and (No_LiqlelL[0] > 0 or No_LiqlelL[-1] > 0 or No_LiqlelL[(max_index/2)] > 0)
+                                    and (No_HgB_Hpre[0] > 1 or No_HgB_Hpre[-1] > 1)):
+                                    
 # ================================================= #
 """
 
@@ -175,24 +184,34 @@ MFC6kD480023 : 江油太平唐僧
 
 ================================================= 
 """
-name_list = ['CW-10KW-0007', 'CW-MFC6000-0001', 'CW-MFC6000-0002', 'CW-MFC6000-0008', 'CW-MFC6000-0010', 'MFC6kD480012',
+name_list = [
+            'CW-10KW-0007',
+    'CW-MFC6000-0001', 'CW-MFC6000-0002', 'CW-MFC6000-0008', 'CW-MFC6000-0010',
+             'MFC6kD480012',
              'MFC6kD480013', 'MFC6kD480014', 'MFC6kD480015', 'MFC6kD480016', 'MFC6kD480017', 'MFC6kD480018',
-             'MFC6kD480019', 'MFC6kD480020', 'MFC6kD480021', 'MFC6kD480022', 'MFC6kD480023']
+             'MFC6kD480019', 'MFC6kD480020', 'MFC6kD480021', 'MFC6kD480022', 'MFC6kD480023'
+]
 
-file_name = ['管委会', '5G汇聚机房01', '5G汇聚机房02',
+file_name = [
+            '管委会',
+    '5G汇聚机房01', '5G汇聚机房02',
              '白石08',
-             '白石10', '新美', '红关', '墩寨',
+             '白石10',
+            '洋美',
+            '红关', '墩寨',
              '谭溪',
-             '华安', '新美', '升平', '平石',
+             '华安',
+            '新美', '升平', '平石',
              '三联',
-             '三堡', '川岛', '四川']
+             '三堡', '川岛', '四川'
+]
 
 # month = 1
 for machine in file_name:
 
     path1 = machine
 
-    for month in range(6, 7):
+    for month in range(9, 10):
 
         b1 = f'2024_{month}月{path1}待机数据统计 '  # 储存 EXCEL表格 的文件名称202
         # adress2 = 'C:/Users/FCK/Desktop/12/test/%s.xlsx' % b1
@@ -620,10 +639,10 @@ for machine in file_name:
                             #       '      No_S_RemFuelOut_value[0]----->>>>>>', No_S_RemFuelOut_value[0])
 
                             # 如果列表为空。说明没有数据，执行下面计算
-                            if (No_S_RemFuelIn_value[0] > 0
+                            if ((No_S_RemFuelIn_value[0] > 0 or No_S_RemFuelIn_value[-1] > 0)
                                     and No_S_RemFuelOut_value[0] == 0
-                                    and No_LiqlelL[0] > 0
-                                    and No_HgB_Hpre[0] > 1):
+                                    and (No_LiqlelL[0] > 0 or No_LiqlelL[-1] > 0 or No_LiqlelL[(max_index/2)] > 0)
+                                    and (No_HgB_Hpre[0] > 1 or No_HgB_Hpre[-1] > 1)):
 
                                 # 计算以升为单位 （L）
                                 # 如果一天中有加液，找出最大值去减第一项，大于1。说明当天有加液
