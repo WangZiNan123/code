@@ -42,6 +42,11 @@ import os
 
 2024_8_1 版本更新：2024.8.1
 新增  A/B 制氢机平均氢气压力（'HGHpre' ：A制氢机氢气压力 ，'HgB_Hpre' ：B制氢机氢气压力 ）
+
+2024_11_25 版本更新：2024.11.25
+新增  calculate_filtered_average 电堆电压计算平均值增加条件判断：machine == '5G汇聚机房01' or '5G汇聚机房02' or '白石08' or '白石10':
+ filtered_data = [x for x in data if 60 <= x < 110]  # 设置筛选范围
+
 """
 
 new_df = []
@@ -172,7 +177,7 @@ Time_diff_1_list = []  # 每次发电时间列表，用于计算总发电时间
 # No_HGHpre = []  #A制氢机氢气压力
 # No_HgB_Hpre = []  # 管委会里面制氢机，氢气压力
 
-No_HGHpre_Value = []  #A制氢机氢气压力
+No_HGHpre_Value = []  # A制氢机氢气压力
 No_HgB_Hpre_Value = []  # 管委会里面制氢机，氢气压力
 
 everytime_No_HGHpre = []  # 储存电堆B2顶部温度的列表
@@ -206,15 +211,17 @@ MFC6kD480023 : 江油太平唐僧
 """
 
 file_name = [
-    '管委会', '5G汇聚机房01', '5G汇聚机房02', '白石08',
-    '白石10',
-    '洋美',
-    '红关', '墩寨',
-    '谭溪',
-    '华安',
-    '新美', '升平', '平石', '三联',
-    '三堡',
-    '川岛', '四川'
+    # '管委会',
+    '5G汇聚机房01', '5G汇聚机房02',
+    # '白石08',
+    # '白石10',
+    # '洋美',
+    # '红关', '墩寨',
+    # '谭溪',
+    # '华安',
+    # '新美', '升平', '平石', '三联',
+    # '三堡',
+    # '川岛', '四川'
 ]
 
 # month = 1
@@ -276,7 +283,7 @@ for machine in file_name:
 
     Time_diff_1_list.clear()
 
-    for month in range(6, 7):
+    for month in range(11, 12):
 
         b1 = f'2024_{month}月{path1}发电数据 '  # 储存 EXCEL表格 的文件名称
         # adress2 = 'C:/Users/FCK/Desktop/12/test/%s.xlsx' % b1
@@ -291,7 +298,7 @@ for machine in file_name:
             a1 = '%d.%d.%d' % (year, month, i)  # 这个指令将会使用 year、month 和 i 的值来创建一个类似于 "XXXX.XX.XX" 格式的字符串，并将其存储在变量 a1 中。
             a1 = a1.strip()  # 这个指令会将变量 a1 中的字符串去掉开头和结尾的空白字符
             # 读取Excel文件中的数据
-            adress1 = f'E:/远程下载数据/{path1}/20240{month}/{a1}.xlsx'  # 读取 EXCEL表格文件 的路径
+            adress1 = f'E:/远程下载数据/{path1}/2024{month}/{a1}.xlsx'  # 读取 EXCEL表格文件 的路径
 
             if os.path.exists(adress1):  # 检查文件（文件名，文件路径是对得上）是否存在，不存在则结束程序
                 try:
@@ -364,7 +371,6 @@ for machine in file_name:
                     HGHpre = 'HGHpre'  # 氢气压力
                     HgB_Hpre = 'HgB_Hpre'  # 管委会里面制氢机氢气压力
 
-
                     #   打印有多少行
                     # print('==========电堆电压', df['StaV'])
 
@@ -378,9 +384,14 @@ for machine in file_name:
                         # #  !!!  如果计算对象是 “攀业电堆” 筛选范围选择：  ７５ ＜＝ Ｘ ＜ １２０
                         # 对电堆电压算平均值 。
                         def calculate_filtered_average(data):
-                            filtered_data = [x for x in data if 90 <= x < 125]  # 设置筛选范围
-                            average = (sum(filtered_data) / len(filtered_data)) if len(
-                                filtered_data) > 0 else 0  # 计算平均值
+                            if machine == '5G汇聚机房01' or '5G汇聚机房02' or '白石08' or '白石10':
+                                filtered_data = [x for x in data if 60 <= x < 110]  # 设置筛选范围
+                                average = (sum(filtered_data) / len(filtered_data)) if len(
+                                    filtered_data) > 0 else 0  # 计算平均值
+                            else:
+                                filtered_data = [x for x in data if 90 <= x < 125]  # 设置筛选范围
+                                average = (sum(filtered_data) / len(filtered_data)) if len(
+                                    filtered_data) > 0 else 0  # 计算平均值
                             return average
 
 
@@ -1826,8 +1837,6 @@ for machine in file_name:
                         print(f"A制氢机平均氢气压力 长度：{len(everytime_No_HGHpre)}")
                         print(f"B制氢机平均氢气压力 长度：{len(everytime_No_HgB_Hpre)}")
 
-
-
                         print(f'\n++++++++++++++   一天的计算结束   ++++++++++++++++++++++++\n')
 
                     else:
@@ -1938,7 +1947,7 @@ for machine in file_name:
                 '平均A电堆电压(V)': everytime_A_StackV,
                 '平均B电堆电压(V)': everytime_B_StackV,
 
-                'A-平均氢气压力(Psi)':everytime_No_HGHpre,
+                'A-平均氢气压力(Psi)': everytime_No_HGHpre,
                 'B-平均氢气压力(Psi)': everytime_No_HgB_Hpre,
 
                 'A-重整室最高温度(℃)': everytime_max_HGretem,
