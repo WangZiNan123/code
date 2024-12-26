@@ -47,6 +47,14 @@ import os
 新增  calculate_filtered_average 电堆电压计算平均值增加条件判断：machine == '5G汇聚机房01' or '5G汇聚机房02' or '白石08' or '白石10':
  filtered_data = [x for x in data if 60 <= x < 110]  # 设置筛选范围
 
+2024_12_26 版本更新：2024.12.26
+新增月份判断，自动匹配月份表达写法
+ if month<10:
+                monthday = f'20240{month}'
+                adress1 = f'E:/远程下载数据/{path1}/{monthday}/{a1}.xlsx'  # 读取 EXCEL表格文件 的路径
+            else:
+                monthday = f'2024{month}'
+                adress1 = f'E:/远程下载数据/{path1}/{monthday}/{a1}.xlsx'  # 读取 EXCEL表格文件 的路径
 """
 
 new_df = []
@@ -211,15 +219,18 @@ MFC6kD480023 : 江油太平唐僧
 """
 
 file_name = [
-    # '管委会',
-    '5G汇聚机房01', '5G汇聚机房02',
+    '管委会',
+    # '5G汇聚机房01', '5G汇聚机房02',
     # '白石08',
     # '白石10',
     # '洋美',
     # '红关', '墩寨',
     # '谭溪',
     # '华安',
-    # '新美', '升平', '平石', '三联',
+    # '新美',
+    # '升平',
+    # '平石',
+    # '三联',
     # '三堡',
     # '川岛', '四川'
 ]
@@ -283,7 +294,7 @@ for machine in file_name:
 
     Time_diff_1_list.clear()
 
-    for month in range(11, 12):
+    for month in range(9, 11):
 
         b1 = f'2024_{month}月{path1}发电数据 '  # 储存 EXCEL表格 的文件名称
         # adress2 = 'C:/Users/FCK/Desktop/12/test/%s.xlsx' % b1
@@ -298,7 +309,12 @@ for machine in file_name:
             a1 = '%d.%d.%d' % (year, month, i)  # 这个指令将会使用 year、month 和 i 的值来创建一个类似于 "XXXX.XX.XX" 格式的字符串，并将其存储在变量 a1 中。
             a1 = a1.strip()  # 这个指令会将变量 a1 中的字符串去掉开头和结尾的空白字符
             # 读取Excel文件中的数据
-            adress1 = f'E:/远程下载数据/{path1}/2024{month}/{a1}.xlsx'  # 读取 EXCEL表格文件 的路径
+            if month<10:
+                monthday = f'20240{month}'
+                adress1 = f'E:/远程下载数据/{path1}/{monthday}/{a1}.xlsx'  # 读取 EXCEL表格文件 的路径
+            else:
+                monthday = f'2024{month}'
+                adress1 = f'E:/远程下载数据/{path1}/{monthday}/{a1}.xlsx'  # 读取 EXCEL表格文件 的路径
 
             if os.path.exists(adress1):  # 检查文件（文件名，文件路径是对得上）是否存在，不存在则结束程序
                 try:
